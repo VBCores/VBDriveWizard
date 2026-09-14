@@ -1,0 +1,55 @@
+# VBDrive default register profile.
+#
+# Source: the configuration tables in the VBDrive firmware README
+# (https://github.com/VBCores/VBDrive). The servo gains are the firmware's documented
+# defaults; gear, kt, max_i and max_tq are the values the README reports as
+# smoke-tested on an M4310. The remainder are the README's example values.
+#
+# The firmware itself ships no defaults table: unset float fields hold NaN until
+# written, so these are starting points, not tuning. Verify them against the actual
+# mechanics and current/torque limits before driving a load.
+#
+# Values are in the drive's native units (radians, rad/s, N*m, A).
+
+# --- drive geometry and limits ---
+gear: 36
+max_i: 0.3
+max_spd: 1000.0
+max_tq: 5.0
+ang_off: 0.0
+ang_dir: 1
+min_ang: -30.0
+max_ang: 30.0
+
+# --- motor and current loop ---
+kt: 0.5
+kp: 0.25
+ki: 0.01
+kd: 0.005
+
+# --- filters ---
+flt_a: 0.5
+flt_g1: 0.1
+flt_g2: 0.1
+flt_g3: 0.1
+i_lpf: 0.1
+
+# --- encoder and bus ---
+# ang_enc: 0 = rotor, 1 = shaft. ang_off is only meaningful with the shaft encoder,
+# because the rotor encoder is not absolute with respect to shaft position.
+ang_enc: 0
+node_id: 1
+# data_baud:    0 = 1 MHz, 1 = 2 MHz, 2 = 4 MHz, 3 = 8 MHz
+# nominal_baud: 0 = 62.5 kHz, 1 = 125 kHz, 2 = 250 kHz, 3 = 500 kHz, 4 = 1 MHz
+data_baud: 0
+nominal_baud: 3
+
+# --- servo controller (firmware defaults) ---
+servo_pos_p_gain: 150.0
+servo_pos_i_gain: 200.0
+servo_pos_d_gain: 10.0
+servo_vel_p_gain: 30.0
+servo_vel_i_gain: 60.0
+# servo_tr_form: 1 = LINE_TRAJ, 2 = POLYNOM_TRAJ
+servo_tr_form: 1
+servo_tr_vel: 0.0

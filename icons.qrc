@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="flag_china.png">icons/flag_china.png</file>
+        <file alias="flag_russia.png">icons/flag_russia.png</file>
+        <file alias="flag_uk.png">icons/flag_uk.png</file>
+        <file alias="refresh.svg">icons/refresh.svg</file>
+        <file alias="restore.svg">icons/restore.svg</file>
+        <file alias="voltbro_logo_dark.png">icons/voltbro_logo_dark.png</file>
+        <file alias="voltbro_logo_white.png">icons/voltbro_logo_white.png</file>
+    </qresource>
+</RCC>
