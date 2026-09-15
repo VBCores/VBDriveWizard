@@ -1,0 +1,32 @@
+# VBDrive register profile written by VBDriveWizard.
+# Values are in the drive's native units (radians, rad/s, N*m, A).
+# 'nan' means the limit is not set.
+
+gear: 36
+max_i: nan
+max_spd: nan
+max_tq: nan
+ang_off: 0
+ang_dir: 1
+min_ang: nan
+max_ang: nan
+kt: 1
+kp: 4
+ki: 1600
+kd: 0
+flt_a: 0
+flt_g1: 0.015701
+flt_g2: 3.925228
+flt_g3: 387.547119
+i_lpf: 0.0925
+ang_enc: 0
+node_id: 83
+data_baud: 3
+nominal_baud: 4
+servo_pos_p_gain: 23.639999
+servo_pos_i_gain: 0
+servo_pos_d_gain: 0.45
+servo_vel_p_gain: 21.33
+servo_vel_i_gain: 0.05
+servo_tr_form: 1
+servo_tr_vel: 0

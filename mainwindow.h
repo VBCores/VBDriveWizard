@@ -120,6 +120,8 @@ private:
     void onDeviceSelected(DeviceModel *device);
     void onDeviceLost(quint8 nodeId);
     void onDeviceReappeared(quint8 nodeId);
+    /// Serial: APPLY rebooted the drive to make the written config take effect.
+    void onDriveRebooted();
     /// Yes / No / Cancel prompt before leaving a drive with pending edits.
     /// Returns false when the user cancels the switch.
     bool confirmLeavingDevice(DeviceModel *device);

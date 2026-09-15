@@ -139,7 +139,7 @@
          <item>
           <widget class="QTabWidget" name="ConfigTabWidget">
            <property name="currentIndex">
-            <number>3</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="BasicTab">
             <attribute name="title">
@@ -277,7 +277,7 @@
                   <item>
                    <widget class="QCheckBox" name="VoltageLimitCheckBox">
                     <property name="enabled">
-                     <bool>false</bool>
+                     <bool>true</bool>
                     </property>
                     <property name="toolTip">
                      <string>The firmware exposes no voltage limit register yet.</string>
@@ -290,7 +290,7 @@
                   <item>
                    <widget class="QDoubleSpinBox" name="VoltageLimitDoubleSpinBox">
                     <property name="enabled">
-                     <bool>false</bool>
+                     <bool>true</bool>
                     </property>
                     <property name="toolTip">
                      <string>The firmware exposes no voltage limit register yet.</string>

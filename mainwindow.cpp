@@ -178,6 +178,7 @@ void MainWindow::setupServices()
                 }
             });
     connect(m_cyphal, &CyphalService::deviceReappeared, this, &MainWindow::onDeviceReappeared);
+    connect(m_serial, &SerialService::driveRebooted, this, &MainWindow::onDriveRebooted);
 
     connect(m_devices, &DeviceManager::listChanged, this, &MainWindow::rebuildDeviceList);
     connect(m_devices, &DeviceManager::selectionChanged, this, &MainWindow::onDeviceSelected);
@@ -1098,6 +1099,16 @@ void MainWindow::onWriteRegisters()
     }
 
     ui->WriteRegBtn->setEnabled(false);
+    if (m_link->kind() == LinkKind::Serial) {
+        // The link stages the values in CONFIG mode (which stops the motor) and
+        // applies them with APPLY, which reboots the drive. A trajectory would only
+        // be spamming a drive that refuses to move and is then gone for a moment.
+        m_control->stop(device->nodeId());
+        m_link->writeRegisters(device->nodeId(), writes);
+        setStatusMessage(tr("Writing %n register(s), the drive restarts to apply them...",
+                            nullptr, writes.size()));
+        return;
+    }
     m_link->writeRegisters(device->nodeId(), writes);
     setStatusMessage(tr("Writing %n register(s)...", nullptr, writes.size()));
 }
@@ -1389,6 +1400,27 @@ void MainWindow::onDeviceLost(quint8 nodeId)
         m_awaitingReconnect.insert(nodeId, true);
         setStatusMessage(tr("Waiting for node %1 to return...").arg(nodeId));
     }
+}
+
+void MainWindow::onDriveRebooted()
+{
+    if (m_link != m_serial)
+        return;
+    const quint8 nodeId = SerialService::kSerialNodeId;
+    DeviceModel *device = m_devices->device(nodeId);
+    if (!device)
+        return;
+
+    // The reboot that applies the config is invisible as a connection event: the
+    // same drive is still selected, its snapshot and the user's pending edits are
+    // kept. What the reboot did reset has to be redone: the driver is enabled
+    // again, and the registers are re-read so the editors show what the drive
+    // actually runs with now (the link itself turns the `state:` log back on).
+    m_link->writeRegisters(nodeId, {{QString::fromLatin1(registers::kIsOn),
+                                     RegisterValue::fromBool(true)}});
+    m_link->readRegisters(nodeId, RegisterCatalog::configGroupNames());
+    m_link->readRegisters(nodeId, RegisterCatalog::profileNames());
+    setStatusMessage(tr("The drive restarted with the new settings."));
 }
 
 void MainWindow::onDeviceReappeared(quint8 nodeId)

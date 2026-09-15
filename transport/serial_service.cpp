@@ -18,6 +18,18 @@ constexpr auto kOkPrefix = "OK: ";
 /// Printed by SAVE: "NOTE: config changes not applied! To apply, run APPLY or reset
 /// controller". Worth showing, since only the servo gains take effect immediately.
 constexpr auto kNotePrefix = "NOTE:";
+/// Last line of the boot banner, printed whether or not the drive is configured; it
+/// is the only reliable sign that the reboot APPLY triggers is over. On the bench
+/// the whole reboot takes about 100 ms, the timeout also covers the flash write.
+constexpr auto kBootBannerEnd = "See HELP for available commands";
+constexpr int kRebootTimeoutMs = 10000;
+/// Measured: for about 1.1 s after the banner the drive queues its input and
+/// answers nothing, so the first command sent right away would time out.
+constexpr int kBootSettleMs = 1500;
+/// Should the port drop during the reboot: how often to retry the open, and for how
+/// long, before the link counts as lost.
+constexpr int kReopenIntervalMs = 250;
+constexpr int kReopenWindowMs = 10000;
 
 bool startsWithAny(const QString &line, const QStringList &prefixes)
 {
@@ -56,6 +68,10 @@ SerialService::SerialService(QObject *parent)
     connect(&m_responseTimer, &QTimer::timeout, this, &SerialService::onResponseTimeout);
     m_closeTimer.setSingleShot(true);
     connect(&m_closeTimer, &QTimer::timeout, this, &SerialService::onCloseTimeout);
+    m_reopenTimer.setSingleShot(true);
+    connect(&m_reopenTimer, &QTimer::timeout, this, &SerialService::onReopenTimeout);
+    m_bootSettleTimer.setSingleShot(true);
+    connect(&m_bootSettleTimer, &QTimer::timeout, this, &SerialService::onBootSettled);
 }
 
 SerialService::~SerialService()
@@ -78,7 +94,11 @@ void SerialService::shutdown()
         abortAll(tr("Serial service is shutting down."));
     }
     m_closeTimer.stop();
+    m_reopenTimer.stop();
+    m_bootSettleTimer.stop();
     m_closing = false;
+    m_reopening = false;
+    m_rebootPending = false;
     if (!m_workerThread.isRunning())
         return;
     QMetaObject::invokeMethod(m_worker, "closePort", Qt::BlockingQueuedConnection);
@@ -91,9 +111,14 @@ void SerialService::connectToPort(const QString &portName, int baudRate)
 {
     start();
     m_portName = portName;
+    m_baudRate = baudRate;
     m_handshakeDone = false;
     m_closeTimer.stop();
+    m_reopenTimer.stop();
+    m_bootSettleTimer.stop();
     m_closing = false;
+    m_reopening = false;
+    m_rebootPending = false;
     m_openPending = true;
     abortAll(tr("Reconnecting."));
     QMetaObject::invokeMethod(m_worker, "openPort", Qt::QueuedConnection,
@@ -104,12 +129,19 @@ void SerialService::closeLink()
 {
     if (m_closing)
         return;
+    if (m_reopening) {
+        // Nothing to drain: the port is not even open. MainWindow still waits for
+        // linkClosed().
+        giveUpReopen(tr("Disconnected."));
+        return;
+    }
     if (!m_portOpen) {
         abortAll(tr("Disconnected."));
         return;
     }
 
     m_closing = true;
+    m_bootSettleTimer.stop();  // the closing log_off may go out at once
     if (m_handshakeDone) {
         // Let the queued `is_on:0` reach the drive, then stop the 100 Hz log so
         // the drive is quiet for whoever opens the port next.
@@ -162,7 +194,9 @@ SerialService::PendingCommand SerialService::bareCommand(const QString &line,
 
 int SerialService::enqueue(PendingCommand command)
 {
-    if (!m_portOpen || (m_closing && !command.internal)) {
+    // While the port is being reopened after a reboot the queue is kept, so what
+    // MainWindow asks for meanwhile simply runs once the drive is back.
+    if ((!m_portOpen && !m_reopening) || (m_closing && !command.internal)) {
         // Rejected up front rather than queued: the caller's slots run right away.
         const QString reason = m_portOpen ? tr("Disconnecting.") : tr("Serial port is not open.");
         if (command.kind == CommandKind::Read)
@@ -188,9 +222,13 @@ void SerialService::pumpQueue()
         return;
     }
     if (!m_portOpen) {
+        if (m_reopening)
+            return;  // resumed by onWorkerPortOpened() once the port is back
         abortAll(tr("Serial port is not open."));
         return;
     }
+    if (m_bootSettleTimer.isActive())
+        return;  // resumed by onBootSettled()
 
     m_current = m_queue.dequeue();
     QMetaObject::invokeMethod(m_worker, "writeLine", Qt::QueuedConnection,
@@ -227,6 +265,8 @@ void SerialService::completeCurrent(bool success, const QString &error)
     const PendingCommand command = *m_current;
     m_current.reset();
     m_responseTimer.stop();
+    if (command.reboots)
+        m_rebootPending = false;
 
     switch (command.kind) {
     case CommandKind::Read:
@@ -243,7 +283,27 @@ void SerialService::completeCurrent(bool success, const QString &error)
         break;
     }
 
-    if (command.handshake) {
+    if (command.handshake && m_reopening) {
+        // The drive is back after the reboot that took the port down. Nothing was
+        // discovered: the same drive is still selected in MainWindow, it only has
+        // to be re-enabled and re-read, like after a reboot on a port that stayed.
+        if (!success) {
+            // Opened while the drive was still starting up (it answers nothing for
+            // about a second after the banner): ask again until the window closes.
+            if (m_reopenDeadline.hasExpired()) {
+                giveUpReopen(tr("The drive did not answer after restarting: %1").arg(error));
+                return;
+            }
+            PendingCommand retry = command;
+            retry.id = m_nextCommandId++;
+            m_queue.prepend(retry);
+            pumpQueue();
+            return;
+        }
+        m_handshakeDone = true;
+        m_reopening = false;
+        emit driveRebooted();
+    } else if (command.handshake) {
         m_handshakeDone = success;
         if (success) {
             // A drive left in CONFIG mode by an interrupted session refuses is_on:1
@@ -274,6 +334,19 @@ void SerialService::completeCurrent(bool success, const QString &error)
         }
     }
 
+    // Reported after the batch, so MainWindow's "written" message is followed by
+    // the reboot notice and not the other way round. When the port dropped the
+    // notice waits for the handshake instead (see above).
+    if (command.reboots && success && !m_reopening) {
+        m_bootSettleTimer.start(kBootSettleMs);
+        emit driveRebooted();
+    }
+
+    pumpQueue();
+}
+
+void SerialService::onBootSettled()
+{
     pumpQueue();
 }
 
@@ -350,12 +423,6 @@ void SerialService::abortAll(const QString &reason)
 void SerialService::onWorkerPortOpened(bool success, const QString &message)
 {
     m_openPending = false;
-    m_portOpen = success;
-    m_logStreaming = false;
-    if (!success) {
-        emit connectionResult(false, message);
-        return;
-    }
 
     // Handshake: the drive is only considered present once vbdrive_model answers.
     PendingCommand handshake;
@@ -364,6 +431,33 @@ void SerialService::onWorkerPortOpened(bool success, const QString &message)
     handshake.line = handshake.token + QStringLiteral(":?");
     handshake.timeoutMs = kHandshakeTimeoutMs;
     handshake.handshake = true;
+
+    if (m_reopening) {
+        if (!success) {
+            // The USB device is not back yet (or came back under another name).
+            if (m_reopenDeadline.hasExpired())
+                giveUpReopen(message);
+            else
+                m_reopenTimer.start(kReopenIntervalMs);
+            return;
+        }
+        // Ahead of everything that queued up during the reboot, so the drive is
+        // known to answer before MainWindow's re-reads and log_on go out. The log
+        // request is deliberately not reset: restoreLogStreaming() already
+        // prepended it when APPLY completed.
+        m_portOpen = true;
+        handshake.id = m_nextCommandId++;
+        m_queue.prepend(handshake);
+        pumpQueue();
+        return;
+    }
+
+    m_portOpen = success;
+    m_logStreaming = false;
+    if (!success) {
+        emit connectionResult(false, message);
+        return;
+    }
     enqueue(handshake);
 }
 
@@ -377,6 +471,12 @@ void SerialService::onWorkerPortClosed()
     m_closeTimer.stop();
     if (m_openPending)
         return;  // the previous port going away on the way to a new one
+    if (wasOpen && !wasClosing && m_rebootPending) {
+        // APPLY is rebooting the drive and the USB device re-enumerated with it.
+        // Not a lost link: the drive is coming back on the same port.
+        beginReopen();
+        return;
+    }
     abortAll(wasClosing ? tr("Disconnected.") : tr("Serial connection lost."));
     if (wasOpen) {
         emit deviceLost(kSerialNodeId);
@@ -384,8 +484,56 @@ void SerialService::onWorkerPortClosed()
     }
 }
 
+void SerialService::beginReopen()
+{
+    m_reopening = true;
+    m_openPending = true;
+    m_reopenDeadline = QDeadlineTimer(kReopenWindowMs);
+    // The port going away under APPLY is the reboot happening: that is the ack the
+    // drive never got to print, so the batch is complete. driveRebooted() itself is
+    // held back until the handshake answers again.
+    if (m_current.has_value() && m_current->reboots)
+        completeCurrent(true, QString());
+    m_reopenTimer.start(kReopenIntervalMs);
+}
+
+void SerialService::onReopenTimeout()
+{
+    if (!m_reopening)
+        return;
+    if (m_reopenDeadline.hasExpired()) {
+        giveUpReopen(tr("The drive did not come back after restarting."));
+        return;
+    }
+    QMetaObject::invokeMethod(m_worker, "openPort", Qt::QueuedConnection,
+                              Q_ARG(QString, m_portName), Q_ARG(int, m_baudRate));
+}
+
+void SerialService::giveUpReopen(const QString &reason)
+{
+    m_reopenTimer.stop();
+    m_reopening = false;
+    m_openPending = false;
+    m_rebootPending = false;
+    m_handshakeDone = false;
+    if (m_portOpen) {
+        // Opened again but the drive never answered: shut the port quietly. With
+        // m_portOpen already cleared, the worker's portClosed reports nothing twice.
+        m_portOpen = false;
+        if (m_workerThread.isRunning())
+            QMetaObject::invokeMethod(m_worker, "closePort", Qt::QueuedConnection);
+    }
+    abortAll(reason);
+    emit deviceLost(kSerialNodeId);
+    emit linkClosed();
+}
+
 void SerialService::onWorkerSerialError(const QString &message)
 {
+    // The port dropping under a reboot, and the failed opens while it is away, are
+    // expected there; the status bar is only told when the reconnect fails.
+    if (m_rebootPending || m_reopening)
+        return;
     emit linkError(message);
 }
 
@@ -404,6 +552,8 @@ void SerialService::onWorkerWriteFinished(int commandId, bool success, const QSt
         completeCurrent(true, QString());
         return;
     }
+    if (m_current->reboots)
+        m_rebootPending = true;  // from here on a port close is the reboot itself
     m_responseTimer.start(m_current->timeoutMs);
 }
 
@@ -504,7 +654,7 @@ void SerialService::writeRegisters(quint8, const RegisterWrites &writes)
         emit writeBatchFinished(kSerialNodeId, true, QString());
         return;
     }
-    if (!m_portOpen || m_closing) {
+    if ((!m_portOpen && !m_reopening) || m_closing) {
         const QString reason = m_portOpen ? tr("Disconnecting.") : tr("Serial port is not open.");
         for (const RegisterWrite &write : writes)
             emit registerWritten(kSerialNodeId, write.first, false, reason);
@@ -512,8 +662,8 @@ void SerialService::writeRegisters(quint8, const RegisterWrites &writes)
         return;
     }
 
-    // Config registers are staged inside CONFIG ... SAVE; runtime ones (is_on) go
-    // after SAVE, because CONFIG mode stops the motor and refuses them with
+    // Config registers are staged inside CONFIG ... APPLY; runtime ones (is_on) go
+    // after APPLY, because CONFIG mode stops the motor and refuses them with
     // `ERROR: RUNNING mode required`.
     RegisterWrites configWrites;
     RegisterWrites runtimeWrites;
@@ -551,14 +701,16 @@ void SerialService::writeRegisters(quint8, const RegisterWrites &writes)
         for (const RegisterWrite &write : std::as_const(configWrites))
             enqueueWrite(write);
 
-        // SAVE persists the staged values and leaves CONFIG mode. It prints an
-        // optional `Saved config` and always ends with the `NOTE: ...` line.
-        PendingCommand save = bareCommand(QStringLiteral("SAVE"),
-                                          {QStringLiteral("NOTE:"), QStringLiteral("OK: SAVE")});
-        save.batchId = batchId;
-        save.closesConfig = true;
-        save.timeoutMs = 3000;  // flash write
-        enqueue(save);
+        // APPLY persists the staged values and reboots the drive, which is what
+        // makes them take effect (SAVE only applies the servo gains). It prints no
+        // ack of its own: the reply is the boot banner of the restarted drive.
+        PendingCommand apply = bareCommand(QStringLiteral("APPLY"),
+                                           {QString::fromLatin1(kBootBannerEnd)});
+        apply.batchId = batchId;
+        apply.closesConfig = true;
+        apply.reboots = true;
+        apply.timeoutMs = kRebootTimeoutMs;
+        enqueue(apply);
     }
 
     for (const RegisterWrite &write : std::as_const(runtimeWrites))

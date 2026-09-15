@@ -3,6 +3,7 @@
 
 #include "transport/device_link.h"
 
+#include <QDeadlineTimer>
 #include <QHash>
 #include <QQueue>
 #include <QStringList>
@@ -24,14 +25,23 @@ class SerialWorker;
 ///   `STOP`                -> `OK: STOP`
 ///   `CONFIG`              -> `CONFIG MODE ENABLED`            (also stops the motor)
 ///   `SAVE`                -> [`Saved config`] `NOTE: ...`     (leaves CONFIG mode)
+///   `APPLY`               -> reboot; the boot banner ends with
+///                            `See HELP for available commands`
 ///   `EXIT`                -> `CONFIG MODE EXITED, ...`, or nothing outside CONFIG
 ///   any failure           -> `ERROR: <reason>`
 ///
-/// Config registers are only writable in CONFIG mode, so a write batch that touches
-/// any of them is wrapped as CONFIG -> writes -> SAVE. CONFIG mode survives a port
-/// close and even a drive reconnect, and in CONFIG mode `is_on:1` and `log_on` are
-/// refused with `ERROR: RUNNING mode required`, so a batch that cannot complete is
-/// always followed by `EXIT`, and every connection starts with one as well.
+/// Config registers are only writable in CONFIG mode, and SAVE only makes the servo
+/// gains take effect ("NOTE: config changes not applied! To apply, run APPLY or
+/// reset controller"), so a write batch that touches any of them is wrapped as
+/// CONFIG -> writes -> APPLY. APPLY persists the staged values and reboots the
+/// drive; the batch is complete once the boot banner has been seen, and
+/// driveRebooted() then tells MainWindow to re-enable the drive and re-read it.
+/// The USB port normally stays open across the reboot (the UART goes through a
+/// bridge); should it drop anyway, the service reopens it itself instead of
+/// reporting a lost link. CONFIG mode survives a port close and even a drive
+/// reconnect, and in CONFIG mode `is_on:1` and `log_on` are refused with
+/// `ERROR: RUNNING mode required`, so a batch that cannot complete is always
+/// followed by `EXIT`, and every connection starts with one as well.
 class SerialService : public DeviceLink
 {
     Q_OBJECT
@@ -44,7 +54,9 @@ public:
     ~SerialService() override;
 
     LinkKind kind() const override { return LinkKind::Serial; }
-    bool isConnected() const override { return m_portOpen && !m_closing; }
+    /// Still true while the port is being reopened after an APPLY reboot: for
+    /// MainWindow that is the same connection.
+    bool isConnected() const override { return (m_portOpen || m_reopening) && !m_closing; }
 
     /// Graceful close: whatever is already queued (MainWindow's `is_on:0`) is
     /// delivered, `log_off` is sent so the drive stops streaming, and only then is
@@ -84,6 +96,9 @@ public:
 signals:
     /// Result of connectToPort(): true only once the drive has answered the handshake.
     void connectionResult(bool success, const QString &message);
+    /// APPLY finished and the drive is up again. It boots into RUNNING mode with the
+    /// `state:` log off, so whoever needs telemetry or `is_on:1` has to ask again.
+    void driveRebooted();
 
 private slots:
     void onWorkerPortOpened(bool success, const QString &message);
@@ -93,6 +108,8 @@ private slots:
     void onWorkerSerialError(const QString &message);
     void onResponseTimeout();
     void onCloseTimeout();
+    void onReopenTimeout();
+    void onBootSettled();
 
 private:
     enum class CommandKind
@@ -120,8 +137,10 @@ private:
         bool internal = false;
         /// CONFIG: when it fails nothing else in the batch can be staged.
         bool opensConfig = false;
-        /// SAVE: the drive is back in RUNNING mode once this is answered.
+        /// APPLY: the drive is back in RUNNING mode once this is answered.
         bool closesConfig = false;
+        /// APPLY: the drive reboots; the ack is its boot banner.
+        bool reboots = false;
     };
 
     struct Batch
@@ -147,6 +166,11 @@ private:
     void finishClosing();
     /// Sends a line without queueing or waiting for an ack, for the trajectory rates.
     void sendImmediate(const QString &line);
+    /// The port went away while the drive was rebooting: keep the queue and retry
+    /// the open until the port is back or the reboot window has passed.
+    void beginReopen();
+    /// Reconnect after a reboot failed: now it really is a lost link.
+    void giveUpReopen(const QString &reason);
 
     QThread m_workerThread;
     SerialWorker *m_worker = nullptr;
@@ -156,6 +180,11 @@ private:
     /// Bounds the drain of closeLink(): the port is closed even if the drive stops
     /// answering.
     QTimer m_closeTimer;
+    /// Paces the open retries while the port is being reopened after a reboot.
+    QTimer m_reopenTimer;
+    /// Holds the queue after the boot banner: the drive buffers, but does not
+    /// answer, what arrives during the first second of its start-up.
+    QTimer m_bootSettleTimer;
 
     int m_nextCommandId = 1;
     int m_nextBatchId = 1;
@@ -167,7 +196,15 @@ private:
     /// connectToPort() was issued and the worker has not reported the open yet; a
     /// portClosed for the previous port arriving meanwhile is not a lost link.
     bool m_openPending = false;
+    /// APPLY has been sent and the boot banner not seen yet: a port close in this
+    /// window is the reboot, not a lost link.
+    bool m_rebootPending = false;
+    /// The port dropped during a reboot and is being reopened; the queue is kept
+    /// and driveRebooted() is held back until the handshake answers again.
+    bool m_reopening = false;
+    QDeadlineTimer m_reopenDeadline;
     QString m_portName;
+    int m_baudRate = 0;
 
     QHash<int, Batch> m_batches;
 };
