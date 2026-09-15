@@ -56,6 +56,11 @@ constexpr int kCloseFallbackMs = 3000;
 /// Width the logo is scaled to; the label itself is 100 px wide before the first
 /// layout pass, so this is what the logo has always been shown at on start-up.
 constexpr int kLogoWidth = 120;
+/// After flashing the drive is reset by OpenOCD and, like after APPLY, ignores its
+/// input for a second or so; the reconnect is retried at this pace until the window
+/// has passed, which also covers a USB re-enumeration of the port.
+constexpr int kFlashReconnectRetryMs = 500;
+constexpr int kFlashReconnectWindowMs = 15000;
 
 /// Registers behind the STATUS panel and the non-telemetry plot signals.
 const QStringList &statusRegisters()
@@ -155,14 +160,32 @@ void MainWindow::setupServices()
     connect(m_serial, &SerialService::connectionResult, this,
             [this](bool ok, const QString &message) {
                 if (ok) {
+                    m_flashReconnectPending = false;
+                    m_flashSerialPort.clear();
                     handleConnected(LinkKind::Serial);
                     setStatusMessage(message);
-                } else {
-                    m_serial->closeLink();
-                    setLink(nullptr);
-                    updateUiState();
-                    showError(tr("Connection failed"), message);
+                    return;
                 }
+                m_serial->closeLink();
+                setLink(nullptr);
+                updateUiState();
+                if (m_flashReconnectPending && !m_flashReconnectDeadline.hasExpired()) {
+                    // The freshly flashed drive is still starting up and answers
+                    // nothing yet; keep knocking until the window closes.
+                    QTimer::singleShot(kFlashReconnectRetryMs, this,
+                                       &MainWindow::tryFlashReconnect);
+                    return;
+                }
+                if (m_flashReconnectPending) {
+                    m_flashReconnectPending = false;
+                    m_flashSerialPort.clear();
+                    showError(tr("Reconnect failed"),
+                              tr("The drive did not answer after flashing; connect again "
+                                 "by hand.\n\n%1")
+                                      .arg(message));
+                    return;
+                }
+                showError(tr("Connection failed"), message);
             });
 
     connect(m_cyphal, &CyphalService::connectionResult, this,
@@ -191,7 +214,8 @@ void MainWindow::setupServices()
     connect(m_downloader, &FirmwareDownloader::progress, this,
             [this](int percent, const QString &stage) {
                 ui->FlashProgressBar->setValue(percent);
-                setStatusMessage(stage);
+                // No timeout: a slow transfer must not leave the bar blank.
+                setStatusMessage(stage, 0);
             });
     connect(m_downloader, &FirmwareDownloader::failed, this, [this](const QString &error) {
         ui->FlashProgressBar->setValue(0);
@@ -208,23 +232,32 @@ void MainWindow::setupServices()
             [this](int percent, const QString &stage) {
                 ui->FlashProgressBar->setValue(percent);
                 if (!stage.isEmpty())
-                    setStatusMessage(stage);
+                    setStatusMessage(stage, 0);
             });
     connect(m_flasher, &FirmwareFlasher::output, this,
             [this](const QString &line) { m_plot->appendLogLine(line); });
     connect(m_flasher, &FirmwareFlasher::finished, this,
             [this](bool ok, const QString &message) {
                 ui->FlashPushButton->setEnabled(true);
-                if (ok) {
-                    ui->FlashProgressBar->setValue(100);
-                    setStatusMessage(message);
-                    // The drive reboots into the new image, so the revision is stale.
-                    if (m_link)
-                        m_link->readRegister(activeNodeId(),
-                                             QString::fromLatin1(registers::kFirmwareRev));
-                } else {
+                if (!ok) {
                     ui->FlashProgressBar->setValue(0);
+                    m_flashSerialPort.clear();
+                    if (m_link && m_link->isConnected())
+                        m_pollTimer.start();
                     showError(tr("Flashing failed"), message);
+                    return;
+                }
+                ui->FlashProgressBar->setValue(100);
+                setStatusMessage(message);
+                if (!m_flashSerialPort.isEmpty()) {
+                    // The drive has been reset into the new image: whatever the
+                    // link knew about it is stale, so it is reconnected from scratch.
+                    reconnectAfterFlash();
+                } else if (m_link && m_link->isConnected()) {
+                    // CAN: the drive reboots into the new image, so the revision is stale.
+                    m_pollTimer.start();
+                    m_link->readRegister(activeNodeId(),
+                                         QString::fromLatin1(registers::kFirmwareRev));
                 }
             });
 }
@@ -292,6 +325,7 @@ void MainWindow::applyUiSettings()
         if (binding.restore)
             binding.restore->applyColors(normal, hover);
     }
+    ui->RestoreVoltageLimitLbl->applyColors(normal, hover);
 
     m_serial->setTelemetryBatchIntervalMs(
             qBound(10, 1000 / qMax(1, m_config.ui.plot_draw_rate_hz), 100));
@@ -444,7 +478,8 @@ void MainWindow::setupRegisterBindings()
         ui->TorqLimitCheckBox);
     add(registers::kMaxCurrent, ui->CurrentLimitDoubleSpinBox, ui->RestoreCurrentLimitLbl,
         ui->CurrentLimitCheckBox);
-    add(registers::kAngleDirection, ui->DirComboBox, ui->RestoreDirLbl, ui->DirCheckBox);
+    // Direction has no "unset" state (ang_dir is +1 or -1), hence no checkbox.
+    add(registers::kAngleDirection, ui->DirComboBox, ui->RestoreDirLbl);
 
     // CAN
     add(registers::kNodeId, ui->NodeIdLineEdit, ui->RestoreNodeIdLbl);
@@ -506,6 +541,29 @@ void MainWindow::setupRegisterBindings()
             binding.restore->setVisible(false);
         }
     }
+
+    // The voltage limit has no register in the firmware yet, so its row is not a
+    // binding; its Restore icon still behaves like the others, against the state
+    // the row starts in.
+    m_voltageLimitBaseline = {ui->VoltageLimitCheckBox->isChecked(),
+                              ui->VoltageLimitDoubleSpinBox->value()};
+    ui->RestoreVoltageLimitLbl->setVisible(false);
+    connect(ui->VoltageLimitCheckBox, &QCheckBox::toggled, this,
+            &MainWindow::updateVoltageRestoreIcon);
+    connect(ui->VoltageLimitDoubleSpinBox, &QDoubleSpinBox::valueChanged, this,
+            &MainWindow::updateVoltageRestoreIcon);
+    connect(ui->RestoreVoltageLimitLbl, &RestoreLabel::clicked, this, [this] {
+        ui->VoltageLimitCheckBox->setChecked(m_voltageLimitBaseline.first);
+        ui->VoltageLimitDoubleSpinBox->setValue(m_voltageLimitBaseline.second);
+    });
+}
+
+void MainWindow::updateVoltageRestoreIcon()
+{
+    const bool modified = ui->VoltageLimitCheckBox->isChecked() != m_voltageLimitBaseline.first
+            || !qFuzzyCompare(1.0 + ui->VoltageLimitDoubleSpinBox->value(),
+                              1.0 + m_voltageLimitBaseline.second);
+    ui->RestoreVoltageLimitLbl->setVisible(modified);
 }
 
 const MainWindow::RegisterBinding *MainWindow::bindingFor(const QString &name) const
@@ -797,6 +855,11 @@ void MainWindow::onSerialConnectClicked()
         showError(tr("Connection failed"), tr("No serial port selected."));
         return;
     }
+    connectSerial(port);
+}
+
+void MainWindow::connectSerial(const QString &port)
+{
     setLink(m_serial);
     ui->SerialConnectBtn->setEnabled(false);
     setStatusMessage(tr("Opening %1...").arg(port));
@@ -873,8 +936,17 @@ void MainWindow::handleDisconnected()
     setStatusMessage(tr("Disconnected."));
     updateUiState();
 
-    if (m_closePending)
+    if (m_closePending) {
         close();  // closeEvent() deferred the close until the link was down
+        return;
+    }
+    if (m_reconnectAfterFlash) {
+        // The close that followed a flash is done; now the reopen. Deferred: the
+        // Serial close arrives here twice in a row (deviceLost, then linkClosed),
+        // and a link set up in between would be dropped by the second call.
+        m_reconnectAfterFlash = false;
+        QTimer::singleShot(0, this, &MainWindow::tryFlashReconnect);
+    }
 }
 
 void MainWindow::updateUiState()
@@ -891,15 +963,19 @@ void MainWindow::updateUiState()
     ui->EmergStopPushButton->setEnabled(connected);
     ui->DevicesGroupBox->setEnabled(can);
 
-    // While a link is up, the rest of CONNECTION is locked to its own control.
+    // Only the row of the chosen transport is usable, and while a link is up the
+    // rest of CONNECTION is locked to its own control.
+    const bool serialChosen = ui->SerialRadioBtn->isChecked();
+    const bool serialRow = !connected && serialChosen;
+    const bool canRow = !connected && !serialChosen;
     ui->SerialRadioBtn->setEnabled(!connected);
     ui->CanRadioBtn->setEnabled(!connected);
-    ui->SerialCombo->setEnabled(!connected);
-    ui->CanCombo->setEnabled(!connected);
-    ui->SerialRefreshBtn->setEnabled(!connected);
-    ui->CanRefreshBtn->setEnabled(!connected);
-    ui->SerialConnectBtn->setEnabled(!connected || serial);
-    ui->CanConnectBtn->setEnabled(!connected || can);
+    ui->SerialCombo->setEnabled(serialRow);
+    ui->CanCombo->setEnabled(canRow);
+    ui->SerialRefreshBtn->setEnabled(serialRow);
+    ui->CanRefreshBtn->setEnabled(canRow);
+    ui->SerialConnectBtn->setEnabled(serialRow || serial);
+    ui->CanConnectBtn->setEnabled(canRow || can);
     ui->SerialConnectBtn->setText(serial ? tr("Disconnect") : tr("Connect"));
     ui->CanConnectBtn->setText(can ? tr("Disconnect") : tr("Connect"));
 
@@ -1097,8 +1173,13 @@ void MainWindow::onWriteRegisters()
         setStatusMessage(tr("No changes to write."));
         return;
     }
+    writeConfigToDrive(device, writes);
+}
 
+void MainWindow::writeConfigToDrive(DeviceModel *device, const RegisterWrites &writes)
+{
     ui->WriteRegBtn->setEnabled(false);
+    ui->SetOriginBtn->setEnabled(false);
     if (m_link->kind() == LinkKind::Serial) {
         // The link stages the values in CONFIG mode (which stops the motor) and
         // applies them with APPLY, which reboots the drive. A trajectory would only
@@ -1134,7 +1215,9 @@ void MainWindow::onSetOrigin()
     refreshAllEditors();
     refreshRestoreIcon(name);
 
-    m_link->writeRegisters(device->nodeId(), {{name, RegisterValue::fromReal32(newOffset)}});
+    // Written exactly like the Write button writes it: ang_off is a config
+    // register, so on Serial it goes CONFIG -> write -> APPLY with the reboot.
+    writeConfigToDrive(device, {{name, RegisterValue::fromReal32(newOffset)}});
     setStatusMessage(tr("Origin set; angle offset is now %1.")
                              .arg(toDisplayUnits(name, newOffset), 0, 'f', 4));
 }
@@ -1320,6 +1403,7 @@ void MainWindow::onWriteBatchFinished(quint8 nodeId, bool ok, const QString &err
 {
     Q_UNUSED(nodeId);
     ui->WriteRegBtn->setEnabled(true);
+    ui->SetOriginBtn->setEnabled(true);
     if (ok) {
         // Restore icons deliberately stay visible after a successful write: the spec
         // requires the previous values to remain recoverable.
@@ -2112,12 +2196,58 @@ void MainWindow::onFlashClicked()
 void MainWindow::startFlashing(const QString &hexPath)
 {
     // OpenOCD drives the target over SWD while the application holds the UART. The
-    // drive is disabled first so it is not spinning while its flash is rewritten.
+    // drive is disabled first so it is not spinning while its flash is rewritten,
+    // and the status polling pauses: a halted core answers nothing.
+    m_flashSerialPort.clear();
     if (m_link && m_link->isConnected()) {
         m_control->stopAll();
+        m_pollTimer.stop();
         m_link->writeRegisters(activeNodeId(), {{QString::fromLatin1(registers::kIsOn),
                                                  RegisterValue::fromBool(false)}});
+        if (m_link->kind() == LinkKind::Serial)
+            m_flashSerialPort = ui->SerialCombo->currentData().toString();
     }
-    setStatusMessage(tr("Flashing %1...").arg(QFileInfo(hexPath).fileName()));
+    setStatusMessage(tr("Flashing %1...").arg(QFileInfo(hexPath).fileName()), 0);
     m_flasher->flash(hexPath, m_config.ui.openocd_interface, m_config.ui.openocd_target);
+}
+
+void MainWindow::reconnectAfterFlash()
+{
+    m_flashReconnectDeadline = QDeadlineTimer(kFlashReconnectWindowMs);
+    m_flashReconnectPending = true;
+
+    if (m_link == m_serial && m_link->isConnected()) {
+        // Still up (the UART bridge survived the flash): close it cleanly first;
+        // handleDisconnected() then reopens it.
+        m_reconnectAfterFlash = true;
+        m_control->stopAll();
+        m_statusTimer.stop();
+        m_pollTimer.stop();
+        setStatusMessage(tr("Reconnecting to the flashed drive..."), 0);
+        m_serial->closeLink();
+        return;
+    }
+    // The port went away with the reset; it is polled for until it is back.
+    tryFlashReconnect();
+}
+
+void MainWindow::tryFlashReconnect()
+{
+    if (!m_flashReconnectPending)
+        return;
+    if (m_link && m_link->isConnected()) {
+        m_flashReconnectPending = false;  // the user connected by hand meanwhile
+        m_flashSerialPort.clear();
+        return;
+    }
+
+    // Just open it: a port that is not back yet fails the open, and the
+    // connectionResult handler retries until the deadline.
+    const QString port = m_flashSerialPort;
+    refreshSerialPorts();
+    const int index = ui->SerialCombo->findData(port);
+    if (index >= 0)
+        ui->SerialCombo->setCurrentIndex(index);
+    connectSerial(port);
+    setStatusMessage(tr("Reconnecting to %1...").arg(port), 0);
 }

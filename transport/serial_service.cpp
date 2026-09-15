@@ -31,6 +31,9 @@ constexpr int kBootSettleMs = 1500;
 constexpr int kReopenIntervalMs = 250;
 constexpr int kReopenWindowMs = 10000;
 
+/// What the drive answers to servo_cmd / mit_cmd / log_on / is_on:1 in CONFIG mode.
+constexpr auto kRunningModeRequired = "ERROR: RUNNING mode required";
+
 bool startsWithAny(const QString &line, const QStringList &prefixes)
 {
     for (const QString &prefix : prefixes) {
@@ -562,15 +565,36 @@ void SerialService::onResponseTimeout()
     completeCurrent(false, tr("The drive did not answer in time."));
 }
 
+bool SerialService::isStrayRunningModeError(const QString &line,
+                                            const PendingCommand &command) const
+{
+    if (line.trimmed() != QLatin1String(kRunningModeRequired))
+        return false;
+    // The trajectory workers' immediate servo_cmd / mit_cmd lines bypass the queue,
+    // and once CONFIG has stopped the motor the drive answers each of them with
+    // this error. Those replies belong to the trajectory, not to the config write,
+    // read, CONFIG or APPLY in flight; only the commands the drive really refuses
+    // in CONFIG mode (a runtime write such as is_on:1, or log_on) may take it.
+    switch (command.kind) {
+    case CommandKind::Write:
+        return RegisterCatalog::requiresConfigMode(command.token);
+    case CommandKind::Bare:
+        return command.token != QLatin1String("log_on");
+    case CommandKind::Read:
+        return true;
+    }
+    return false;
+}
+
 void SerialService::onWorkerLine(const QString &line)
 {
     emit logLine(line);
 
     if (line.startsWith(QLatin1String(kErrorPrefix))) {
-        if (m_current.has_value())
-            completeCurrent(false, line.mid(static_cast<int>(qstrlen(kErrorPrefix))).trimmed());
-        else
+        if (!m_current.has_value())
             emit linkError(line);
+        else if (!isStrayRunningModeError(line, *m_current))
+            completeCurrent(false, line.mid(static_cast<int>(qstrlen(kErrorPrefix))).trimmed());
         return;
     }
 

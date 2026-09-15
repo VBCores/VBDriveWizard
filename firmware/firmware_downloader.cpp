@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLocale>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -109,10 +110,20 @@ void FirmwareDownloader::startAssetDownload(const QUrl &url)
     m_reply = m_network->get(request);
     connect(m_reply, &QNetworkReply::downloadProgress, this,
             [this](qint64 received, qint64 total) {
+                const QLocale locale;
                 if (total > 0) {
                     // 15..95 % covers the transfer; the rest is metadata and saving.
+                    const int share = static_cast<int>(100.0 * received / total);
                     const int percent = 15 + static_cast<int>(80.0 * received / total);
-                    emit progress(qBound(15, percent, 95), tr("Downloading %1...").arg(m_version));
+                    emit progress(qBound(15, percent, 95),
+                                  tr("Downloading %1: %2 of %3 (%4%)")
+                                          .arg(m_version, locale.formattedDataSize(received),
+                                               locale.formattedDataSize(total))
+                                          .arg(share));
+                } else {
+                    // GitHub's asset redirect does not always carry a length.
+                    emit progress(15, tr("Downloading %1: %2 received")
+                                              .arg(m_version, locale.formattedDataSize(received)));
                 }
             });
     connect(m_reply, &QNetworkReply::finished, this, &FirmwareDownloader::onAssetFinished);

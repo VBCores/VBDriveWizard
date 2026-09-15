@@ -4,9 +4,12 @@
 #include "app_types.h"
 #include "control/trajectory.h"
 #include "core/register_yaml.h"
+#include "transport/device_link.h"
 
+#include <QDeadlineTimer>
 #include <QHash>
 #include <QMainWindow>
+#include <QPair>
 #include <QTimer>
 #include <QVector>
 
@@ -83,6 +86,7 @@ private:
 
     // --- connection ---
     void onSerialConnectClicked();
+    void connectSerial(const QString &port);
     void onCanConnectClicked();
     void refreshSerialPorts();
     void refreshCanInterfaces();
@@ -100,6 +104,9 @@ private:
     void refreshRestoreIcon(const QString &name);
     void refreshAllEditors();
     void refreshAllRestoreIcons();
+    /// The voltage row has no register behind it; its icon compares against the
+    /// state the row started in.
+    void updateVoltageRestoreIcon();
     /// Converts between the drive's native units and what the editor shows.
     double toDisplayUnits(const QString &name, double nativeValue) const;
     double toNativeUnits(const QString &name, double displayValue) const;
@@ -107,6 +114,9 @@ private:
     // --- configuration actions ---
     void onReadRegisters();
     void onWriteRegisters();
+    /// Sends config registers the way the Write button does: on Serial that is
+    /// CONFIG -> writes -> APPLY, with the drive rebooting to take them.
+    void writeConfigToDrive(DeviceModel *device, const RegisterWrites &writes);
     void onSetOrigin();
     void onSaveProfile();
     void onLoadProfile();
@@ -167,6 +177,10 @@ private:
     void onOpenHexFile();
     void onFlashClicked();
     void startFlashing(const QString &hexPath);
+    /// Serial: the flashed drive has restarted, so the link is reopened for the
+    /// user instead of leaving them to press Disconnect and Connect.
+    void reconnectAfterFlash();
+    void tryFlashReconnect();
 
     // --- plot ---
     void onSignalChanged();
@@ -211,6 +225,17 @@ private:
     QTimer m_pollTimer;     ///< periodic re-read of the status registers
 
     QString m_selectedHexPath;
+    /// Port the drive was on when flashing started; empty when it was not on Serial.
+    /// The link is dropped and reopened on it once the new image has been written.
+    QString m_flashSerialPort;
+    /// handleDisconnected() is to reconnect: the link is being closed after a flash.
+    bool m_reconnectAfterFlash = false;
+    /// The post-flash reconnect is retried until this expires: the drive answers
+    /// nothing for a while after the reset.
+    QDeadlineTimer m_flashReconnectDeadline;
+    bool m_flashReconnectPending = false;
+    /// Checked state and value the voltage row started with (see the Restore icon).
+    QPair<bool, double> m_voltageLimitBaseline{false, 0.0};
     QLabel *m_connectionStatusLabel = nullptr;
     /// Node whose heartbeat was lost and which the user asked to wait for.
     QHash<quint8, bool> m_awaitingReconnect;

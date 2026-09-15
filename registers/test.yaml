@@ -6,7 +6,7 @@ gear: 36
 max_i: nan
 max_spd: nan
 max_tq: nan
-ang_off: 0
+ang_off: 0.044047
 ang_dir: 1
 min_ang: nan
 max_ang: nan

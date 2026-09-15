@@ -153,6 +153,9 @@ private:
     int enqueue(PendingCommand command);
     void pumpQueue();
     void completeCurrent(bool success, const QString &error);
+    /// `ERROR: RUNNING mode required` answering a trajectory command that slipped
+    /// into CONFIG mode, rather than the command in flight.
+    bool isStrayRunningModeError(const QString &line, const PendingCommand &command) const;
     /// Books one finished command of its batch and reports the batch when done.
     void finishBatchCommand(const PendingCommand &command, bool success);
     /// Drops the batch's remaining commands and reports it as failed.

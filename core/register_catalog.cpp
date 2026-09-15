@@ -213,7 +213,9 @@ QString RegisterCodec::format(const RegisterValue &value)
         const double d = value.toDouble();
         if (std::isnan(d))
             return QStringLiteral("nan");
-        return QString::number(d, 'g', 9);
+        // Plain decimal notation, as the firmware itself prints reals (%f): the
+        // 'g' form would send a small offset as "1.5e-05".
+        return QString::number(d, 'f', 6);
     }
     case RegisterType::String:
         return value.toString();
