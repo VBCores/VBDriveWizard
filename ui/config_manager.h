@@ -1,5 +1,5 @@
-#ifndef UI_CONFIG_MANAGER_H
-#define UI_CONFIG_MANAGER_H
+#ifndef VBDW_UI_CONFIG_MANAGER_H
+#define VBDW_UI_CONFIG_MANAGER_H
 
 #include "app_types.h"
 
@@ -37,4 +37,4 @@ private:
     static void sanitize(AppConfig *config);
 };
 
-#endif // UI_CONFIG_MANAGER_H
+#endif // VBDW_UI_CONFIG_MANAGER_H

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1582</width>
-    <height>1070</height>
+    <height>1209</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
          <string>CONNECTION</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_12">
-         <item column="0" row="0">
+         <item row="0" column="0">
           <widget class="QRadioButton" name="SerialRadioBtn">
            <property name="text">
             <string>Serial</string>
@@ -33,41 +33,41 @@
            </property>
           </widget>
          </item>
-         <item column="1" row="0">
+         <item row="0" column="1">
           <widget class="QComboBox" name="SerialCombo"/>
          </item>
-         <item column="2" row="0">
+         <item row="0" column="2">
           <widget class="QPushButton" name="SerialConnectBtn">
            <property name="text">
             <string>Connect</string>
            </property>
           </widget>
          </item>
-         <item column="3" row="0">
+         <item row="0" column="3">
           <widget class="QPushButton" name="SerialRefreshBtn">
            <property name="text">
             <string>Refresh</string>
            </property>
           </widget>
          </item>
-         <item column="0" row="1">
+         <item row="1" column="0">
           <widget class="QRadioButton" name="CanRadioBtn">
            <property name="text">
             <string>CAN</string>
            </property>
           </widget>
          </item>
-         <item column="1" row="1">
+         <item row="1" column="1">
           <widget class="QComboBox" name="CanCombo"/>
          </item>
-         <item column="2" row="1">
+         <item row="1" column="2">
           <widget class="QPushButton" name="CanConnectBtn">
            <property name="text">
             <string>Connect</string>
            </property>
           </widget>
          </item>
-         <item column="3" row="1">
+         <item row="1" column="3">
           <widget class="QPushButton" name="CanRefreshBtn">
            <property name="text">
             <string>Refresh</string>
@@ -91,7 +91,8 @@
               <string/>
              </property>
              <property name="icon">
-              <iconset><normaloff>:/icons/refresh.svg</normaloff>:/icons/refresh.svg</iconset>
+              <iconset resource="icons.qrc">
+               <normaloff>:/icons/refresh.svg</normaloff>:/icons/refresh.svg</iconset>
              </property>
             </widget>
            </item>
@@ -173,13 +174,13 @@
                      <number>4</number>
                     </property>
                     <property name="minimum">
-                     <double>-100000.000000</double>
+                     <double>-100000.000000000000000</double>
                     </property>
                     <property name="maximum">
-                     <double>100000.000000</double>
+                     <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>0.010000</double>
+                     <double>0.010000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -196,13 +197,13 @@
                      <number>4</number>
                     </property>
                     <property name="minimum">
-                     <double>-100000.000000</double>
+                     <double>-100000.000000000000000</double>
                     </property>
                     <property name="maximum">
-                     <double>100000.000000</double>
+                     <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>0.010000</double>
+                     <double>0.010000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -226,13 +227,13 @@
                      <number>4</number>
                     </property>
                     <property name="minimum">
-                     <double>0.000000</double>
+                     <double>0.000000000000000</double>
                     </property>
                     <property name="maximum">
-                     <double>100000.000000</double>
+                     <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>0.100000</double>
+                     <double>0.100000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -256,13 +257,13 @@
                      <number>4</number>
                     </property>
                     <property name="minimum">
-                     <double>0.000000</double>
+                     <double>0.000000000000000</double>
                     </property>
                     <property name="maximum">
-                     <double>10000.000000</double>
+                     <double>10000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>0.100000</double>
+                     <double>0.100000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -275,36 +276,36 @@
                  <layout class="QHBoxLayout" name="horizontalLayout_13">
                   <item>
                    <widget class="QCheckBox" name="VoltageLimitCheckBox">
-                    <property name="text">
-                     <string>Voltage</string>
-                    </property>
                     <property name="enabled">
                      <bool>false</bool>
                     </property>
                     <property name="toolTip">
                      <string>The firmware exposes no voltage limit register yet.</string>
+                    </property>
+                    <property name="text">
+                     <string>Voltage</string>
                     </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QDoubleSpinBox" name="VoltageLimitDoubleSpinBox">
-                    <property name="decimals">
-                     <number>2</number>
-                    </property>
-                    <property name="minimum">
-                     <double>0.000000</double>
-                    </property>
-                    <property name="maximum">
-                     <double>1000.000000</double>
-                    </property>
-                    <property name="singleStep">
-                     <double>0.100000</double>
-                    </property>
                     <property name="enabled">
                      <bool>false</bool>
                     </property>
                     <property name="toolTip">
                      <string>The firmware exposes no voltage limit register yet.</string>
+                    </property>
+                    <property name="decimals">
+                     <number>2</number>
+                    </property>
+                    <property name="minimum">
+                     <double>0.000000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>1000.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.100000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -328,13 +329,13 @@
                      <number>4</number>
                     </property>
                     <property name="minimum">
-                     <double>0.000000</double>
+                     <double>0.000000000000000</double>
                     </property>
                     <property name="maximum">
-                     <double>1000.000000</double>
+                     <double>1000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>0.100000</double>
+                     <double>0.100000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -394,24 +395,24 @@
              <string>CAN</string>
             </attribute>
             <layout class="QGridLayout" name="gridLayout_14">
-             <item colspan="2" column="0" row="1">
+             <item row="1" column="0" colspan="2">
               <widget class="QLabel" name="DataBaudLbl">
                <property name="text">
                 <string>Data Baud Rate</string>
                </property>
               </widget>
              </item>
-             <item column="0" row="0">
+             <item row="0" column="0">
               <widget class="QLabel" name="NodeIdLbl">
                <property name="text">
                 <string>Node ID</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="0">
+             <item row="0" column="2">
               <widget class="QLineEdit" name="NodeIdLineEdit"/>
              </item>
-             <item column="2" row="3">
+             <item row="3" column="2">
               <spacer name="verticalSpacer_13">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -424,7 +425,7 @@
                </property>
               </spacer>
              </item>
-             <item column="2" row="2">
+             <item row="2" column="2">
               <widget class="QComboBox" name="NomBaudComboBox">
                <property name="currentIndex">
                 <number>3</number>
@@ -456,7 +457,7 @@
                </item>
               </widget>
              </item>
-             <item column="2" row="1">
+             <item row="1" column="2">
               <widget class="QComboBox" name="DataBaudComboBox">
                <property name="currentIndex">
                 <number>0</number>
@@ -483,14 +484,14 @@
                </item>
               </widget>
              </item>
-             <item colspan="2" column="0" row="2">
+             <item row="2" column="0" colspan="2">
               <widget class="QLabel" name="NomBaudLbl">
                <property name="text">
                 <string>Nominal Baud Rate</string>
                </property>
               </widget>
              </item>
-             <item column="1" row="3">
+             <item row="3" column="1">
               <spacer name="verticalSpacer_10">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -503,13 +504,13 @@
                </property>
               </spacer>
              </item>
-             <item column="3" row="0">
+             <item row="0" column="3">
               <widget class="RestoreLabel" name="RestoreNodeIdLbl"/>
              </item>
-             <item column="3" row="1">
+             <item row="1" column="3">
               <widget class="RestoreLabel" name="RestoreDataBaudLbl"/>
              </item>
-             <item column="3" row="2">
+             <item row="2" column="3">
               <widget class="RestoreLabel" name="RestoreNomBaudLbl"/>
              </item>
             </layout>
@@ -519,14 +520,14 @@
              <string>Advanced</string>
             </attribute>
             <layout class="QGridLayout" name="gridLayout_15">
-             <item column="0" row="0">
+             <item row="0" column="0">
               <widget class="QLabel" name="GearRatioLbl">
                <property name="text">
                 <string>Gear Ratio</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="0">
+             <item row="0" column="2">
               <widget class="QSpinBox" name="GearRatioSpinBox">
                <property name="minimum">
                 <number>1</number>
@@ -539,251 +540,251 @@
                </property>
               </widget>
              </item>
-             <item column="0" row="1">
+             <item row="1" column="0">
               <widget class="QLabel" name="EncoderTypeLbl">
                <property name="text">
                 <string>Encoder</string>
                </property>
               </widget>
              </item>
-             <item column="4" row="1">
+             <item row="1" column="4">
               <widget class="RestoreLabel" name="RestoreEncoderTypeLbl"/>
              </item>
-             <item column="0" row="2">
+             <item row="2" column="0">
               <widget class="QLabel" name="TorqueConstLbl">
                <property name="text">
                 <string>Torque const</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="2">
+             <item row="2" column="2">
               <widget class="QDoubleSpinBox" name="TorqueConstDoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
                <property name="minimum">
-                <double>0.000000</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>1000.000000</double>
+                <double>1000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000</double>
+                <double>0.001000000000000</double>
                </property>
               </widget>
              </item>
-             <item column="4" row="2">
+             <item row="2" column="4">
               <widget class="RestoreLabel" name="RestoreTorqueConstLbl"/>
              </item>
-             <item column="0" row="3">
+             <item row="3" column="0">
               <widget class="QLabel" name="CurrentKpLbl">
                <property name="text">
                 <string>Current Kp</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="3">
+             <item row="3" column="2">
               <widget class="QDoubleSpinBox" name="CurrentKpDoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
                <property name="minimum">
-                <double>0.000000</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>100000.000000</double>
+                <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000</double>
+                <double>0.001000000000000</double>
                </property>
               </widget>
              </item>
-             <item column="4" row="3">
+             <item row="3" column="4">
               <widget class="RestoreLabel" name="RestoreCurrentKpLbl"/>
              </item>
-             <item column="0" row="4">
+             <item row="4" column="0">
               <widget class="QLabel" name="CurrentKiLbl">
                <property name="text">
                 <string>Current Ki</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="4">
+             <item row="4" column="2">
               <widget class="QDoubleSpinBox" name="CurrentKiDoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
                <property name="minimum">
-                <double>0.000000</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>100000.000000</double>
+                <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000</double>
+                <double>0.001000000000000</double>
                </property>
               </widget>
              </item>
-             <item column="4" row="4">
+             <item row="4" column="4">
               <widget class="RestoreLabel" name="RestoreCurrentKiLbl"/>
              </item>
-             <item column="0" row="5">
+             <item row="5" column="0">
               <widget class="QLabel" name="PosOffsetLbl">
                <property name="text">
                 <string>Position Offset</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="5">
+             <item row="5" column="2">
               <widget class="QDoubleSpinBox" name="PosOffsetDoubleSpinBox">
                <property name="decimals">
                 <number>4</number>
                </property>
                <property name="minimum">
-                <double>-100000.000000</double>
+                <double>-100000.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>100000.000000</double>
+                <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.010000</double>
+                <double>0.010000000000000</double>
                </property>
               </widget>
              </item>
-             <item column="4" row="5">
+             <item row="5" column="4">
               <widget class="RestoreLabel" name="RestorePosOffsetLbl"/>
              </item>
-             <item colspan="2" column="0" row="6">
+             <item row="6" column="0" colspan="2">
               <widget class="QLabel" name="FilterALbl">
                <property name="text">
                 <string>Main Filter Param A</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="6">
+             <item row="6" column="2">
               <widget class="QDoubleSpinBox" name="FilterADoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
                <property name="minimum">
-                <double>0.000000</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>100000.000000</double>
+                <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000</double>
+                <double>0.001000000000000</double>
                </property>
               </widget>
              </item>
-             <item column="4" row="6">
+             <item row="6" column="4">
               <widget class="RestoreLabel" name="RestoreFilterALbl"/>
              </item>
-             <item column="0" row="7">
+             <item row="7" column="0">
               <widget class="QLabel" name="FilterG1Lbl">
                <property name="text">
                 <string>Filter Gain 1</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="7">
+             <item row="7" column="2">
               <widget class="QDoubleSpinBox" name="FilterG1DoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
                <property name="minimum">
-                <double>0.000000</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>100000.000000</double>
+                <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000</double>
+                <double>0.001000000000000</double>
                </property>
               </widget>
              </item>
-             <item column="4" row="7">
+             <item row="7" column="4">
               <widget class="RestoreLabel" name="RestoreFilterG1Lbl"/>
              </item>
-             <item column="0" row="8">
+             <item row="8" column="0">
               <widget class="QLabel" name="FilterG2Lbl">
                <property name="text">
                 <string>Filter Gain 2</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="8">
+             <item row="8" column="2">
               <widget class="QDoubleSpinBox" name="FilterG2DoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
                <property name="minimum">
-                <double>0.000000</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>100000.000000</double>
+                <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000</double>
+                <double>0.001000000000000</double>
                </property>
               </widget>
              </item>
-             <item column="4" row="8">
+             <item row="8" column="4">
               <widget class="RestoreLabel" name="RestoreFilterG2Lbl"/>
              </item>
-             <item column="0" row="9">
+             <item row="9" column="0">
               <widget class="QLabel" name="FilterG3Lbl">
                <property name="text">
                 <string>Filter Gain 3</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="9">
+             <item row="9" column="2">
               <widget class="QDoubleSpinBox" name="FilterG3DoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
                <property name="minimum">
-                <double>0.000000</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>100000.000000</double>
+                <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000</double>
+                <double>0.001000000000000</double>
                </property>
               </widget>
              </item>
-             <item column="4" row="9">
+             <item row="9" column="4">
               <widget class="RestoreLabel" name="RestoreFilterG3Lbl"/>
              </item>
-             <item column="0" row="10">
+             <item row="10" column="0">
               <widget class="QLabel" name="CurrentLpfLbl">
                <property name="text">
                 <string>Current LPF Gain</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="10">
+             <item row="10" column="2">
               <widget class="QDoubleSpinBox" name="CurrentLpfDoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
                <property name="minimum">
-                <double>0.000000</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>100000.000000</double>
+                <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000</double>
+                <double>0.001000000000000</double>
                </property>
               </widget>
              </item>
-             <item column="4" row="10">
+             <item row="10" column="4">
               <widget class="RestoreLabel" name="RestoreCurrentLpfLbl"/>
              </item>
-             <item column="1" row="12">
+             <item row="12" column="1">
               <spacer name="verticalSpacer_11">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -796,7 +797,7 @@
                </property>
               </spacer>
              </item>
-             <item column="2" row="12">
+             <item row="12" column="2">
               <spacer name="verticalSpacer_12">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -809,7 +810,7 @@
                </property>
               </spacer>
              </item>
-             <item column="4" row="12">
+             <item row="12" column="4">
               <spacer name="verticalSpacer_17">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -822,10 +823,10 @@
                </property>
               </spacer>
              </item>
-             <item column="4" row="0">
+             <item row="0" column="4">
               <widget class="RestoreLabel" name="RestoreGearRatioLbl"/>
              </item>
-             <item column="2" row="1">
+             <item row="1" column="2">
               <widget class="QComboBox" name="EncoderTypeComboBox">
                <item>
                 <property name="text">
@@ -844,30 +845,30 @@
                </item>
               </widget>
              </item>
-             <item column="0" row="11">
+             <item row="11" column="0">
               <widget class="QLabel" name="CurrentKdLbl">
                <property name="text">
                 <string>Current Kd</string>
                </property>
               </widget>
              </item>
-             <item column="2" row="11">
+             <item row="11" column="2">
               <widget class="QDoubleSpinBox" name="CurrentKdDoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
                <property name="minimum">
-                <double>0.000000</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>100000.000000</double>
+                <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000</double>
+                <double>0.001000000000000</double>
                </property>
               </widget>
              </item>
-             <item column="4" row="11">
+             <item row="11" column="4">
               <widget class="RestoreLabel" name="RestoreCurrentKdLbl"/>
              </item>
             </layout>
@@ -883,20 +884,20 @@
                 <string>Sensor</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_16">
-                <item column="0" row="0">
+                <item row="0" column="0">
                  <widget class="QPushButton" name="CalibrateBtn">
                   <property name="text">
                    <string>Calibrate</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="0">
+                <item row="0" column="1">
                  <widget class="QProgressBar" name="CalibProgressBar">
-                  <property name="value">
-                   <number>0</number>
-                  </property>
                   <property name="visible">
                    <bool>false</bool>
+                  </property>
+                  <property name="value">
+                   <number>0</number>
                   </property>
                  </widget>
                 </item>
@@ -909,21 +910,21 @@
                 <string>Register Parameters</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_13">
-                <item column="0" row="0">
+                <item row="0" column="0">
                  <widget class="QPushButton" name="SaveRegBtn">
                   <property name="text">
                    <string>Save to File...</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="0">
+                <item row="0" column="1">
                  <widget class="QPushButton" name="LoadRegBtn">
                   <property name="text">
                    <string>Load from File...</string>
                   </property>
                  </widget>
                 </item>
-                <item colspan="2" column="0" row="1">
+                <item row="1" column="0" colspan="2">
                  <widget class="QPushButton" name="RestoreRegBtn">
                   <property name="text">
                    <string>Restore to Default</string>
@@ -1051,7 +1052,7 @@
          <item>
           <widget class="QLabel" name="LogoLabel">
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;Logo&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Logo&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -1178,7 +1179,8 @@
              <string>English</string>
             </property>
             <property name="icon">
-             <iconset><normaloff>:/icons/flag_uk.png</normaloff>:/icons/flag_uk.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icons/flag_uk.png</normaloff>:/icons/flag_uk.png</iconset>
             </property>
            </item>
            <item>
@@ -1186,7 +1188,8 @@
              <string>Русский</string>
             </property>
             <property name="icon">
-             <iconset><normaloff>:/icons/flag_russia.png</normaloff>:/icons/flag_russia.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icons/flag_russia.png</normaloff>:/icons/flag_russia.png</iconset>
             </property>
            </item>
            <item>
@@ -1194,7 +1197,8 @@
              <string>中文</string>
             </property>
             <property name="icon">
-             <iconset><normaloff>:/icons/flag_china.png</normaloff>:/icons/flag_china.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icons/flag_china.png</normaloff>:/icons/flag_china.png</iconset>
             </property>
            </item>
           </widget>
@@ -1253,10 +1257,10 @@
          <string>CONTROL</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_11">
-         <item column="0" row="0">
+         <item row="0" column="0">
           <widget class="QTabWidget" name="ControlTabWidget">
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="ServoTab">
             <attribute name="title">
@@ -1349,13 +1353,13 @@
                        <number>4</number>
                       </property>
                       <property name="minimum">
-                       <double>0.000000</double>
+                       <double>0.000000000000000</double>
                       </property>
                       <property name="maximum">
-                       <double>100000.000000</double>
+                       <double>100000.000000000000000</double>
                       </property>
                       <property name="singleStep">
-                       <double>0.100000</double>
+                       <double>0.100000000000000</double>
                       </property>
                      </widget>
                     </item>
@@ -1398,120 +1402,120 @@
                <layout class="QVBoxLayout" name="verticalLayout_15">
                 <item>
                  <layout class="QGridLayout" name="gridLayout_7">
-                  <item column="0" row="0">
+                  <item row="0" column="0">
                    <widget class="QLabel" name="ServoKpLbl">
                     <property name="text">
                      <string>Kp:</string>
                     </property>
                    </widget>
                   </item>
-                  <item column="2" row="0">
+                  <item row="0" column="2">
                    <widget class="QDoubleSpinBox" name="ServoKpDoubleSpinBox">
                     <property name="decimals">
                      <number>4</number>
                     </property>
                     <property name="minimum">
-                     <double>0.000000</double>
+                     <double>0.000000000000000</double>
                     </property>
                     <property name="maximum">
-                     <double>100000.000000</double>
+                     <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>1.000000</double>
+                     <double>1.000000000000000</double>
                     </property>
                    </widget>
                   </item>
-                  <item column="3" row="0">
+                  <item row="0" column="3">
                    <widget class="QSlider" name="ServoKpSlider">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
                     <property name="minimum">
                      <number>0</number>
                     </property>
                     <property name="maximum">
-                     <number>1000</number>
+                     <number>30</number>
                     </property>
                     <property name="pageStep">
                      <number>50</number>
                     </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
                    </widget>
                   </item>
-                  <item column="0" row="1">
+                  <item row="1" column="0">
                    <widget class="QLabel" name="ServoKiLbl">
                     <property name="text">
                      <string>Ki:</string>
                     </property>
                    </widget>
                   </item>
-                  <item colspan="2" column="1" row="1">
+                  <item row="1" column="1" colspan="2">
                    <widget class="QDoubleSpinBox" name="ServoKiDoubleSpinBox">
                     <property name="decimals">
                      <number>4</number>
                     </property>
                     <property name="minimum">
-                     <double>0.000000</double>
+                     <double>0.000000000000000</double>
                     </property>
                     <property name="maximum">
-                     <double>100000.000000</double>
+                     <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>1.000000</double>
+                     <double>1.000000000000000</double>
                     </property>
                    </widget>
                   </item>
-                  <item column="3" row="1">
+                  <item row="1" column="3">
                    <widget class="QSlider" name="ServoKiSlider">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
                     <property name="minimum">
                      <number>0</number>
                     </property>
                     <property name="maximum">
-                     <number>1000</number>
+                     <number>1</number>
                     </property>
                     <property name="pageStep">
                      <number>50</number>
                     </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
                    </widget>
                   </item>
-                  <item colspan="2" column="0" row="2">
+                  <item row="2" column="0" colspan="2">
                    <widget class="QLabel" name="ServoKdLbl">
                     <property name="text">
                      <string>Kd:</string>
                     </property>
                    </widget>
                   </item>
-                  <item column="2" row="2">
+                  <item row="2" column="2">
                    <widget class="QDoubleSpinBox" name="ServoKdDoubleSpinBox">
                     <property name="decimals">
                      <number>4</number>
                     </property>
                     <property name="minimum">
-                     <double>0.000000</double>
+                     <double>0.000000000000000</double>
                     </property>
                     <property name="maximum">
-                     <double>100000.000000</double>
+                     <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>1.000000</double>
+                     <double>1.000000000000000</double>
                     </property>
                    </widget>
                   </item>
-                  <item column="3" row="2">
+                  <item row="2" column="3">
                    <widget class="QSlider" name="ServoKdSlider">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
                     <property name="minimum">
                      <number>0</number>
                     </property>
                     <property name="maximum">
-                     <number>1000</number>
+                     <number>10</number>
                     </property>
                     <property name="pageStep">
                      <number>50</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
                     </property>
                    </widget>
                   </item>
@@ -1547,7 +1551,7 @@
              <item>
               <widget class="QTabWidget" name="RefTrajectoryTabWidget">
                <property name="currentIndex">
-                <number>3</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="ServoUserTab">
                 <attribute name="title">
@@ -1569,29 +1573,32 @@
                       <number>4</number>
                      </property>
                      <property name="minimum">
-                      <double>-100000.000000</double>
+                      <double>-100000.000000000000000</double>
                      </property>
                      <property name="maximum">
-                      <double>100000.000000</double>
+                      <double>100000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.010000</double>
+                      <double>0.010000000000000</double>
                      </property>
                     </widget>
                    </item>
                    <item>
                     <widget class="QSlider" name="ServoUserTargetSlider">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
                      <property name="minimum">
                       <number>0</number>
                      </property>
                      <property name="maximum">
-                      <number>1000</number>
+                      <number>7</number>
+                     </property>
+                     <property name="singleStep">
+                      <number>1</number>
                      </property>
                      <property name="pageStep">
                       <number>50</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
                      </property>
                     </widget>
                    </item>
@@ -1643,34 +1650,31 @@
                 <layout class="QVBoxLayout" name="verticalLayout_5">
                  <item>
                   <layout class="QGridLayout" name="gridLayout_8">
-                   <item column="0" row="0">
+                   <item row="0" column="0">
                     <widget class="QLabel" name="ServoSinAmpLbl">
                      <property name="text">
                       <string>Amplitude</string>
                      </property>
                     </widget>
                    </item>
-                   <item column="1" row="0">
+                   <item row="0" column="1">
                     <widget class="QDoubleSpinBox" name="ServoSinAmpDoubleSpinBox">
                      <property name="decimals">
                       <number>4</number>
                      </property>
                      <property name="minimum">
-                      <double>0.000000</double>
+                      <double>0.000000000000000</double>
                      </property>
                      <property name="maximum">
-                      <double>100000.000000</double>
+                      <double>100000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.010000</double>
+                      <double>0.010000000000000</double>
                      </property>
                     </widget>
                    </item>
-                   <item column="2" row="0">
+                   <item row="0" column="2">
                     <widget class="QSlider" name="ServoSinAmpSlider">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
                      <property name="minimum">
                       <number>0</number>
                      </property>
@@ -1680,36 +1684,36 @@
                      <property name="pageStep">
                       <number>50</number>
                      </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
                     </widget>
                    </item>
-                   <item column="0" row="1">
+                   <item row="1" column="0">
                     <widget class="QLabel" name="ServoSinFreqLbl">
                      <property name="text">
                       <string>Frequency</string>
                      </property>
                     </widget>
                    </item>
-                   <item column="1" row="1">
+                   <item row="1" column="1">
                     <widget class="QDoubleSpinBox" name="ServoSinFreqDoubleSpinBox">
                      <property name="decimals">
                       <number>3</number>
                      </property>
                      <property name="minimum">
-                      <double>0.001000</double>
+                      <double>0.001000000000000</double>
                      </property>
                      <property name="maximum">
-                      <double>1000.000000</double>
+                      <double>1000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.100000</double>
+                      <double>0.100000000000000</double>
                      </property>
                     </widget>
                    </item>
-                   <item column="2" row="1">
+                   <item row="1" column="2">
                     <widget class="QSlider" name="ServoSinFreqSlider">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
                      <property name="minimum">
                       <number>0</number>
                      </property>
@@ -1718,6 +1722,9 @@
                      </property>
                      <property name="pageStep">
                       <number>50</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
                      </property>
                     </widget>
                    </item>
@@ -1769,34 +1776,31 @@
                 <layout class="QVBoxLayout" name="verticalLayout_4">
                  <item>
                   <layout class="QGridLayout" name="gridLayout_9">
-                   <item column="0" row="0">
+                   <item row="0" column="0">
                     <widget class="QLabel" name="ServoMeanderAmpLbl">
                      <property name="text">
                       <string>Amplitude</string>
                      </property>
                     </widget>
                    </item>
-                   <item column="1" row="0">
+                   <item row="0" column="1">
                     <widget class="QDoubleSpinBox" name="ServoMeanderAmpDoubleSpinBox">
                      <property name="decimals">
                       <number>4</number>
                      </property>
                      <property name="minimum">
-                      <double>0.000000</double>
+                      <double>0.000000000000000</double>
                      </property>
                      <property name="maximum">
-                      <double>100000.000000</double>
+                      <double>100000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.010000</double>
+                      <double>0.010000000000000</double>
                      </property>
                     </widget>
                    </item>
-                   <item column="2" row="0">
+                   <item row="0" column="2">
                     <widget class="QSlider" name="ServoMeanderAmpSlider">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
                      <property name="minimum">
                       <number>0</number>
                      </property>
@@ -1806,36 +1810,36 @@
                      <property name="pageStep">
                       <number>50</number>
                      </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
                     </widget>
                    </item>
-                   <item column="0" row="1">
+                   <item row="1" column="0">
                     <widget class="QLabel" name="ServoMeanderFreqLbl">
                      <property name="text">
                       <string>Frequency</string>
                      </property>
                     </widget>
                    </item>
-                   <item column="1" row="1">
+                   <item row="1" column="1">
                     <widget class="QDoubleSpinBox" name="ServoMeanderFreqDoubleSpinBox">
                      <property name="decimals">
                       <number>3</number>
                      </property>
                      <property name="minimum">
-                      <double>0.001000</double>
+                      <double>0.001000000000000</double>
                      </property>
                      <property name="maximum">
-                      <double>1000.000000</double>
+                      <double>1000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.100000</double>
+                      <double>0.100000000000000</double>
                      </property>
                     </widget>
                    </item>
-                   <item column="2" row="1">
+                   <item row="1" column="2">
                     <widget class="QSlider" name="ServoMeanderFreqSlider">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
                      <property name="minimum">
                       <number>0</number>
                      </property>
@@ -1844,6 +1848,9 @@
                      </property>
                      <property name="pageStep">
                       <number>50</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
                      </property>
                     </widget>
                    </item>
@@ -1895,34 +1902,31 @@
                 <layout class="QVBoxLayout" name="verticalLayout_3">
                  <item>
                   <layout class="QGridLayout" name="gridLayout_10">
-                   <item column="0" row="0">
+                   <item row="0" column="0">
                     <widget class="QLabel" name="ServoTriangleAmpLbl">
                      <property name="text">
                       <string>Amplitude</string>
                      </property>
                     </widget>
                    </item>
-                   <item column="1" row="0">
+                   <item row="0" column="1">
                     <widget class="QDoubleSpinBox" name="ServoTriangleAmpDoubleSpinBox">
                      <property name="decimals">
                       <number>4</number>
                      </property>
                      <property name="minimum">
-                      <double>0.000000</double>
+                      <double>0.000000000000000</double>
                      </property>
                      <property name="maximum">
-                      <double>100000.000000</double>
+                      <double>100000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.010000</double>
+                      <double>0.010000000000000</double>
                      </property>
                     </widget>
                    </item>
-                   <item column="2" row="0">
+                   <item row="0" column="2">
                     <widget class="QSlider" name="ServoTriangleAmpSlider">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
                      <property name="minimum">
                       <number>0</number>
                      </property>
@@ -1932,36 +1936,36 @@
                      <property name="pageStep">
                       <number>50</number>
                      </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
                     </widget>
                    </item>
-                   <item column="0" row="1">
+                   <item row="1" column="0">
                     <widget class="QLabel" name="ServoTriangleFreqLbl">
                      <property name="text">
                       <string>Frequency</string>
                      </property>
                     </widget>
                    </item>
-                   <item column="1" row="1">
+                   <item row="1" column="1">
                     <widget class="QDoubleSpinBox" name="ServoTriangleFreqDoubleSpinBox">
                      <property name="decimals">
                       <number>3</number>
                      </property>
                      <property name="minimum">
-                      <double>0.001000</double>
+                      <double>0.001000000000000</double>
                      </property>
                      <property name="maximum">
-                      <double>1000.000000</double>
+                      <double>1000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.100000</double>
+                      <double>0.100000000000000</double>
                      </property>
                     </widget>
                    </item>
-                   <item column="2" row="1">
+                   <item row="1" column="2">
                     <widget class="QSlider" name="ServoTriangleFreqSlider">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
                      <property name="minimum">
                       <number>0</number>
                      </property>
@@ -1970,6 +1974,9 @@
                      </property>
                      <property name="pageStep">
                       <number>50</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
                      </property>
                     </widget>
                    </item>
@@ -2069,34 +2076,31 @@
                 <string>Step Targets</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_3">
-                <item column="0" row="0">
+                <item row="0" column="0">
                  <widget class="QLabel" name="MitStepPosLbl">
                   <property name="text">
                    <string>Position</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="0">
+                <item row="0" column="1">
                  <widget class="QDoubleSpinBox" name="MitStepPosDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
                   </property>
                   <property name="minimum">
-                   <double>-100000.000000</double>
+                   <double>-100000.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>100000.000000</double>
+                   <double>100000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.010000</double>
+                   <double>0.010000000000000</double>
                   </property>
                  </widget>
                 </item>
-                <item column="2" row="0">
+                <item row="0" column="2">
                  <widget class="QSlider" name="MitStepPosSlider">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
                   <property name="minimum">
                    <number>0</number>
                   </property>
@@ -2106,36 +2110,36 @@
                   <property name="pageStep">
                    <number>50</number>
                   </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
                  </widget>
                 </item>
-                <item column="0" row="1">
+                <item row="1" column="0">
                  <widget class="QLabel" name="MitStepVelLbl">
                   <property name="text">
                    <string>Velocity</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="1">
+                <item row="1" column="1">
                  <widget class="QDoubleSpinBox" name="MitStepVelDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
                   </property>
                   <property name="minimum">
-                   <double>-100000.000000</double>
+                   <double>-100000.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>100000.000000</double>
+                   <double>100000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.100000</double>
+                   <double>0.100000000000000</double>
                   </property>
                  </widget>
                 </item>
-                <item column="2" row="1">
+                <item row="1" column="2">
                  <widget class="QSlider" name="MitStepVelSlider">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
                   <property name="minimum">
                    <number>0</number>
                   </property>
@@ -2145,36 +2149,36 @@
                   <property name="pageStep">
                    <number>50</number>
                   </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
                  </widget>
                 </item>
-                <item column="0" row="2">
+                <item row="2" column="0">
                  <widget class="QLabel" name="MitStepTorqLbl">
                   <property name="text">
                    <string>Torque</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="2">
+                <item row="2" column="1">
                  <widget class="QDoubleSpinBox" name="MitStepTorqDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
                   </property>
                   <property name="minimum">
-                   <double>-10000.000000</double>
+                   <double>-10000.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>10000.000000</double>
+                   <double>10000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.010000</double>
+                   <double>0.010000000000000</double>
                   </property>
                  </widget>
                 </item>
-                <item column="2" row="2">
+                <item row="2" column="2">
                  <widget class="QSlider" name="MitStepTorqSlider">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
                   <property name="minimum">
                    <number>0</number>
                   </property>
@@ -2184,36 +2188,36 @@
                   <property name="pageStep">
                    <number>50</number>
                   </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
                  </widget>
                 </item>
-                <item column="0" row="3">
+                <item row="3" column="0">
                  <widget class="QLabel" name="MitStepKpLbl">
                   <property name="text">
                    <string>Kp</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="3">
+                <item row="3" column="1">
                  <widget class="QDoubleSpinBox" name="MitStepKpDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
                   </property>
                   <property name="minimum">
-                   <double>0.000000</double>
+                   <double>0.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>10000.000000</double>
+                   <double>10000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.100000</double>
+                   <double>0.100000000000000</double>
                   </property>
                  </widget>
                 </item>
-                <item column="2" row="3">
+                <item row="3" column="2">
                  <widget class="QSlider" name="MitStepKpSlider">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
                   <property name="minimum">
                    <number>0</number>
                   </property>
@@ -2223,36 +2227,36 @@
                   <property name="pageStep">
                    <number>50</number>
                   </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
                  </widget>
                 </item>
-                <item column="0" row="4">
+                <item row="4" column="0">
                  <widget class="QLabel" name="MitStepKdLbl">
                   <property name="text">
                    <string>Kd</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="4">
+                <item row="4" column="1">
                  <widget class="QDoubleSpinBox" name="MitStepKdDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
                   </property>
                   <property name="minimum">
-                   <double>0.000000</double>
+                   <double>0.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>10000.000000</double>
+                   <double>10000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.100000</double>
+                   <double>0.100000000000000</double>
                   </property>
                  </widget>
                 </item>
-                <item column="2" row="4">
+                <item row="4" column="2">
                  <widget class="QSlider" name="MitStepKdSlider">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
                   <property name="minimum">
                    <number>0</number>
                   </property>
@@ -2261,6 +2265,9 @@
                   </property>
                   <property name="pageStep">
                    <number>50</number>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
                   </property>
                  </widget>
                 </item>
@@ -2273,34 +2280,31 @@
                 <string>Trajectory Targets</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_4">
-                <item column="0" row="0">
+                <item row="0" column="0">
                  <widget class="QLabel" name="MitTrajAmpLbl">
                   <property name="text">
                    <string>Amplitude</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="0">
+                <item row="0" column="1">
                  <widget class="QDoubleSpinBox" name="MitTrajAmpDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
                   </property>
                   <property name="minimum">
-                   <double>0.000000</double>
+                   <double>0.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>100000.000000</double>
+                   <double>100000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.010000</double>
+                   <double>0.010000000000000</double>
                   </property>
                  </widget>
                 </item>
-                <item column="2" row="0">
+                <item row="0" column="2">
                  <widget class="QSlider" name="MitTrajAmpSlider">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
                   <property name="minimum">
                    <number>0</number>
                   </property>
@@ -2310,36 +2314,36 @@
                   <property name="pageStep">
                    <number>50</number>
                   </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
                  </widget>
                 </item>
-                <item column="0" row="1">
+                <item row="1" column="0">
                  <widget class="QLabel" name="MitTrajFreqLbl">
                   <property name="text">
                    <string>Frequency</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="1">
+                <item row="1" column="1">
                  <widget class="QDoubleSpinBox" name="MitTrajFreqDoubleSpinBox">
                   <property name="decimals">
                    <number>3</number>
                   </property>
                   <property name="minimum">
-                   <double>0.001000</double>
+                   <double>0.001000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>1000.000000</double>
+                   <double>1000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.100000</double>
+                   <double>0.100000000000000</double>
                   </property>
                  </widget>
                 </item>
-                <item column="2" row="1">
+                <item row="1" column="2">
                  <widget class="QSlider" name="MitTrajFreqSlider">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
                   <property name="minimum">
                    <number>0</number>
                   </property>
@@ -2349,36 +2353,36 @@
                   <property name="pageStep">
                    <number>50</number>
                   </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
                  </widget>
                 </item>
-                <item column="0" row="5">
+                <item row="5" column="0">
                  <widget class="QLabel" name="MitTrajKpLbl">
                   <property name="text">
                    <string>Kp</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="5">
+                <item row="5" column="1">
                  <widget class="QDoubleSpinBox" name="MitTrajKpDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
                   </property>
                   <property name="minimum">
-                   <double>0.000000</double>
+                   <double>0.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>10000.000000</double>
+                   <double>10000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.100000</double>
+                   <double>0.100000000000000</double>
                   </property>
                  </widget>
                 </item>
-                <item column="2" row="5">
+                <item row="5" column="2">
                  <widget class="QSlider" name="MitTrajKpSlider">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
                   <property name="minimum">
                    <number>0</number>
                   </property>
@@ -2388,36 +2392,36 @@
                   <property name="pageStep">
                    <number>50</number>
                   </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
                  </widget>
                 </item>
-                <item column="0" row="6">
+                <item row="6" column="0">
                  <widget class="QLabel" name="MitTrajKdLbl">
                   <property name="text">
                    <string>Kd</string>
                   </property>
                  </widget>
                 </item>
-                <item column="1" row="6">
+                <item row="6" column="1">
                  <widget class="QDoubleSpinBox" name="MitTrajKdDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
                   </property>
                   <property name="minimum">
-                   <double>0.000000</double>
+                   <double>0.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>10000.000000</double>
+                   <double>10000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.100000</double>
+                   <double>0.100000000000000</double>
                   </property>
                  </widget>
                 </item>
-                <item column="2" row="6">
+                <item row="6" column="2">
                  <widget class="QSlider" name="MitTrajKdSlider">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
                   <property name="minimum">
                    <number>0</number>
                   </property>
@@ -2427,30 +2431,33 @@
                   <property name="pageStep">
                    <number>50</number>
                   </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
                  </widget>
                 </item>
-                <item column="0" row="4">
+                <item row="4" column="0">
                  <widget class="QRadioButton" name="MitTrajTorqueRadioBtn">
                   <property name="text">
                    <string>Torque</string>
                   </property>
                  </widget>
                 </item>
-                <item column="0" row="3">
+                <item row="3" column="0">
                  <widget class="QRadioButton" name="MitTrajVelocityRadioBtn">
                   <property name="text">
                    <string>Velocity</string>
                   </property>
                  </widget>
                 </item>
-                <item column="0" row="2">
+                <item row="2" column="0">
                  <widget class="QRadioButton" name="MitTrajPositionRadioBtn">
                   <property name="text">
                    <string>Position</string>
                   </property>
                  </widget>
                 </item>
-                <item column="2" row="2">
+                <item row="2" column="2">
                  <widget class="QCheckBox" name="MitDerivativeCheckBox">
                   <property name="text">
                    <string>+derivative</string>
@@ -2484,6 +2491,19 @@
                </item>
               </layout>
              </item>
+             <item>
+              <spacer name="verticalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
            </widget>
           </widget>
@@ -2497,168 +2517,168 @@
          <string>STATUS</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item column="0" row="0">
+         <item row="0" column="0">
           <widget class="QLabel" name="StatusModelCaptionLbl">
            <property name="text">
             <string>Model</string>
            </property>
           </widget>
          </item>
-         <item column="1" row="0">
+         <item row="0" column="1">
           <widget class="QLabel" name="StatusModelLbl">
            <property name="text">
             <string>M4310R10</string>
            </property>
           </widget>
          </item>
-         <item column="2" row="0">
+         <item row="0" column="2">
           <widget class="QLabel" name="StatusModelUnitLbl">
            <property name="text">
             <string/>
            </property>
           </widget>
          </item>
-         <item column="0" row="1">
+         <item row="1" column="0">
           <widget class="QLabel" name="StatusTempMcuCaptionLbl">
            <property name="text">
             <string>Temperature MCU</string>
            </property>
           </widget>
          </item>
-         <item column="1" row="1">
+         <item row="1" column="1">
           <widget class="QLabel" name="StatusTempMcuLbl">
            <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
          </item>
-         <item column="2" row="1">
+         <item row="1" column="2">
           <widget class="QLabel" name="StatusTempMcuUnitLbl">
            <property name="text">
             <string>C</string>
            </property>
           </widget>
          </item>
-         <item column="0" row="2">
+         <item row="2" column="0">
           <widget class="QLabel" name="StatusTempStatorCaptionLbl">
            <property name="text">
             <string>Temperature Stator</string>
            </property>
           </widget>
          </item>
-         <item column="1" row="2">
+         <item row="2" column="1">
           <widget class="QLabel" name="StatusTempStatorLbl">
            <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
          </item>
-         <item column="2" row="2">
+         <item row="2" column="2">
           <widget class="QLabel" name="StatusTempStatorUnitLbl">
            <property name="text">
             <string>C</string>
            </property>
           </widget>
          </item>
-         <item column="0" row="3">
+         <item row="3" column="0">
           <widget class="QLabel" name="StatusBusVoltageCaptionLbl">
            <property name="text">
             <string>Bus Voltage</string>
            </property>
           </widget>
          </item>
-         <item column="1" row="3">
+         <item row="3" column="1">
           <widget class="QLabel" name="StatusBusVoltageLbl">
            <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
          </item>
-         <item column="2" row="3">
+         <item row="3" column="2">
           <widget class="QLabel" name="StatusBusVoltageUnitLbl">
            <property name="text">
             <string>V</string>
            </property>
           </widget>
          </item>
-         <item column="0" row="4">
+         <item row="4" column="0">
           <widget class="QLabel" name="StatusAngleCaptionLbl">
            <property name="text">
             <string>Angle</string>
            </property>
           </widget>
          </item>
-         <item column="1" row="4">
+         <item row="4" column="1">
           <widget class="QLabel" name="StatusAngleLbl">
            <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
          </item>
-         <item column="2" row="4">
+         <item row="4" column="2">
           <widget class="QLabel" name="StatusAngleUnitLbl">
            <property name="text">
             <string>rad</string>
            </property>
           </widget>
          </item>
-         <item column="0" row="5">
+         <item row="5" column="0">
           <widget class="QLabel" name="StatusRotorEncoderCaptionLbl">
            <property name="text">
             <string>Motor Encoder</string>
            </property>
           </widget>
          </item>
-         <item column="1" row="5">
+         <item row="5" column="1">
           <widget class="QLabel" name="StatusRotorEncoderLbl">
            <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
          </item>
-         <item column="2" row="5">
+         <item row="5" column="2">
           <widget class="QLabel" name="StatusRotorEncoderUnitLbl">
            <property name="text">
             <string>-</string>
            </property>
           </widget>
          </item>
-         <item column="0" row="6">
+         <item row="6" column="0">
           <widget class="QLabel" name="StatusShaftEncoderCaptionLbl">
            <property name="text">
             <string>Shaft Encoder</string>
            </property>
           </widget>
          </item>
-         <item column="1" row="6">
+         <item row="6" column="1">
           <widget class="QLabel" name="StatusShaftEncoderLbl">
            <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
          </item>
-         <item column="2" row="6">
+         <item row="6" column="2">
           <widget class="QLabel" name="StatusShaftEncoderUnitLbl">
            <property name="text">
             <string>-</string>
            </property>
           </widget>
          </item>
-         <item column="0" row="7">
+         <item row="7" column="0">
           <widget class="QLabel" name="StatusFaultCaptionLbl">
            <property name="text">
             <string>Fault</string>
            </property>
           </widget>
          </item>
-         <item column="1" row="7">
+         <item row="7" column="1">
           <widget class="QLabel" name="FaultLabel">
            <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
          </item>
-         <item column="2" row="7">
+         <item row="7" column="2">
           <widget class="QLabel" name="StatusFaultUnitLbl">
            <property name="text">
             <string>-</string>
@@ -2674,7 +2694,7 @@
          <string/>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item column="0" row="0">
+         <item row="0" column="0">
           <widget class="QPushButton" name="EmergStopPushButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -2719,6 +2739,8 @@
    <header>ui/restore_label.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

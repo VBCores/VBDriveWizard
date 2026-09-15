@@ -1,5 +1,5 @@
-#ifndef UI_THEME_MANAGER_H
-#define UI_THEME_MANAGER_H
+#ifndef VBDW_UI_THEME_MANAGER_H
+#define VBDW_UI_THEME_MANAGER_H
 
 #include "app_types.h"
 
@@ -39,4 +39,4 @@ public:
     static QString logoPath(const QString &theme);
 };
 
-#endif // UI_THEME_MANAGER_H
+#endif // VBDW_UI_THEME_MANAGER_H

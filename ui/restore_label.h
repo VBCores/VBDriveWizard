@@ -1,5 +1,5 @@
-#ifndef UI_RESTORE_LABEL_H
-#define UI_RESTORE_LABEL_H
+#ifndef VBDW_UI_RESTORE_LABEL_H
+#define VBDW_UI_RESTORE_LABEL_H
 
 #include <QLabel>
 #include <QPixmap>
@@ -37,4 +37,4 @@ private:
     bool m_hovered = false;
 };
 
-#endif // UI_RESTORE_LABEL_H
+#endif // VBDW_UI_RESTORE_LABEL_H

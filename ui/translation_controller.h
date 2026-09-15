@@ -1,5 +1,5 @@
-#ifndef UI_TRANSLATION_CONTROLLER_H
-#define UI_TRANSLATION_CONTROLLER_H
+#ifndef VBDW_UI_TRANSLATION_CONTROLLER_H
+#define VBDW_UI_TRANSLATION_CONTROLLER_H
 
 #include <QString>
 #include <QTranslator>
@@ -40,4 +40,4 @@ private:
     QString m_effectiveLanguage = QStringLiteral("en_US");
 };
 
-#endif // UI_TRANSLATION_CONTROLLER_H
+#endif // VBDW_UI_TRANSLATION_CONTROLLER_H

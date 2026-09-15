@@ -1,5 +1,5 @@
-#ifndef UI_LANGUAGE_MANAGER_H
-#define UI_LANGUAGE_MANAGER_H
+#ifndef VBDW_UI_LANGUAGE_MANAGER_H
+#define VBDW_UI_LANGUAGE_MANAGER_H
 
 #include <QLocale>
 #include <QString>
@@ -25,4 +25,4 @@ public:
     static int comboIndexForLanguage(const QString &effectiveLanguage);
 };
 
-#endif // UI_LANGUAGE_MANAGER_H
+#endif // VBDW_UI_LANGUAGE_MANAGER_H

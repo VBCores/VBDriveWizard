@@ -149,12 +149,14 @@ void SerialService::completeCurrent(bool success, const QString &error)
 
     if (command.handshake) {
         m_handshakeDone = success;
+        // Discovery first: MainWindow's connected handler walks the device list, and
+        // on CAN the drives are already there by the time the result is reported.
+        if (success)
+            emit deviceDiscovered(kSerialNodeId);
         emit connectionResult(success,
                               success ? tr("Drive detected on %1.").arg(m_portName)
                                       : tr("No drive answered on %1: %2")
                                                 .arg(m_portName, error));
-        if (success)
-            emit deviceDiscovered(kSerialNodeId);
     }
 
     // CONFIG failing means nothing else in the batch can be staged: drop the rest.

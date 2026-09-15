@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RestoreModelDialog</class>
+ <widget class="QDialog" name="RestoreModelDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>380</width>
+    <height>150</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Restore Default Registers</string>
+  </property>
+  <layout class="QVBoxLayout" name="RootLayout">
+   <item>
+    <widget class="QLabel" name="HintLabel">
+     <property name="text">
+      <string>Load the factory register profile for this drive model. The values are placed in the editors; nothing is written to the drive until you press Write.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="ModelLayout">
+     <item>
+      <widget class="QLabel" name="ModelCaptionLabel">
+       <property name="text">
+        <string>Drive model:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="ModelComboBox">
+       <item>
+        <property name="text">
+         <string>M4310R10</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>M4310R36</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="VerticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="ButtonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

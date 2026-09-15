@@ -1,182 +1,182 @@
 <?xml version='1.0' encoding='utf-8'?>
-<TS version="2.1" language="en_US">
+<TS version="2.1" language="ru_RU">
 <context>
     <name>CanInterfaceList</name>
     <message>
         <source>No CAN interface selected.</source>
-        <translation>No CAN interface selected.</translation>
+        <translation>CAN-интерфейс не выбран.</translation>
     </message>
     <message>
         <source>Interface %1 is down. Bring it up, for example:
   sudo ip link set %1 up type can bitrate 500000 dbitrate 2000000 fd on</source>
-        <translation>Interface %1 is down. Bring it up, for example:
+        <translation>Интерфейс %1 выключен. Включите его, например:
   sudo ip link set %1 up type can bitrate 500000 dbitrate 2000000 fd on</translation>
     </message>
     <message>
         <source>Interface %1 is not running in CAN FD mode (MTU %2, expected %3).
 VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</source>
-        <translation>Interface %1 is not running in CAN FD mode (MTU %2, expected %3).
-VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translation>
+        <translation>Интерфейс %1 работает не в режиме CAN FD (MTU %2, ожидается %3).
+VBDrive использует Cyphal поверх CAN FD, поэтому нужен адаптер с поддержкой FD.</translation>
     </message>
 </context>
 <context>
     <name>ConfigManager</name>
     <message>
         <source>Cannot write %1: %2</source>
-        <translation>Cannot write %1: %2</translation>
+        <translation>Не удалось записать %1: %2</translation>
     </message>
     <message>
         <source>Settings loaded.</source>
-        <translation>Settings loaded.</translation>
+        <translation>Настройки загружены.</translation>
     </message>
     <message>
         <source>No settings file found; defaults are in use.</source>
-        <translation>No settings file found; defaults are in use.</translation>
+        <translation>Файл настроек не найден; используются значения по умолчанию.</translation>
     </message>
     <message>
         <source>Settings file could not be read; defaults are in use.</source>
-        <translation>Settings file could not be read; defaults are in use.</translation>
+        <translation>Не удалось прочитать файл настроек; используются значения по умолчанию.</translation>
     </message>
 </context>
 <context>
     <name>CyphalBridge</name>
     <message>
         <source>The Cyphal stack reported an internal error.</source>
-        <translation>The Cyphal stack reported an internal error.</translation>
+        <translation>Внутренняя ошибка стека Cyphal.</translation>
     </message>
     <message>
         <source>Could not open CAN interface %1.</source>
-        <translation>Could not open CAN interface %1.</translation>
+        <translation>Не удалось открыть CAN-интерфейс %1.</translation>
     </message>
 </context>
 <context>
     <name>CyphalService</name>
     <message>
         <source>The CAN connection was closed.</source>
-        <translation>The CAN connection was closed.</translation>
+        <translation>CAN-соединение закрыто.</translation>
     </message>
     <message>
         <source>No VBDrive answered on %1 within %2 seconds.</source>
-        <translation>No VBDrive answered on %1 within %2 seconds.</translation>
+        <translation>За %2 с на интерфейсе %1 не ответил ни один привод VBDrive.</translation>
     </message>
     <message numerus="yes">
         <source>Found %n drive(s) on %1.</source>
-        <translation><numerusform>Found %n drive(s) on %1.</numerusform></translation>
+        <translation><numerusform>Найден %n привод на %1.</numerusform><numerusform>Найдено %n привода на %1.</numerusform><numerusform>Найдено %n приводов на %1.</numerusform></translation>
     </message>
     <message>
         <source>The drive stopped answering.</source>
-        <translation>The drive stopped answering.</translation>
+        <translation>Привод перестал отвечать.</translation>
     </message>
     <message>
         <source>The drive did not answer register '%1' in time.</source>
-        <translation>The drive did not answer register '%1' in time.</translation>
+        <translation>Привод не ответил на регистр «%1» за отведённое время.</translation>
     </message>
     <message>
         <source>Could not send the request.</source>
-        <translation>Could not send the request.</translation>
+        <translation>Не удалось отправить запрос.</translation>
     </message>
     <message>
         <source>The drive did not accept the value.</source>
-        <translation>The drive did not accept the value.</translation>
+        <translation>Привод не принял значение.</translation>
     </message>
     <message>
         <source>Register '%1' is read-only.</source>
-        <translation>Register '%1' is read-only.</translation>
+        <translation>Регистр «%1» доступен только для чтения.</translation>
     </message>
     <message>
         <source>Register '%1' is not available on this drive.</source>
-        <translation>Register '%1' is not available on this drive.</translation>
+        <translation>Регистр «%1» недоступен на этом приводе.</translation>
     </message>
     <message>
         <source>These registers were rejected by the drive: %1</source>
-        <translation>These registers were rejected by the drive: %1</translation>
+        <translation>Привод отклонил запись регистров: %1</translation>
     </message>
 </context>
 <context>
     <name>DeviceModel</name>
     <message>
         <source>Unknown drive</source>
-        <translation>Unknown drive</translation>
+        <translation>Неизвестный привод</translation>
     </message>
 </context>
 <context>
     <name>FirmwareDownloader</name>
     <message>
         <source>A firmware download is already running.</source>
-        <translation>A firmware download is already running.</translation>
+        <translation>Загрузка прошивки уже выполняется.</translation>
     </message>
     <message>
         <source>Looking up the latest release...</source>
-        <translation>Looking up the latest release...</translation>
+        <translation>Поиск последнего релиза...</translation>
     </message>
     <message>
         <source>Could not reach the VBDrive releases: %1</source>
-        <translation>Could not reach the VBDrive releases: %1</translation>
+        <translation>Не удалось получить список релизов VBDrive: %1</translation>
     </message>
     <message>
         <source>Release %1 does not contain %2.</source>
-        <translation>Release %1 does not contain %2.</translation>
+        <translation>Релиз %1 не содержит %2.</translation>
     </message>
     <message>
         <source>(unknown)</source>
-        <translation>(unknown)</translation>
+        <translation>(неизвестно)</translation>
     </message>
     <message>
         <source>Downloading %1...</source>
-        <translation>Downloading %1...</translation>
+        <translation>Загрузка %1...</translation>
     </message>
     <message>
         <source>Firmware download failed: %1</source>
-        <translation>Firmware download failed: %1</translation>
+        <translation>Не удалось загрузить прошивку: %1</translation>
     </message>
     <message>
         <source>Could not write %1: %2</source>
-        <translation>Could not write %1: %2</translation>
+        <translation>Не удалось записать %1: %2</translation>
     </message>
     <message>
         <source>Download complete.</source>
-        <translation>Download complete.</translation>
+        <translation>Загрузка завершена.</translation>
     </message>
 </context>
 <context>
     <name>FirmwareFlasher</name>
     <message>
         <source>A flashing operation is already running.</source>
-        <translation>A flashing operation is already running.</translation>
+        <translation>Прошивка уже выполняется.</translation>
     </message>
     <message>
         <source>Firmware file not found: %1</source>
-        <translation>Firmware file not found: %1</translation>
+        <translation>Файл прошивки не найден: %1</translation>
     </message>
     <message>
         <source>openocd was not found. Install it, for example:
   sudo apt install openocd</source>
-        <translation>openocd was not found. Install it, for example:
+        <translation>openocd не найден. Установите его, например:
   sudo apt install openocd</translation>
     </message>
     <message>
         <source>openocd could not be started.</source>
-        <translation>openocd could not be started.</translation>
+        <translation>Не удалось запустить openocd.</translation>
     </message>
     <message>
         <source>Done.</source>
-        <translation>Done.</translation>
+        <translation>Готово.</translation>
     </message>
     <message>
         <source>Firmware written and verified.</source>
-        <translation>Firmware written and verified.</translation>
+        <translation>Прошивка записана и проверена.</translation>
     </message>
     <message>
         <source>openocd exited with code %1.
 
 %2</source>
-        <translation>openocd exited with code %1.
+        <translation>openocd завершился с кодом %1.
 
 %2</translation>
     </message>
     <message>
         <source>Starting openocd...</source>
-        <translation>Starting openocd...</translation>
+        <translation>Запуск openocd...</translation>
     </message>
 </context>
 <context>
@@ -187,7 +187,7 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>CONNECTION</source>
-        <translation>CONNECTION</translation>
+        <translation>ПОДКЛЮЧЕНИЕ</translation>
     </message>
     <message>
         <source>Serial</source>
@@ -195,11 +195,11 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Connect</source>
-        <translation>Connect</translation>
+        <translation>Подключить</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Refresh</translation>
+        <translation>Обновить</translation>
     </message>
     <message>
         <source>CAN</source>
@@ -207,67 +207,67 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>DEVICES</source>
-        <translation>DEVICES</translation>
+        <translation>УСТРОЙСТВА</translation>
     </message>
     <message>
         <source>CONFIGURATION</source>
-        <translation>CONFIGURATION</translation>
+        <translation>КОНФИГУРАЦИЯ</translation>
     </message>
     <message>
         <source>Basic</source>
-        <translation>Basic</translation>
+        <translation>Основные</translation>
     </message>
     <message>
         <source>Limits</source>
-        <translation>Limits</translation>
+        <translation>Ограничения</translation>
     </message>
     <message>
         <source>Angle</source>
-        <translation>Angle</translation>
+        <translation>Угол</translation>
     </message>
     <message>
         <source>min:</source>
-        <translation>min:</translation>
+        <translation>мин:</translation>
     </message>
     <message>
         <source>max</source>
-        <translation>max</translation>
+        <translation>макс</translation>
     </message>
     <message>
         <source>Velocity</source>
-        <translation>Velocity</translation>
+        <translation>Скорость</translation>
     </message>
     <message>
         <source>Torque</source>
-        <translation>Torque</translation>
+        <translation>Момент</translation>
     </message>
     <message>
         <source>Voltage</source>
-        <translation>Voltage</translation>
+        <translation>Напряжение</translation>
     </message>
     <message>
         <source>The firmware exposes no voltage limit register yet.</source>
-        <translation>The firmware exposes no voltage limit register yet.</translation>
+        <translation>В прошивке пока нет регистра ограничения напряжения.</translation>
     </message>
     <message>
         <source>Current</source>
-        <translation>Current</translation>
+        <translation>Ток</translation>
     </message>
     <message>
         <source>Direction</source>
-        <translation>Direction</translation>
+        <translation>Направление</translation>
     </message>
     <message>
         <source>CCW</source>
-        <translation>CCW</translation>
+        <translation>Против часовой</translation>
     </message>
     <message>
         <source>CW</source>
-        <translation>CW</translation>
+        <translation>По часовой</translation>
     </message>
     <message>
         <source>Data Baud Rate</source>
-        <translation>Data Baud Rate</translation>
+        <translation>Скорость data-сегмента</translation>
     </message>
     <message>
         <source>Node ID</source>
@@ -307,107 +307,107 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Nominal Baud Rate</source>
-        <translation>Nominal Baud Rate</translation>
+        <translation>Номинальная скорость</translation>
     </message>
     <message>
         <source>Advanced</source>
-        <translation>Advanced</translation>
+        <translation>Расширенные</translation>
     </message>
     <message>
         <source>Gear Ratio</source>
-        <translation>Gear Ratio</translation>
+        <translation>Передаточное число</translation>
     </message>
     <message>
         <source>Encoder</source>
-        <translation>Encoder</translation>
+        <translation>Энкодер</translation>
     </message>
     <message>
         <source>Torque const</source>
-        <translation>Torque const</translation>
+        <translation>Константа момента</translation>
     </message>
     <message>
         <source>Current Kp</source>
-        <translation>Current Kp</translation>
+        <translation>Kp тока</translation>
     </message>
     <message>
         <source>Current Ki</source>
-        <translation>Current Ki</translation>
+        <translation>Ki тока</translation>
     </message>
     <message>
         <source>Position Offset</source>
-        <translation>Position Offset</translation>
+        <translation>Смещение положения</translation>
     </message>
     <message>
         <source>Main Filter Param A</source>
-        <translation>Main Filter Param A</translation>
+        <translation>Параметр A основного фильтра</translation>
     </message>
     <message>
         <source>Filter Gain 1</source>
-        <translation>Filter Gain 1</translation>
+        <translation>Коэффициент фильтра 1</translation>
     </message>
     <message>
         <source>Filter Gain 2</source>
-        <translation>Filter Gain 2</translation>
+        <translation>Коэффициент фильтра 2</translation>
     </message>
     <message>
         <source>Filter Gain 3</source>
-        <translation>Filter Gain 3</translation>
+        <translation>Коэффициент фильтра 3</translation>
     </message>
     <message>
         <source>Current LPF Gain</source>
-        <translation>Current LPF Gain</translation>
+        <translation>Коэффициент ФНЧ тока</translation>
     </message>
     <message>
         <source>rotor</source>
-        <translation>rotor</translation>
+        <translation>ротор</translation>
     </message>
     <message>
         <source>shaft</source>
-        <translation>shaft</translation>
+        <translation>вал</translation>
     </message>
     <message>
         <source>external</source>
-        <translation>external</translation>
+        <translation>внешний</translation>
     </message>
     <message>
         <source>Current Kd</source>
-        <translation>Current Kd</translation>
+        <translation>Kd тока</translation>
     </message>
     <message>
         <source>System</source>
-        <translation>System</translation>
+        <translation>Система</translation>
     </message>
     <message>
         <source>Sensor</source>
-        <translation>Sensor</translation>
+        <translation>Датчик</translation>
     </message>
     <message>
         <source>Calibrate</source>
-        <translation>Calibrate</translation>
+        <translation>Калибровать</translation>
     </message>
     <message>
         <source>Register Parameters</source>
-        <translation>Register Parameters</translation>
+        <translation>Параметры регистров</translation>
     </message>
     <message>
         <source>Save to File...</source>
-        <translation>Save to File...</translation>
+        <translation>Сохранить в файл...</translation>
     </message>
     <message>
         <source>Load from File...</source>
-        <translation>Load from File...</translation>
+        <translation>Загрузить из файла...</translation>
     </message>
     <message>
         <source>Restore to Default</source>
-        <translation>Restore to Default</translation>
+        <translation>Значения по умолчанию</translation>
     </message>
     <message>
         <source>Firmware</source>
-        <translation>Firmware</translation>
+        <translation>Прошивка</translation>
     </message>
     <message>
         <source>Current Version:</source>
-        <translation>Current Version:</translation>
+        <translation>Текущая версия:</translation>
     </message>
     <message>
         <source>0.0.1</source>
@@ -415,31 +415,31 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Choose file</source>
-        <translation>Choose file</translation>
+        <translation>Выбрать файл</translation>
     </message>
     <message>
         <source>Open</source>
-        <translation>Open</translation>
+        <translation>Открыть</translation>
     </message>
     <message>
         <source>Download from remote repo</source>
-        <translation>Download from remote repo</translation>
+        <translation>Скачать из репозитория</translation>
     </message>
     <message>
         <source>Flash</source>
-        <translation>Flash</translation>
+        <translation>Прошить</translation>
     </message>
     <message>
         <source>Read</source>
-        <translation>Read</translation>
+        <translation>Прочитать</translation>
     </message>
     <message>
         <source>Write</source>
-        <translation>Write</translation>
+        <translation>Записать</translation>
     </message>
     <message>
         <source>Set Origin</source>
-        <translation>Set Origin</translation>
+        <translation>Задать ноль</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;Logo&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -447,27 +447,27 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>REALTIME DATA</source>
-        <translation>REALTIME DATA</translation>
+        <translation>ДАННЫЕ В РЕАЛЬНОМ ВРЕМЕНИ</translation>
     </message>
     <message>
         <source>Signal:</source>
-        <translation>Signal:</translation>
+        <translation>Сигнал:</translation>
     </message>
     <message>
         <source>Position</source>
-        <translation>Position</translation>
+        <translation>Положение</translation>
     </message>
     <message>
         <source>Temperature</source>
-        <translation>Temperature</translation>
+        <translation>Температура</translation>
     </message>
     <message>
         <source>Log</source>
-        <translation>Log</translation>
+        <translation>Журнал</translation>
     </message>
     <message>
         <source>Units:</source>
-        <translation>Units:</translation>
+        <translation>Единицы:</translation>
     </message>
     <message>
         <source>rad</source>
@@ -479,11 +479,11 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Preferences</source>
-        <translation>Preferences</translation>
+        <translation>Настройки</translation>
     </message>
     <message>
         <source>Language:</source>
-        <translation>Language:</translation>
+        <translation>Язык:</translation>
     </message>
     <message>
         <source>English</source>
@@ -499,19 +499,19 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Pause</source>
-        <translation>Pause</translation>
+        <translation>Пауза</translation>
     </message>
     <message>
         <source>Save as CSV...</source>
-        <translation>Save as CSV...</translation>
+        <translation>Сохранить в CSV...</translation>
     </message>
     <message>
         <source>Save as PNG...</source>
-        <translation>Save as PNG...</translation>
+        <translation>Сохранить в PNG...</translation>
     </message>
     <message>
         <source>CONTROL</source>
-        <translation>CONTROL</translation>
+        <translation>УПРАВЛЕНИЕ</translation>
     </message>
     <message>
         <source>Servo</source>
@@ -519,27 +519,27 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Control Type</source>
-        <translation>Control Type</translation>
+        <translation>Тип управления</translation>
     </message>
     <message>
         <source>Transient Form</source>
-        <translation>Transient Form</translation>
+        <translation>Переходный процесс</translation>
     </message>
     <message>
         <source>Linear</source>
-        <translation>Linear</translation>
+        <translation>Линейный</translation>
     </message>
     <message>
         <source>Polynomial</source>
-        <translation>Polynomial</translation>
+        <translation>Полиномиальный</translation>
     </message>
     <message>
         <source>Set</source>
-        <translation>Set</translation>
+        <translation>Задать</translation>
     </message>
     <message>
         <source>Feedback Gains</source>
-        <translation>Feedback Gains</translation>
+        <translation>Коэффициенты регулятора</translation>
     </message>
     <message>
         <source>Kp:</source>
@@ -555,35 +555,35 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>User</source>
-        <translation>User</translation>
+        <translation>Вручную</translation>
     </message>
     <message>
         <source>Target position:</source>
-        <translation>Target position:</translation>
+        <translation>Заданное положение:</translation>
     </message>
     <message>
         <source>Start</source>
-        <translation>Start</translation>
+        <translation>Пуск</translation>
     </message>
     <message>
         <source>Sin</source>
-        <translation>Sin</translation>
+        <translation>Синус</translation>
     </message>
     <message>
         <source>Amplitude</source>
-        <translation>Amplitude</translation>
+        <translation>Амплитуда</translation>
     </message>
     <message>
         <source>Frequency</source>
-        <translation>Frequency</translation>
+        <translation>Частота</translation>
     </message>
     <message>
         <source>Meander</source>
-        <translation>Meander</translation>
+        <translation>Меандр</translation>
     </message>
     <message>
         <source>Triangle</source>
-        <translation>Triangle</translation>
+        <translation>Треугольник</translation>
     </message>
     <message>
         <source>MIT</source>
@@ -591,15 +591,15 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Trajectory</source>
-        <translation>Trajectory</translation>
+        <translation>Траектория</translation>
     </message>
     <message>
         <source>Step</source>
-        <translation>Step</translation>
+        <translation>Ступенька</translation>
     </message>
     <message>
         <source>Step Targets</source>
-        <translation>Step Targets</translation>
+        <translation>Параметры ступеньки</translation>
     </message>
     <message>
         <source>Kp</source>
@@ -611,19 +611,19 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Trajectory Targets</source>
-        <translation>Trajectory Targets</translation>
+        <translation>Параметры траектории</translation>
     </message>
     <message>
         <source>+derivative</source>
-        <translation>+derivative</translation>
+        <translation>+производная</translation>
     </message>
     <message>
         <source>STATUS</source>
-        <translation>STATUS</translation>
+        <translation>СОСТОЯНИЕ</translation>
     </message>
     <message>
         <source>Model</source>
-        <translation>Model</translation>
+        <translation>Модель</translation>
     </message>
     <message>
         <source>M4310R10</source>
@@ -631,7 +631,7 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Temperature MCU</source>
-        <translation>Temperature MCU</translation>
+        <translation>Температура МК</translation>
     </message>
     <message>
         <source>TextLabel</source>
@@ -643,11 +643,11 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Temperature Stator</source>
-        <translation>Temperature Stator</translation>
+        <translation>Температура статора</translation>
     </message>
     <message>
         <source>Bus Voltage</source>
-        <translation>Bus Voltage</translation>
+        <translation>Напряжение шины</translation>
     </message>
     <message>
         <source>V</source>
@@ -655,7 +655,7 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Motor Encoder</source>
-        <translation>Motor Encoder</translation>
+        <translation>Энкодер ротора</translation>
     </message>
     <message>
         <source>-</source>
@@ -663,530 +663,530 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <source>Shaft Encoder</source>
-        <translation>Shaft Encoder</translation>
+        <translation>Энкодер вала</translation>
     </message>
     <message>
         <source>Fault</source>
-        <translation>Fault</translation>
+        <translation>Ошибка</translation>
     </message>
     <message>
         <source>STOP</source>
-        <translation>STOP</translation>
+        <translation>СТОП</translation>
     </message>
     <message>
         <source>Connection failed</source>
-        <translation>Connection failed</translation>
+        <translation>Не удалось подключиться</translation>
     </message>
     <message>
         <source>Firmware download failed</source>
-        <translation>Firmware download failed</translation>
+        <translation>Не удалось загрузить прошивку</translation>
     </message>
     <message>
         <source>Downloaded firmware %1.</source>
-        <translation>Downloaded firmware %1.</translation>
+        <translation>Прошивка %1 загружена.</translation>
     </message>
     <message>
         <source>Flashing failed</source>
-        <translation>Flashing failed</translation>
+        <translation>Не удалось прошить</translation>
     </message>
     <message>
         <source>Disconnect</source>
-        <translation>Disconnect</translation>
+        <translation>Отключить</translation>
     </message>
     <message>
         <source>Resume</source>
-        <translation>Resume</translation>
+        <translation>Продолжить</translation>
     </message>
     <message>
         <source>Not connected</source>
-        <translation>Not connected</translation>
+        <translation>Не подключено</translation>
     </message>
     <message>
         <source>Unsaved changes</source>
-        <translation>Unsaved changes</translation>
+        <translation>Несохранённые изменения</translation>
     </message>
     <message>
         <source>Some register changes have not been written to the drive.
 Close anyway?</source>
-        <translation>Some register changes have not been written to the drive.
-Close anyway?</translation>
+        <translation>Часть изменений регистров не записана в привод.
+Всё равно закрыть?</translation>
     </message>
     <message>
         <source>%1 (unavailable)</source>
-        <translation>%1 (unavailable)</translation>
+        <translation>%1 (недоступен)</translation>
     </message>
     <message>
         <source>No serial port selected.</source>
-        <translation>No serial port selected.</translation>
+        <translation>Serial-порт не выбран.</translation>
     </message>
     <message>
         <source>Opening %1...</source>
-        <translation>Opening %1...</translation>
+        <translation>Открытие %1...</translation>
     </message>
     <message>
         <source>Listening for drives on %1...</source>
-        <translation>Listening for drives on %1...</translation>
+        <translation>Поиск приводов на %1...</translation>
     </message>
     <message>
         <source>Serial connected</source>
-        <translation>Serial connected</translation>
+        <translation>Serial подключён</translation>
     </message>
     <message>
         <source>CAN connected</source>
-        <translation>CAN connected</translation>
+        <translation>CAN подключён</translation>
     </message>
     <message>
         <source>Disconnected.</source>
-        <translation>Disconnected.</translation>
+        <translation>Отключено.</translation>
     </message>
     <message>
         <source>Sort by model</source>
-        <translation>Sort by model</translation>
+        <translation>Сортировать по модели</translation>
     </message>
     <message>
         <source>Sort by Node ID</source>
-        <translation>Sort by Node ID</translation>
+        <translation>Сортировать по Node ID</translation>
     </message>
     <message>
         <source>  (no heartbeat)</source>
-        <translation>  (no heartbeat)</translation>
+        <translation>  (нет heartbeat)</translation>
     </message>
     <message>
         <source>Drive %1 has register changes that were not written.
 Write them before switching?</source>
-        <translation>Drive %1 has register changes that were not written.
-Write them before switching?</translation>
+        <translation>У привода %1 есть незаписанные изменения регистров.
+Записать их перед переключением?</translation>
     </message>
     <message>
         <source>Reading registers...</source>
-        <translation>Reading registers...</translation>
+        <translation>Чтение регистров...</translation>
     </message>
     <message>
         <source>No changes to write.</source>
-        <translation>No changes to write.</translation>
+        <translation>Нет изменений для записи.</translation>
     </message>
     <message numerus="yes">
         <source>Writing %n register(s)...</source>
-        <translation><numerusform>Writing %n register(s)...</numerusform></translation>
+        <translation><numerusform>Запись %n регистра...</numerusform><numerusform>Запись %n регистров...</numerusform><numerusform>Запись %n регистров...</numerusform></translation>
     </message>
     <message>
         <source>Origin set; angle offset is now %1.</source>
-        <translation>Origin set; angle offset is now %1.</translation>
+        <translation>Ноль задан; смещение угла теперь %1.</translation>
     </message>
     <message>
         <source>Calibrate sensor</source>
-        <translation>Calibrate sensor</translation>
+        <translation>Калибровка датчика</translation>
     </message>
     <message>
         <source>Calibration moves the motor and cannot be cancelled. The drive stops answering until it finishes.
 
 Start calibration?</source>
-        <translation>Calibration moves the motor and cannot be cancelled. The drive stops answering until it finishes.
+        <translation>Калибровка вращает двигатель и не может быть прервана. Привод не отвечает до её завершения.
 
-Start calibration?</translation>
+Начать калибровку?</translation>
     </message>
     <message>
         <source>Calibration started; the drive will not answer until it is done.</source>
-        <translation>Calibration started; the drive will not answer until it is done.</translation>
+        <translation>Калибровка запущена; привод не будет отвечать до её окончания.</translation>
     </message>
     <message>
         <source>Save register profile</source>
-        <translation>Save register profile</translation>
+        <translation>Сохранить профиль регистров</translation>
     </message>
     <message>
         <source>YAML files (*.yaml *.yml)</source>
-        <translation>YAML files (*.yaml *.yml)</translation>
+        <translation>Файлы YAML (*.yaml *.yml)</translation>
     </message>
     <message>
         <source>Could not save the profile</source>
-        <translation>Could not save the profile</translation>
+        <translation>Не удалось сохранить профиль</translation>
     </message>
     <message>
         <source>Profile saved to %1.</source>
-        <translation>Profile saved to %1.</translation>
+        <translation>Профиль сохранён в %1.</translation>
     </message>
     <message>
         <source>Load register profile</source>
-        <translation>Load register profile</translation>
+        <translation>Загрузить профиль регистров</translation>
     </message>
     <message>
         <source>Could not load the profile</source>
-        <translation>Could not load the profile</translation>
+        <translation>Не удалось загрузить профиль</translation>
     </message>
     <message numerus="yes">
         <source>Loaded %n register(s) from the profile.</source>
-        <translation><numerusform>Loaded %n register(s) from the profile.</numerusform></translation>
+        <translation><numerusform>Из профиля загружен %n регистр.</numerusform><numerusform>Из профиля загружено %n регистра.</numerusform><numerusform>Из профиля загружено %n регистров.</numerusform></translation>
     </message>
     <message>
         <source>Loaded with warnings: %1</source>
-        <translation>Loaded with warnings: %1</translation>
+        <translation>Загружено с предупреждениями: %1</translation>
     </message>
     <message>
         <source>Could not load the default profile</source>
-        <translation>Could not load the default profile</translation>
+        <translation>Не удалось загрузить профиль по умолчанию</translation>
     </message>
     <message>
         <source>Default values for %1 loaded into the editors.</source>
-        <translation>Default values for %1 loaded into the editors.</translation>
+        <translation>Значения по умолчанию для %1 загружены в поля.</translation>
     </message>
     <message>
         <source>Could not read '%1': %2</source>
-        <translation>Could not read '%1': %2</translation>
+        <translation>Не удалось прочитать «%1»: %2</translation>
     </message>
     <message>
         <source>Could not write '%1': %2</source>
-        <translation>Could not write '%1': %2</translation>
+        <translation>Не удалось записать «%1»: %2</translation>
     </message>
     <message>
         <source>Registers written.</source>
-        <translation>Registers written.</translation>
+        <translation>Регистры записаны.</translation>
     </message>
     <message>
         <source>Some registers were not written</source>
-        <translation>Some registers were not written</translation>
+        <translation>Часть регистров не записана</translation>
     </message>
     <message>
         <source>Drive lost</source>
-        <translation>Drive lost</translation>
+        <translation>Связь с приводом потеряна</translation>
     </message>
     <message>
         <source>Drive %1 (node %2) stopped sending heartbeats.</source>
-        <translation>Drive %1 (node %2) stopped sending heartbeats.</translation>
+        <translation>Привод %1 (узел %2) перестал отправлять heartbeat.</translation>
     </message>
     <message>
         <source>Wait for it to come back, keeping your unsaved register changes, or drop it and discard them?</source>
-        <translation>Wait for it to come back, keeping your unsaved register changes, or drop it and discard them?</translation>
+        <translation>Дождаться его возвращения, сохранив несохранённые изменения регистров, или убрать привод и отменить их?</translation>
     </message>
     <message>
         <source>Reconnect</source>
-        <translation>Reconnect</translation>
+        <translation>Подключить снова</translation>
     </message>
     <message>
         <source>Remove drive</source>
-        <translation>Remove drive</translation>
+        <translation>Убрать привод</translation>
     </message>
     <message>
         <source>Waiting for node %1 to return...</source>
-        <translation>Waiting for node %1 to return...</translation>
+        <translation>Ожидание возвращения узла %1...</translation>
     </message>
     <message>
         <source>Node %1 is back.</source>
-        <translation>Node %1 is back.</translation>
+        <translation>Узел %1 снова на связи.</translation>
     </message>
     <message>
         <source>Yes</source>
-        <translation>Yes</translation>
+        <translation>Да</translation>
     </message>
     <message>
         <source>No</source>
-        <translation>No</translation>
+        <translation>Нет</translation>
     </message>
     <message>
         <source>Serial cannot sustain %1 Hz; running at %2 Hz instead.</source>
-        <translation>Serial cannot sustain %1 Hz; running at %2 Hz instead.</translation>
+        <translation>Serial не выдерживает %1 Гц; используется %2 Гц.</translation>
     </message>
     <message>
         <source>Feedback gains written.</source>
-        <translation>Feedback gains written.</translation>
+        <translation>Коэффициенты регулятора записаны.</translation>
     </message>
     <message>
         <source>Transient form written.</source>
-        <translation>Transient form written.</translation>
+        <translation>Параметры переходного процесса записаны.</translation>
     </message>
     <message>
         <source>Emergency stop: all drives disabled.</source>
-        <translation>Emergency stop: all drives disabled.</translation>
+        <translation>Аварийная остановка: все приводы выключены.</translation>
     </message>
     <message>
         <source>Stop</source>
-        <translation>Stop</translation>
+        <translation>Стоп</translation>
     </message>
     <message>
         <source>Save plot data</source>
-        <translation>Save plot data</translation>
+        <translation>Сохранить данные графика</translation>
     </message>
     <message>
         <source>CSV files (*.csv)</source>
-        <translation>CSV files (*.csv)</translation>
+        <translation>Файлы CSV (*.csv)</translation>
     </message>
     <message>
         <source>Could not save the CSV</source>
-        <translation>Could not save the CSV</translation>
+        <translation>Не удалось сохранить CSV</translation>
     </message>
     <message>
         <source>Plot data saved.</source>
-        <translation>Plot data saved.</translation>
+        <translation>Данные графика сохранены.</translation>
     </message>
     <message>
         <source>Save plot image</source>
-        <translation>Save plot image</translation>
+        <translation>Сохранить изображение графика</translation>
     </message>
     <message>
         <source>PNG images (*.png)</source>
-        <translation>PNG images (*.png)</translation>
+        <translation>Изображения PNG (*.png)</translation>
     </message>
     <message>
         <source>Could not save the image</source>
-        <translation>Could not save the image</translation>
+        <translation>Не удалось сохранить изображение</translation>
     </message>
     <message>
         <source>Plot image saved.</source>
-        <translation>Plot image saved.</translation>
+        <translation>Изображение графика сохранено.</translation>
     </message>
     <message>
         <source>Select firmware image</source>
-        <translation>Select firmware image</translation>
+        <translation>Выбрать файл прошивки</translation>
     </message>
     <message>
         <source>Intel HEX files (*.hex)</source>
-        <translation>Intel HEX files (*.hex)</translation>
+        <translation>Файлы Intel HEX (*.hex)</translation>
     </message>
     <message>
         <source>Selected %1.</source>
-        <translation>Selected %1.</translation>
+        <translation>Выбрано: %1.</translation>
     </message>
     <message>
         <source>No firmware selected</source>
-        <translation>No firmware selected</translation>
+        <translation>Прошивка не выбрана</translation>
     </message>
     <message>
         <source>Choose a .hex file first, or switch to downloading the latest release.</source>
-        <translation>Choose a .hex file first, or switch to downloading the latest release.</translation>
+        <translation>Сначала выберите .hex-файл или переключитесь на загрузку последнего релиза.</translation>
     </message>
     <message>
         <source>Flashing %1...</source>
-        <translation>Flashing %1...</translation>
+        <translation>Прошивка %1...</translation>
     </message>
 </context>
 <context>
     <name>PlotController</name>
     <message>
         <source>t, s</source>
-        <translation>t, s</translation>
+        <translation>t, с</translation>
     </message>
     <message>
         <source>Position</source>
-        <translation>Position</translation>
+        <translation>Положение</translation>
     </message>
     <message>
         <source>Velocity</source>
-        <translation>Velocity</translation>
+        <translation>Скорость</translation>
     </message>
     <message>
         <source>Torque</source>
-        <translation>Torque</translation>
+        <translation>Момент</translation>
     </message>
     <message>
         <source>MCU</source>
-        <translation>MCU</translation>
+        <translation>МК</translation>
     </message>
     <message>
         <source>Bus current</source>
-        <translation>Bus current</translation>
+        <translation>Ток шины</translation>
     </message>
     <message>
         <source>Rotor</source>
-        <translation>Rotor</translation>
+        <translation>Ротор</translation>
     </message>
     <message>
         <source>Target</source>
-        <translation>Target</translation>
+        <translation>Задание</translation>
     </message>
     <message>
         <source>Stator</source>
-        <translation>Stator</translation>
+        <translation>Статор</translation>
     </message>
     <message>
         <source>Shaft</source>
-        <translation>Shaft</translation>
+        <translation>Вал</translation>
     </message>
     <message>
         <source>Position, %1</source>
-        <translation>Position, %1</translation>
+        <translation>Положение, %1</translation>
     </message>
     <message>
         <source>Velocity, %1</source>
-        <translation>Velocity, %1</translation>
+        <translation>Скорость, %1</translation>
     </message>
     <message>
         <source>Torque, N*m</source>
-        <translation>Torque, N*m</translation>
+        <translation>Момент, Н·м</translation>
     </message>
     <message>
         <source>Temperature, C</source>
-        <translation>Temperature, C</translation>
+        <translation>Температура, °C</translation>
     </message>
     <message>
         <source>Current, A</source>
-        <translation>Current, A</translation>
+        <translation>Ток, А</translation>
     </message>
     <message>
         <source>Encoder, counts</source>
-        <translation>Encoder, counts</translation>
+        <translation>Энкодер, отсчёты</translation>
     </message>
     <message>
         <source>The plot is not initialised.</source>
-        <translation>The plot is not initialised.</translation>
+        <translation>График не инициализирован.</translation>
     </message>
     <message>
         <source>The log view cannot be exported as an image.</source>
-        <translation>The log view cannot be exported as an image.</translation>
+        <translation>Журнал нельзя сохранить как изображение.</translation>
     </message>
     <message>
         <source>The plot could not be rendered.</source>
-        <translation>The plot could not be rendered.</translation>
+        <translation>Не удалось отрисовать график.</translation>
     </message>
     <message>
         <source>Could not write %1.</source>
-        <translation>Could not write %1.</translation>
+        <translation>Не удалось записать %1.</translation>
     </message>
     <message>
         <source>Could not write %1: %2</source>
-        <translation>Could not write %1: %2</translation>
+        <translation>Не удалось записать %1: %2</translation>
     </message>
 </context>
 <context>
     <name>PreferencesDialog</name>
     <message>
         <source>Preferences</source>
-        <translation>Preferences</translation>
+        <translation>Настройки</translation>
     </message>
     <message>
         <source>Appearance</source>
-        <translation>Appearance</translation>
+        <translation>Оформление</translation>
     </message>
     <message>
         <source>Theme:</source>
-        <translation>Theme:</translation>
+        <translation>Тема:</translation>
     </message>
     <message>
         <source>Dark</source>
-        <translation>Dark</translation>
+        <translation>Тёмная</translation>
     </message>
     <message>
         <source>Light</source>
-        <translation>Light</translation>
+        <translation>Светлая</translation>
     </message>
     <message>
         <source>Interface font size, pt:</source>
-        <translation>Interface font size, pt:</translation>
+        <translation>Размер шрифта интерфейса, пт:</translation>
     </message>
     <message>
         <source>Plot</source>
-        <translation>Plot</translation>
+        <translation>График</translation>
     </message>
     <message>
         <source>Plot font size, pt:</source>
-        <translation>Plot font size, pt:</translation>
+        <translation>Размер шрифта графика, пт:</translation>
     </message>
     <message>
         <source>Line width, px:</source>
-        <translation>Line width, px:</translation>
+        <translation>Толщина линии, пикс:</translation>
     </message>
     <message>
         <source>Time window, s:</source>
-        <translation>Time window, s:</translation>
+        <translation>Временное окно, с:</translation>
     </message>
     <message>
         <source>Redraw rate, Hz:</source>
-        <translation>Redraw rate, Hz:</translation>
+        <translation>Частота перерисовки, Гц:</translation>
     </message>
     <message>
         <source>Connection</source>
-        <translation>Connection</translation>
+        <translation>Подключение</translation>
     </message>
     <message>
         <source>This application's Cyphal node ID:</source>
-        <translation>This application's Cyphal node ID:</translation>
+        <translation>Cyphal Node ID этого приложения:</translation>
     </message>
     <message>
         <source>Serial baud rate:</source>
-        <translation>Serial baud rate:</translation>
+        <translation>Скорость Serial-порта:</translation>
     </message>
     <message>
         <source>Firmware flashing (OpenOCD)</source>
-        <translation>Firmware flashing (OpenOCD)</translation>
+        <translation>Прошивка (OpenOCD)</translation>
     </message>
     <message>
         <source>Interface config:</source>
-        <translation>Interface config:</translation>
+        <translation>Конфигурация интерфейса:</translation>
     </message>
     <message>
         <source>Target config:</source>
-        <translation>Target config:</translation>
+        <translation>Конфигурация цели:</translation>
     </message>
     <message>
         <source>OpenOCD interface script, relative to its scripts directory.
 VBDrive is programmed over SWD with an ST-Link.</source>
-        <translation>OpenOCD interface script, relative to its scripts directory.
-VBDrive is programmed over SWD with an ST-Link.</translation>
+        <translation>Скрипт интерфейса OpenOCD относительно его каталога scripts.
+VBDrive программируется по SWD через ST-Link.</translation>
     </message>
     <message>
         <source>OpenOCD target script. VBDrive uses an STM32G431VB.</source>
-        <translation>OpenOCD target script. VBDrive uses an STM32G431VB.</translation>
+        <translation>Скрипт цели OpenOCD. В VBDrive используется STM32G431VB.</translation>
     </message>
     <message>
         <source>Node ID this application announces on the CAN bus.
 It must not collide with any drive.</source>
-        <translation>Node ID this application announces on the CAN bus.
-It must not collide with any drive.</translation>
+        <translation>Node ID, который приложение объявляет на шине CAN.
+Он не должен совпадать с Node ID приводов.</translation>
     </message>
 </context>
 <context>
     <name>RegisterYaml</name>
     <message>
         <source>File does not exist: %1</source>
-        <translation>File does not exist: %1</translation>
+        <translation>Файл не существует: %1</translation>
     </message>
     <message>
         <source>Cannot parse %1: %2</source>
-        <translation>Cannot parse %1: %2</translation>
+        <translation>Не удалось разобрать %1: %2</translation>
     </message>
     <message>
         <source>%1 is not a map of register names to values.</source>
-        <translation>%1 is not a map of register names to values.</translation>
+        <translation>%1 не содержит отображение «имя регистра: значение».</translation>
     </message>
     <message>
         <source>unknown register '%1'</source>
-        <translation>unknown register '%1'</translation>
+        <translation>неизвестный регистр «%1»</translation>
     </message>
     <message>
         <source>'%1' does not hold a single value</source>
-        <translation>'%1' does not hold a single value</translation>
+        <translation>«%1» содержит не одно значение</translation>
     </message>
     <message>
         <source>'%1' has a value of the wrong type</source>
-        <translation>'%1' has a value of the wrong type</translation>
+        <translation>у «%1» значение неверного типа</translation>
     </message>
     <message>
         <source>%1 contains no recognised registers.</source>
-        <translation>%1 contains no recognised registers.</translation>
+        <translation>В %1 нет ни одного известного регистра.</translation>
     </message>
     <message>
         <source>Cannot write %1: %2</source>
-        <translation>Cannot write %1: %2</translation>
+        <translation>Не удалось записать %1: %2</translation>
     </message>
 </context>
 <context>
     <name>RestoreLabel</name>
     <message>
         <source>Restore the value this field had when the drive was selected</source>
-        <translation>Restore the value this field had when the drive was selected</translation>
+        <translation>Вернуть значение, которое было при выборе привода</translation>
     </message>
 </context>
 <context>
     <name>RestoreModelDialog</name>
     <message>
         <source>Restore Default Registers</source>
-        <translation>Restore Default Registers</translation>
+        <translation>Восстановление значений по умолчанию</translation>
     </message>
     <message>
         <source>Load the factory register profile for this drive model. The values are placed in the editors; nothing is written to the drive until you press Write.</source>
-        <translation>Load the factory register profile for this drive model. The values are placed in the editors; nothing is written to the drive until you press Write.</translation>
+        <translation>Загрузить заводской профиль регистров для этой модели привода. Значения попадут в поля; в привод ничего не записывается, пока вы не нажмёте «Записать».</translation>
     </message>
     <message>
         <source>Drive model:</source>
-        <translation>Drive model:</translation>
+        <translation>Модель привода:</translation>
     </message>
     <message>
         <source>M4310R10</source>
@@ -1201,58 +1201,58 @@ It must not collide with any drive.</translation>
     <name>SerialService</name>
     <message>
         <source>Serial service is shutting down.</source>
-        <translation>Serial service is shutting down.</translation>
+        <translation>Serial-сервис завершает работу.</translation>
     </message>
     <message>
         <source>Reconnecting.</source>
-        <translation>Reconnecting.</translation>
+        <translation>Переподключение.</translation>
     </message>
     <message>
         <source>Disconnected.</source>
-        <translation>Disconnected.</translation>
+        <translation>Отключено.</translation>
     </message>
     <message>
         <source>Serial port is not open.</source>
-        <translation>Serial port is not open.</translation>
+        <translation>Serial-порт не открыт.</translation>
     </message>
     <message>
         <source>Command '%1' failed: %2</source>
-        <translation>Command '%1' failed: %2</translation>
+        <translation>Команда «%1» не выполнена: %2</translation>
     </message>
     <message>
         <source>Drive detected on %1.</source>
-        <translation>Drive detected on %1.</translation>
+        <translation>Привод обнаружен на %1.</translation>
     </message>
     <message>
         <source>No drive answered on %1: %2</source>
-        <translation>No drive answered on %1: %2</translation>
+        <translation>На %1 ни один привод не ответил: %2</translation>
     </message>
     <message>
         <source>These registers were rejected by the drive: %1</source>
-        <translation>These registers were rejected by the drive: %1</translation>
+        <translation>Привод отклонил запись регистров: %1</translation>
     </message>
     <message>
         <source>Serial connection lost.</source>
-        <translation>Serial connection lost.</translation>
+        <translation>Serial-соединение потеряно.</translation>
     </message>
     <message>
         <source>The drive did not answer in time.</source>
-        <translation>The drive did not answer in time.</translation>
+        <translation>Привод не ответил за отведённое время.</translation>
     </message>
     <message>
         <source>Could not interpret the value '%1'.</source>
-        <translation>Could not interpret the value '%1'.</translation>
+        <translation>Не удалось разобрать значение «%1».</translation>
     </message>
 </context>
 <context>
     <name>SerialWorker</name>
     <message>
         <source>Port %1 opened at %2 baud.</source>
-        <translation>Port %1 opened at %2 baud.</translation>
+        <translation>Порт %1 открыт на скорости %2 бод.</translation>
     </message>
     <message>
         <source>Serial port is not open.</source>
-        <translation>Serial port is not open.</translation>
+        <translation>Serial-порт не открыт.</translation>
     </message>
 </context>
 </TS>
