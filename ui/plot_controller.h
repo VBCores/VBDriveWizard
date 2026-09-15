@@ -54,6 +54,7 @@ public:
     // --- ingest; each is a no-op unless it feeds the selected signal ---
     void appendTelemetry(const TelemetryBatch &samples);
     void appendStatus(const DeviceStatus &status);
+    /// `value` is in drive-native units, like the telemetry samples.
     void appendSetpoint(double value, ServoControlType type);
     void appendLogLine(const QString &line);
 
@@ -74,6 +75,8 @@ private:
 
     void configureForSignal();
     void push(double primary, bool hasSecondary, double secondary);
+    /// Multiplies every buffered and plotted value, and the value axis, by `factor`.
+    void rescaleValues(double factor);
     double displayScale() const;
     QString primaryName() const;
     QString secondaryName() const;

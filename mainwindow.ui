@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1582</width>
-    <height>1209</height>
+    <height>1217</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -139,7 +139,7 @@
          <item>
           <widget class="QTabWidget" name="ConfigTabWidget">
            <property name="currentIndex">
-            <number>2</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="BasicTab">
             <attribute name="title">
@@ -180,7 +180,7 @@
                      <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>0.010000000000000</double>
+                     <double>0.100000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -203,7 +203,7 @@
                      <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>0.010000000000000</double>
+                     <double>0.100000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -532,7 +532,7 @@
                 <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000000000000</double>
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -548,7 +548,7 @@
                 <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000000000000</double>
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -567,7 +567,7 @@
                 <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000000000000</double>
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -599,7 +599,7 @@
                 <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000000000000</double>
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -625,7 +625,7 @@
                 <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.010000000000000</double>
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -733,7 +733,7 @@
                 <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000000000000</double>
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -771,7 +771,7 @@
                 <double>1000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000000000000</double>
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -787,7 +787,7 @@
                 <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000000000000</double>
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -806,7 +806,7 @@
                 <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000000000000</double>
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -822,7 +822,7 @@
                 <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000000000000</double>
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -1052,7 +1052,7 @@
          <item>
           <widget class="QLabel" name="LogoLabel">
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Logo&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string notr="true"/>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -1174,6 +1174,12 @@
          </item>
          <item>
           <widget class="QComboBox" name="LanguageComboBox">
+           <property name="sizeAdjustPolicy">
+            <enum>QComboBox::AdjustToContents</enum>
+           </property>
+           <property name="minimumContentsLength">
+            <number>10</number>
+           </property>
            <item>
             <property name="text">
              <string>English</string>
@@ -1260,7 +1266,7 @@
          <item row="0" column="0">
           <widget class="QTabWidget" name="ControlTabWidget">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="ServoTab">
             <attribute name="title">
@@ -1421,21 +1427,12 @@
                      <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>1.000000000000000</double>
+                     <double>0.100000000000000</double>
                     </property>
                    </widget>
                   </item>
                   <item row="0" column="3">
                    <widget class="QSlider" name="ServoKpSlider">
-                    <property name="minimum">
-                     <number>0</number>
-                    </property>
-                    <property name="maximum">
-                     <number>30</number>
-                    </property>
-                    <property name="pageStep">
-                     <number>50</number>
-                    </property>
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
@@ -1460,21 +1457,12 @@
                      <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>1.000000000000000</double>
+                     <double>0.100000000000000</double>
                     </property>
                    </widget>
                   </item>
                   <item row="1" column="3">
                    <widget class="QSlider" name="ServoKiSlider">
-                    <property name="minimum">
-                     <number>0</number>
-                    </property>
-                    <property name="maximum">
-                     <number>1</number>
-                    </property>
-                    <property name="pageStep">
-                     <number>50</number>
-                    </property>
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
@@ -1499,21 +1487,12 @@
                      <double>100000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>1.000000000000000</double>
+                     <double>0.100000000000000</double>
                     </property>
                    </widget>
                   </item>
                   <item row="2" column="3">
                    <widget class="QSlider" name="ServoKdSlider">
-                    <property name="minimum">
-                     <number>0</number>
-                    </property>
-                    <property name="maximum">
-                     <number>10</number>
-                    </property>
-                    <property name="pageStep">
-                     <number>50</number>
-                    </property>
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
@@ -1579,24 +1558,12 @@
                       <double>100000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.010000000000000</double>
+                      <double>0.100000000000000</double>
                      </property>
                     </widget>
                    </item>
                    <item>
                     <widget class="QSlider" name="ServoUserTargetSlider">
-                     <property name="minimum">
-                      <number>0</number>
-                     </property>
-                     <property name="maximum">
-                      <number>7</number>
-                     </property>
-                     <property name="singleStep">
-                      <number>1</number>
-                     </property>
-                     <property name="pageStep">
-                      <number>50</number>
-                     </property>
                      <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                      </property>
@@ -1669,21 +1636,12 @@
                       <double>100000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.010000000000000</double>
+                      <double>0.100000000000000</double>
                      </property>
                     </widget>
                    </item>
                    <item row="0" column="2">
                     <widget class="QSlider" name="ServoSinAmpSlider">
-                     <property name="minimum">
-                      <number>0</number>
-                     </property>
-                     <property name="maximum">
-                      <number>1000</number>
-                     </property>
-                     <property name="pageStep">
-                      <number>50</number>
-                     </property>
                      <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                      </property>
@@ -1714,15 +1672,6 @@
                    </item>
                    <item row="1" column="2">
                     <widget class="QSlider" name="ServoSinFreqSlider">
-                     <property name="minimum">
-                      <number>0</number>
-                     </property>
-                     <property name="maximum">
-                      <number>1000</number>
-                     </property>
-                     <property name="pageStep">
-                      <number>50</number>
-                     </property>
                      <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                      </property>
@@ -1795,21 +1744,12 @@
                       <double>100000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.010000000000000</double>
+                      <double>0.100000000000000</double>
                      </property>
                     </widget>
                    </item>
                    <item row="0" column="2">
                     <widget class="QSlider" name="ServoMeanderAmpSlider">
-                     <property name="minimum">
-                      <number>0</number>
-                     </property>
-                     <property name="maximum">
-                      <number>1000</number>
-                     </property>
-                     <property name="pageStep">
-                      <number>50</number>
-                     </property>
                      <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                      </property>
@@ -1840,15 +1780,6 @@
                    </item>
                    <item row="1" column="2">
                     <widget class="QSlider" name="ServoMeanderFreqSlider">
-                     <property name="minimum">
-                      <number>0</number>
-                     </property>
-                     <property name="maximum">
-                      <number>1000</number>
-                     </property>
-                     <property name="pageStep">
-                      <number>50</number>
-                     </property>
                      <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                      </property>
@@ -1921,21 +1852,12 @@
                       <double>100000.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>0.010000000000000</double>
+                      <double>0.100000000000000</double>
                      </property>
                     </widget>
                    </item>
                    <item row="0" column="2">
                     <widget class="QSlider" name="ServoTriangleAmpSlider">
-                     <property name="minimum">
-                      <number>0</number>
-                     </property>
-                     <property name="maximum">
-                      <number>1000</number>
-                     </property>
-                     <property name="pageStep">
-                      <number>50</number>
-                     </property>
                      <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                      </property>
@@ -1966,15 +1888,6 @@
                    </item>
                    <item row="1" column="2">
                     <widget class="QSlider" name="ServoTriangleFreqSlider">
-                     <property name="minimum">
-                      <number>0</number>
-                     </property>
-                     <property name="maximum">
-                      <number>1000</number>
-                     </property>
-                     <property name="pageStep">
-                      <number>50</number>
-                     </property>
                      <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                      </property>
@@ -2095,21 +2008,12 @@
                    <double>100000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.010000000000000</double>
+                   <double>0.100000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item row="0" column="2">
                  <widget class="QSlider" name="MitStepPosSlider">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>50</number>
-                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -2140,15 +2044,6 @@
                 </item>
                 <item row="1" column="2">
                  <widget class="QSlider" name="MitStepVelSlider">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>50</number>
-                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -2173,21 +2068,12 @@
                    <double>10000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.010000000000000</double>
+                   <double>0.100000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item row="2" column="2">
                  <widget class="QSlider" name="MitStepTorqSlider">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>50</number>
-                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -2218,15 +2104,6 @@
                 </item>
                 <item row="3" column="2">
                  <widget class="QSlider" name="MitStepKpSlider">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>50</number>
-                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -2257,15 +2134,6 @@
                 </item>
                 <item row="4" column="2">
                  <widget class="QSlider" name="MitStepKdSlider">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>50</number>
-                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -2299,21 +2167,12 @@
                    <double>100000.000000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.010000000000000</double>
+                   <double>0.100000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item row="0" column="2">
                  <widget class="QSlider" name="MitTrajAmpSlider">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>50</number>
-                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -2344,15 +2203,6 @@
                 </item>
                 <item row="1" column="2">
                  <widget class="QSlider" name="MitTrajFreqSlider">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>50</number>
-                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -2383,15 +2233,6 @@
                 </item>
                 <item row="5" column="2">
                  <widget class="QSlider" name="MitTrajKpSlider">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>50</number>
-                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -2422,15 +2263,6 @@
                 </item>
                 <item row="6" column="2">
                  <widget class="QSlider" name="MitTrajKdSlider">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>50</number>
-                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -2454,6 +2286,9 @@
                  <widget class="QRadioButton" name="MitTrajPositionRadioBtn">
                   <property name="text">
                    <string>Position</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
                   </property>
                  </widget>
                 </item>
@@ -2507,6 +2342,9 @@
             </layout>
            </widget>
           </widget>
+         </item>
+         <item row="1" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout_9"/>
          </item>
         </layout>
        </widget>

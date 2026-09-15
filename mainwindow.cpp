@@ -53,6 +53,9 @@ constexpr int kRegisterPollHz = 5;
 /// Longest the window waits for the link to shut down on close before giving up;
 /// the Serial drain itself is bounded at 2 s by the service.
 constexpr int kCloseFallbackMs = 3000;
+/// Width the logo is scaled to; the label itself is 100 px wide before the first
+/// layout pass, so this is what the logo has always been shown at on start-up.
+constexpr int kLogoWidth = 120;
 
 /// Registers behind the STATUS panel and the non-telemetry plot signals.
 const QStringList &statusRegisters()
@@ -299,9 +302,9 @@ void MainWindow::updateLogo()
     const QPixmap logo(ThemeManager::logoPath(m_config.ui.theme));
     if (logo.isNull())
         return;
-    ui->LogoLabel->setPixmap(
-            logo.scaledToWidth(qMax(120, ui->LogoLabel->width()), Qt::SmoothTransformation));
-    ui->LogoLabel->setText(QString());
+    // A fixed width: scaling to the label's current width would grow the logo
+    // every time the theme is switched, since the label expands to fit the pixmap.
+    ui->LogoLabel->setPixmap(logo.scaledToWidth(kLogoWidth, Qt::SmoothTransformation));
 }
 
 void MainWindow::applyLanguageFromCombo()
@@ -323,6 +326,8 @@ void MainWindow::changeEvent(QEvent *event)
         return;
     ui->retranslateUi(this);
     retranslateDynamicTexts();
+    // retranslateUi() resets LogoLabel's text, which drops the pixmap.
+    updateLogo();
 }
 
 void MainWindow::retranslateDynamicTexts()
@@ -337,6 +342,7 @@ void MainWindow::retranslateDynamicTexts()
         ui->CanConnectBtn->setText(tr("Disconnect"));
 
     ui->PausePltBtn->setText(m_plot->isLiveMode() ? tr("Pause") : tr("Resume"));
+    updateServoTargetLabel();
 
     if (!connected)
         m_connectionStatusLabel->setText(tr("Not connected"));
@@ -1498,12 +1504,16 @@ void MainWindow::setupControlUi()
     connect(ui->TransientSetBtn, &QPushButton::clicked, this, &MainWindow::onTransientFormSet);
 
     // Every Start button drives the same worker; the active trajectory tab decides
-    // the waveform, so switching tabs mid-run just changes the shape.
-    for (QPushButton *button : {ui->ServoUserStartBtn, ui->ServoSinStartBtn,
-                                ui->ServoMeanderStartBtn, ui->ServoTriangleStartBtn}) {
+    // the waveform, so switching tabs mid-run just changes the shape (switching
+    // into the User tab is the exception, see onControlParamsEdited()).
+    for (QPushButton *button : {ui->ServoSinStartBtn, ui->ServoMeanderStartBtn,
+                                ui->ServoTriangleStartBtn}) {
         connect(button, &QPushButton::clicked, this,
                 [this] { onTrajectoryStart(ControlProtocol::Servo); });
     }
+    // The User tab is the exception: its button never turns into Stop, it applies
+    // the typed target each time it is pressed.
+    connect(ui->ServoUserStartBtn, &QPushButton::clicked, this, &MainWindow::onServoUserStart);
     connect(ui->MitStartBtn, &QPushButton::clicked, this,
             [this] { onTrajectoryStart(ControlProtocol::Mit); });
 
@@ -1520,9 +1530,11 @@ void MainWindow::setupControlUi()
     }
 
     // Live edits: anything that changes a trajectory parameter updates the running
-    // worker in place, without stopping the motion.
+    // worker in place, without stopping the motion. The User target is deliberately
+    // absent: it is applied by ServoUserStartBtn only, so typing a new value does not
+    // move the drive on every keystroke.
     const QList<QDoubleSpinBox *> liveSpins = {
-        ui->ServoUserTargetDoubleSpinBox, ui->ServoSinAmpDoubleSpinBox,
+        ui->ServoSinAmpDoubleSpinBox,
         ui->ServoSinFreqDoubleSpinBox,    ui->ServoMeanderAmpDoubleSpinBox,
         ui->ServoMeanderFreqDoubleSpinBox, ui->ServoTriangleAmpDoubleSpinBox,
         ui->ServoTriangleFreqDoubleSpinBox, ui->MitStepPosDoubleSpinBox,
@@ -1540,7 +1552,7 @@ void MainWindow::setupControlUi()
     connect(ui->EmergStopPushButton, &QPushButton::clicked, this,
             &MainWindow::onEmergencyStop);
 
-    // Sliders are normalised 0..1000 handles for their spin box.
+    // Sliders drive their spin box in hundredths: slider position 628 is 6.28.
     const QVector<QPair<QSlider *, QDoubleSpinBox *>> pairs = {
         {ui->ServoKpSlider, ui->ServoKpDoubleSpinBox},
         {ui->ServoKiSlider, ui->ServoKiDoubleSpinBox},
@@ -1565,22 +1577,22 @@ void MainWindow::setupControlUi()
     for (const auto &pair : pairs) {
         QSlider *slider = pair.first;
         QDoubleSpinBox *spin = pair.second;
-        connect(slider, &QSlider::valueChanged, this, [slider, spin](int position) {
-            const double fraction = static_cast<double>(position) / slider->maximum();
-            const double value = spin->minimum() + fraction * (spin->maximum() - spin->minimum());
+        slider->setSingleStep(1);
+        slider->setPageStep(10);
+        connect(slider, &QSlider::valueChanged, this, [spin](int position) {
             // setValue() emits valueChanged(), which drives the spin box's own
             // handlers; the reverse direction below blocks the slider, so this
             // cannot loop.
-            spin->setValue(value);
+            spin->setValue(position / 100.0);
         });
-        connect(spin, &QDoubleSpinBox::valueChanged, this, [slider, spin](double value) {
-            const double span = spin->maximum() - spin->minimum();
-            if (span <= 0.0)
-                return;
+        connect(spin, &QDoubleSpinBox::valueChanged, this, [slider](double value) {
+            // The spin box accepts values outside the slider's span; the slider
+            // then just sits at the nearer end.
             const QSignalBlocker blocker(slider);
-            slider->setValue(qRound((value - spin->minimum()) / span * slider->maximum()));
+            slider->setValue(qRound(value * 100.0));
         });
     }
+    updateControlSliderRanges();
 
     onMitTrajectoryChanged();
 }
@@ -1600,7 +1612,83 @@ void MainWindow::onServoControlTypeChanged()
     ui->ServoKdSlider->setEnabled(position);
     ui->ServoGainsSetBtn->setEnabled(anyGains);
 
+    updateServoTargetLabel();
+    updateControlSliderRanges();
     onControlParamsEdited();
+}
+
+void MainWindow::updateServoTargetLabel()
+{
+    if (ui->ServoVelocityRadioBtn->isChecked())
+        ui->ServoUserTargetLbl->setText(tr("Target vel:"));
+    else if (ui->ServoTorqueRadioBtn->isChecked())
+        ui->ServoUserTargetLbl->setText(tr("Target torq:"));
+    else
+        ui->ServoUserTargetLbl->setText(tr("Target pos:"));
+}
+
+bool MainWindow::servoUserTabActive() const
+{
+    return ui->ControlTabWidget->currentIndex() == 0
+            && ui->RefTrajectoryTabWidget->currentIndex() == 0;
+}
+
+void MainWindow::setSliderRange(QSlider *slider, QDoubleSpinBox *spin, double min, double max)
+{
+    const QSignalBlocker blocker(slider);
+    slider->setRange(qRound(min * 100.0), qRound(max * 100.0));
+    // setRange() clamps the position, so re-seat the handle from the spin box.
+    slider->setValue(qRound(spin->value() * 100.0));
+}
+
+void MainWindow::updateControlSliderRanges()
+{
+    // One turn, 60 rad/s and 25 N*m in the display unit; the angular spans are
+    // what the user sees, so they follow the rad/deg switch.
+    const double angle = units::fromRadians(2.0 * units::kPi, m_angleUnit);
+    const double velocity = units::fromRadians(60.0, m_angleUnit);
+    constexpr double kTorque = 25.0;
+    constexpr double kMaxKp = 64.0;
+    constexpr double kMaxKi = 1.0;
+    constexpr double kMaxKd = 10.0;
+    constexpr double kMaxFrequency = 40.0;
+
+    const auto spanFor = [&](bool velocityMode, bool torqueMode) {
+        return torqueMode ? kTorque : velocityMode ? velocity : angle;
+    };
+    const double servoSpan = spanFor(ui->ServoVelocityRadioBtn->isChecked(),
+                                     ui->ServoTorqueRadioBtn->isChecked());
+    const double mitSpan = spanFor(ui->MitTrajVelocityRadioBtn->isChecked(),
+                                   ui->MitTrajTorqueRadioBtn->isChecked());
+
+    setSliderRange(ui->ServoKpSlider, ui->ServoKpDoubleSpinBox, 0.0, kMaxKp);
+    setSliderRange(ui->ServoKiSlider, ui->ServoKiDoubleSpinBox, 0.0, kMaxKi);
+    setSliderRange(ui->ServoKdSlider, ui->ServoKdDoubleSpinBox, 0.0, kMaxKd);
+    setSliderRange(ui->ServoUserTargetSlider, ui->ServoUserTargetDoubleSpinBox, -servoSpan,
+                   servoSpan);
+    // Amplitudes are magnitudes, so their sliders start at zero.
+    for (const auto &pair : {qMakePair(ui->ServoSinAmpSlider, ui->ServoSinAmpDoubleSpinBox),
+                             qMakePair(ui->ServoMeanderAmpSlider, ui->ServoMeanderAmpDoubleSpinBox),
+                             qMakePair(ui->ServoTriangleAmpSlider,
+                                       ui->ServoTriangleAmpDoubleSpinBox)}) {
+        setSliderRange(pair.first, pair.second, 0.0, servoSpan);
+    }
+    for (const auto &pair : {qMakePair(ui->ServoSinFreqSlider, ui->ServoSinFreqDoubleSpinBox),
+                             qMakePair(ui->ServoMeanderFreqSlider, ui->ServoMeanderFreqDoubleSpinBox),
+                             qMakePair(ui->ServoTriangleFreqSlider,
+                                       ui->ServoTriangleFreqDoubleSpinBox),
+                             qMakePair(ui->MitTrajFreqSlider, ui->MitTrajFreqDoubleSpinBox)}) {
+        setSliderRange(pair.first, pair.second, 0.0, kMaxFrequency);
+    }
+
+    setSliderRange(ui->MitStepPosSlider, ui->MitStepPosDoubleSpinBox, -angle, angle);
+    setSliderRange(ui->MitStepVelSlider, ui->MitStepVelDoubleSpinBox, -velocity, velocity);
+    setSliderRange(ui->MitStepTorqSlider, ui->MitStepTorqDoubleSpinBox, -kTorque, kTorque);
+    setSliderRange(ui->MitStepKpSlider, ui->MitStepKpDoubleSpinBox, 0.0, kMaxKp);
+    setSliderRange(ui->MitStepKdSlider, ui->MitStepKdDoubleSpinBox, 0.0, kMaxKd);
+    setSliderRange(ui->MitTrajAmpSlider, ui->MitTrajAmpDoubleSpinBox, 0.0, mitSpan);
+    setSliderRange(ui->MitTrajKpSlider, ui->MitTrajKpDoubleSpinBox, 0.0, kMaxKp);
+    setSliderRange(ui->MitTrajKdSlider, ui->MitTrajKdDoubleSpinBox, 0.0, kMaxKd);
 }
 
 void MainWindow::onMitTrajectoryChanged()
@@ -1611,6 +1699,7 @@ void MainWindow::onMitTrajectoryChanged()
     ui->TrajectoryTargetsGroupBox->setVisible(!step);
     // "+derivative" only means anything when the waveform drives position.
     ui->MitDerivativeCheckBox->setEnabled(ui->MitTrajPositionRadioBtn->isChecked());
+    updateControlSliderRanges();
     onControlParamsEdited();
 }
 
@@ -1731,8 +1820,26 @@ void MainWindow::onTrajectoryStart(ControlProtocol protocol)
     m_control->start(nodeId, params);
 }
 
+void MainWindow::onServoUserStart()
+{
+    DeviceModel *device = m_devices->selected();
+    if (!m_link || !device)
+        return;
+
+    // Whatever is running keeps running; the press only swaps in the new target.
+    const quint8 nodeId = device->nodeId();
+    if (m_control->isRunning(nodeId)) {
+        m_control->updateParams(nodeId, collectServoParams());
+        return;
+    }
+    onTrajectoryStart(ControlProtocol::Servo);
+}
+
 void MainWindow::onControlParamsEdited()
 {
+    // The User tab waits for its Start button; see onServoUserStart().
+    if (servoUserTabActive())
+        return;
     DeviceModel *device = m_devices->selected();
     if (!device)
         return;
@@ -1805,12 +1912,9 @@ void MainWindow::onSetpointProduced(quint8 nodeId, const TrajectoryOutput &outpu
     DeviceModel *device = m_devices->selected();
     if (!device || device->nodeId() != nodeId)
         return;
-    const bool angular = output.primaryType == ServoControlType::Position
-            || output.primaryType == ServoControlType::Velocity;
-    const double displayed = angular
-            ? units::fromRadians(output.primary, m_angleUnit)
-            : output.primary;
-    m_plot->appendSetpoint(displayed, output.primaryType);
+    // Native units: the plot scales the set-point together with the sample it is
+    // drawn against.
+    m_plot->appendSetpoint(output.primary, output.primaryType);
 }
 
 void MainWindow::onTrajectoryRunningChanged(quint8 nodeId, bool running)
@@ -1819,10 +1923,10 @@ void MainWindow::onTrajectoryRunningChanged(quint8 nodeId, bool running)
     if (!device || device->nodeId() != nodeId)
         return;
 
+    // ServoUserStartBtn stays "Start": it applies a target rather than toggling.
     const QString label = running ? tr("Stop") : tr("Start");
-    for (QPushButton *button : {ui->ServoUserStartBtn, ui->ServoSinStartBtn,
-                                ui->ServoMeanderStartBtn, ui->ServoTriangleStartBtn,
-                                ui->MitStartBtn}) {
+    for (QPushButton *button : {ui->ServoSinStartBtn, ui->ServoMeanderStartBtn,
+                                ui->ServoTriangleStartBtn, ui->MitStartBtn}) {
         button->setText(label);
     }
 }
@@ -1863,12 +1967,40 @@ void MainWindow::onSignalChanged()
 
 void MainWindow::onUnitsChanged()
 {
+    const AngleUnit previous = m_angleUnit;
     m_angleUnit = ui->UnitsComboBox->currentIndex() == 1 ? AngleUnit::Degrees
                                                          : AngleUnit::Radians;
+    if (m_angleUnit == previous)
+        return;
     m_plot->setAngleUnit(m_angleUnit);
     // Editors hold display units, so every angular field has to be re-rendered.
     refreshAllEditors();
+    convertControlEditors(previous, m_angleUnit);
+    updateControlSliderRanges();
     updateStatusLabels();
+}
+
+void MainWindow::convertControlEditors(AngleUnit from, AngleUnit to)
+{
+    // The control-tab spin boxes are not register bindings, so they are converted
+    // directly: the same physical value, re-expressed in the new unit. Which of them
+    // are angular follows the selected control type, as in collectServoParams() and
+    // collectMitParams(). m_angleUnit is already `to`, so the valueChanged() handlers
+    // that push live edits to a running trajectory compute the same radian value.
+    QList<QDoubleSpinBox *> angular = {
+        ui->MitStepPosDoubleSpinBox,
+        ui->MitStepVelDoubleSpinBox,
+        ui->TransientVelDoubleSpinBox,
+    };
+    if (!ui->ServoTorqueRadioBtn->isChecked()) {
+        angular << ui->ServoUserTargetDoubleSpinBox << ui->ServoSinAmpDoubleSpinBox
+                << ui->ServoMeanderAmpDoubleSpinBox << ui->ServoTriangleAmpDoubleSpinBox;
+    }
+    if (!ui->MitTrajTorqueRadioBtn->isChecked())
+        angular << ui->MitTrajAmpDoubleSpinBox;
+
+    for (QDoubleSpinBox *spin : angular)
+        spin->setValue(units::fromRadians(units::toRadians(spin->value(), from), to));
 }
 
 void MainWindow::onPausePlot()

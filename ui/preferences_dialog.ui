@@ -120,7 +120,7 @@
          <number>1</number>
         </property>
         <property name="singleStep">
-         <double>0.500000</double>
+         <double>0.100000000000000</double>
         </property>
        </widget>
       </item>

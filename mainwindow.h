@@ -17,6 +17,7 @@ class MainWindow;
 class QAbstractButton;
 class QCheckBox;
 class QComboBox;
+class QDoubleSpinBox;
 class QLabel;
 class QSlider;
 class QWidget;
@@ -142,8 +143,16 @@ private:
     TrajectoryParams collectMitParams() const;
     TrajectoryParams collectCurrentParams() const;
     void onTrajectoryStart(ControlProtocol protocol);
+    void onServoUserStart();
     void onControlParamsEdited();
     void onServoControlTypeChanged();
+    void updateServoTargetLabel();
+    /// Servo tab with the User trajectory tab in front: edits there are not live.
+    bool servoUserTabActive() const;
+    /// Sliders step their spin box in hundredths over a fixed useful span; the
+    /// angular spans follow the display unit and the selected control type.
+    void setSliderRange(QSlider *slider, QDoubleSpinBox *spin, double min, double max);
+    void updateControlSliderRanges();
     void onServoGainsSet();
     void onTransientFormSet();
     void onMitTrajectoryChanged();
@@ -160,6 +169,8 @@ private:
     // --- plot ---
     void onSignalChanged();
     void onUnitsChanged();
+    /// Re-expresses the angular control-tab spin boxes in the new display unit.
+    void convertControlEditors(AngleUnit from, AngleUnit to);
     void onPausePlot();
     void onSavePlotCsv();
     void onSavePlotPng();

@@ -203,7 +203,7 @@ QString PlotController::yAxisLabel() const
     return QString();
 }
 
-/// Radian-valued signals are stored natively and scaled only for display.
+/// Radian-valued signals arrive in radians; the traces hold them in the display unit.
 double PlotController::displayScale() const
 {
     if (m_angleUnit != AngleUnit::Degrees)
@@ -238,9 +238,33 @@ void PlotController::setAngleUnit(AngleUnit unit)
 {
     if (m_angleUnit == unit)
         return;
+    const double before = displayScale();
     m_angleUnit = unit;
-    clear();  // buffered points were scaled for the previous unit
+    // The traces hold display units, so what is already on screen is converted in
+    // place: a paused plot keeps its picture, a live one keeps its history.
+    rescaleValues(displayScale() / before);
     retranslate();
+}
+
+void PlotController::rescaleValues(double factor)
+{
+    if (qFuzzyCompare(factor, 1.0))
+        return;
+    for (Pending &pending : m_pending) {
+        pending.primary *= factor;
+        pending.secondary *= factor;
+    }
+    if (!m_initialized)
+        return;
+    // Values only; the containers stay sorted by key.
+    for (QCPGraph *graph : {m_primary, m_secondary}) {
+        auto data = graph->data();
+        for (auto it = data->begin(); it != data->end(); ++it)
+            it->value *= factor;
+    }
+    const QCPRange range = m_plot->yAxis->range();
+    m_plot->yAxis->setRange(range.lower * factor, range.upper * factor);
+    m_plot->replot(QCustomPlot::rpQueuedReplot);
 }
 
 void PlotController::setLiveMode(bool enabled)
@@ -355,7 +379,8 @@ void PlotController::appendStatus(const DeviceStatus &status)
 void PlotController::appendSetpoint(double value, ServoControlType type)
 {
     // Only remembered when it belongs to the signal on screen; the trace itself is
-    // emitted alongside the next telemetry sample so both share a key.
+    // emitted alongside the next telemetry sample so both share a key. Kept in
+    // native units and scaled together with that sample.
     const bool matches = (m_signal == PlotSignal::Position && type == ServoControlType::Position)
             || (m_signal == PlotSignal::Velocity && type == ServoControlType::Velocity)
             || (m_signal == PlotSignal::Torque

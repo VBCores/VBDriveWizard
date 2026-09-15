@@ -8,6 +8,41 @@
 #include <QStyle>
 #include <QWidget>
 
+namespace {
+
+/// Up/down buttons for the spin boxes. Giving QSpinBox a padding or border-radius
+/// hands its whole rendering to the stylesheet engine, which then draws the arrows
+/// only from an explicit ::up-arrow / ::down-arrow image; without one the buttons
+/// come out as empty frames.
+QString spinBoxStyle(const QString &theme)
+{
+    const QString suffix = ThemeManager::isDark(theme) ? QStringLiteral("dark")
+                                                       : QStringLiteral("light");
+    const QString hover = ThemeManager::isDark(theme) ? QStringLiteral("rgba(255, 255, 255, 0.10)")
+                                                      : QStringLiteral("rgba(0, 0, 0, 0.08)");
+    return QStringLiteral(
+                   "QSpinBox::up-button, QDoubleSpinBox::up-button { subcontrol-origin: border;"
+                   " subcontrol-position: top right; width: 18px; border: none;"
+                   " border-top-right-radius: 4px; }"
+                   "QSpinBox::down-button, QDoubleSpinBox::down-button { subcontrol-origin: border;"
+                   " subcontrol-position: bottom right; width: 18px; border: none;"
+                   " border-bottom-right-radius: 4px; }"
+                   "QSpinBox::up-button:hover, QDoubleSpinBox::up-button:hover,"
+                   " QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover"
+                   " { background-color: %2; }"
+                   "QSpinBox::up-arrow, QDoubleSpinBox::up-arrow"
+                   " { image: url(:/icons/spin_up_%1.svg); width: 8px; height: 5px; }"
+                   "QSpinBox::down-arrow, QDoubleSpinBox::down-arrow"
+                   " { image: url(:/icons/spin_down_%1.svg); width: 8px; height: 5px; }"
+                   "QSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:disabled"
+                   " { image: url(:/icons/spin_up_%1_disabled.svg); }"
+                   "QSpinBox::down-arrow:disabled, QDoubleSpinBox::down-arrow:disabled"
+                   " { image: url(:/icons/spin_down_%1_disabled.svg); }")
+            .arg(suffix, hover);
+}
+
+} // namespace
+
 bool ThemeManager::isDark(const QString &theme)
 {
     return theme.compare(QLatin1String("dark"), Qt::CaseInsensitive) == 0;
@@ -58,7 +93,38 @@ void ThemeManager::applyApplicationTheme(QApplication &app, const UiSettings &se
                              .arg(settings.font_size)
                              .arg(settings.font_size + 6);
     } else {
-        palette = app.style()->standardPalette();
+        // The classic Fusion light palette, spelled out rather than taken from
+        // style()->standardPalette(): on Linux that follows the desktop colour
+        // scheme and comes back dark under a dark GNOME/KDE setting, so the light
+        // theme would not look the same on every platform.
+        const QColor window(239, 239, 239);
+        const QColor light = window.lighter(150);
+        const QColor mid = window.darker(130);
+        const QColor dark = window.darker(150);
+        const QColor shadow = dark.darker(135);
+        const QColor disabledText(190, 190, 190);
+        const QColor highlight(48, 140, 198);
+
+        palette = QPalette(Qt::black, window, light, dark, mid, Qt::black, Qt::white);
+        palette.setColor(QPalette::Midlight, mid.lighter(110));
+        palette.setColor(QPalette::Button, window);
+        palette.setColor(QPalette::Shadow, shadow);
+        palette.setColor(QPalette::ToolTipBase, QColor(255, 255, 220));
+        palette.setColor(QPalette::ToolTipText, Qt::black);
+        palette.setColor(QPalette::BrightText, Qt::red);
+        palette.setColor(QPalette::Highlight, highlight);
+        palette.setColor(QPalette::HighlightedText, Qt::white);
+        palette.setColor(QPalette::Link, highlight);
+        QColor placeholder = Qt::black;
+        placeholder.setAlpha(128);
+        palette.setColor(QPalette::PlaceholderText, placeholder);
+        palette.setColor(QPalette::Disabled, QPalette::Text, disabledText);
+        palette.setColor(QPalette::Disabled, QPalette::WindowText, disabledText);
+        palette.setColor(QPalette::Disabled, QPalette::ButtonText, disabledText);
+        palette.setColor(QPalette::Disabled, QPalette::Base, window);
+        palette.setColor(QPalette::Disabled, QPalette::Dark, QColor(209, 209, 209).darker(110));
+        palette.setColor(QPalette::Disabled, QPalette::Shadow, shadow.lighter(150));
+        palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(145, 145, 145));
 
         styleSheet = QStringLiteral(
                 "QWidget { font-size: %1pt; }"
@@ -83,7 +149,7 @@ void ThemeManager::applyApplicationTheme(QApplication &app, const UiSettings &se
     }
 
     app.setPalette(palette);
-    app.setStyleSheet(styleSheet);
+    app.setStyleSheet(styleSheet + spinBoxStyle(settings.theme));
 }
 
 void ThemeManager::applyWidgetTheme(QWidget *widget, const UiSettings &settings)
