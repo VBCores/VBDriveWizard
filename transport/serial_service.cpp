@@ -4,12 +4,29 @@
 #include "transport/serial_worker.h"
 
 #include <QMetaObject>
+#include <QSignalBlocker>
+
+#include <utility>
 
 namespace {
 constexpr int kDefaultTimeoutMs = 1000;
 constexpr int kHandshakeTimeoutMs = 2000;
+/// How long closeLink() lets the queue drain before the port is closed anyway.
+constexpr int kCloseTimeoutMs = 2000;
 constexpr auto kErrorPrefix = "ERROR:";
 constexpr auto kOkPrefix = "OK: ";
+/// Printed by SAVE: "NOTE: config changes not applied! To apply, run APPLY or reset
+/// controller". Worth showing, since only the servo gains take effect immediately.
+constexpr auto kNotePrefix = "NOTE:";
+
+bool startsWithAny(const QString &line, const QStringList &prefixes)
+{
+    for (const QString &prefix : prefixes) {
+        if (line.startsWith(prefix))
+            return true;
+    }
+    return false;
+}
 } // namespace
 
 SerialService::SerialService(QObject *parent)
@@ -37,6 +54,8 @@ SerialService::SerialService(QObject *parent)
 
     m_responseTimer.setSingleShot(true);
     connect(&m_responseTimer, &QTimer::timeout, this, &SerialService::onResponseTimeout);
+    m_closeTimer.setSingleShot(true);
+    connect(&m_closeTimer, &QTimer::timeout, this, &SerialService::onCloseTimeout);
 }
 
 SerialService::~SerialService()
@@ -52,7 +71,14 @@ void SerialService::start()
 
 void SerialService::shutdown()
 {
-    abortAll(tr("Serial service is shutting down."));
+    {
+        // The window is being destroyed: nobody may react to these failures any
+        // more (a modal error box here would keep the event loop alive forever).
+        const QSignalBlocker blocker(this);
+        abortAll(tr("Serial service is shutting down."));
+    }
+    m_closeTimer.stop();
+    m_closing = false;
     if (!m_workerThread.isRunning())
         return;
     QMetaObject::invokeMethod(m_worker, "closePort", Qt::BlockingQueuedConnection);
@@ -66,6 +92,9 @@ void SerialService::connectToPort(const QString &portName, int baudRate)
     start();
     m_portName = portName;
     m_handshakeDone = false;
+    m_closeTimer.stop();
+    m_closing = false;
+    m_openPending = true;
     abortAll(tr("Reconnecting."));
     QMetaObject::invokeMethod(m_worker, "openPort", Qt::QueuedConnection,
                               Q_ARG(QString, portName), Q_ARG(int, baudRate));
@@ -73,9 +102,40 @@ void SerialService::connectToPort(const QString &portName, int baudRate)
 
 void SerialService::closeLink()
 {
-    abortAll(tr("Disconnected."));
+    if (m_closing)
+        return;
+    if (!m_portOpen) {
+        abortAll(tr("Disconnected."));
+        return;
+    }
+
+    m_closing = true;
+    if (m_handshakeDone) {
+        // Let the queued `is_on:0` reach the drive, then stop the 100 Hz log so
+        // the drive is quiet for whoever opens the port next.
+        PendingCommand logOff = bareCommand(QStringLiteral("log_off"));
+        logOff.internal = true;
+        enqueue(logOff);
+    } else {
+        // No drive answered: there is nothing worth waiting for.
+        abortAll(tr("Disconnected."));
+    }
+    m_closeTimer.start(kCloseTimeoutMs);
+    if (!m_current.has_value() && m_queue.isEmpty())
+        finishClosing();
+}
+
+void SerialService::finishClosing()
+{
+    m_closeTimer.stop();
     if (m_workerThread.isRunning())
         QMetaObject::invokeMethod(m_worker, "closePort", Qt::QueuedConnection);
+}
+
+void SerialService::onCloseTimeout()
+{
+    abortAll(tr("Disconnected."));
+    finishClosing();
 }
 
 void SerialService::setTelemetryBatchIntervalMs(int intervalMs)
@@ -88,8 +148,30 @@ void SerialService::setTelemetryBatchIntervalMs(int intervalMs)
 
 // --- queue ------------------------------------------------------------------------
 
+SerialService::PendingCommand SerialService::bareCommand(const QString &line,
+                                                         const QStringList &acks)
+{
+    PendingCommand command;
+    command.kind = CommandKind::Bare;
+    command.token = line.section(QLatin1Char(' '), 0, 0);
+    command.line = line;
+    command.acks = acks;
+    command.timeoutMs = kDefaultTimeoutMs;
+    return command;
+}
+
 int SerialService::enqueue(PendingCommand command)
 {
+    if (!m_portOpen || (m_closing && !command.internal)) {
+        // Rejected up front rather than queued: the caller's slots run right away.
+        const QString reason = m_portOpen ? tr("Disconnecting.") : tr("Serial port is not open.");
+        if (command.kind == CommandKind::Read)
+            emit registerRead(kSerialNodeId, command.token, RegisterValue{}, false, reason);
+        else if (command.kind == CommandKind::Write)
+            emit registerWritten(kSerialNodeId, command.token, false, reason);
+        return -1;
+    }
+
     command.id = m_nextCommandId++;
     m_queue.enqueue(command);
     pumpQueue();
@@ -98,27 +180,43 @@ int SerialService::enqueue(PendingCommand command)
 
 void SerialService::pumpQueue()
 {
-    if (m_current.has_value() || m_queue.isEmpty())
+    if (m_current.has_value())
         return;
+    if (m_queue.isEmpty()) {
+        if (m_closing)
+            finishClosing();
+        return;
+    }
     if (!m_portOpen) {
         abortAll(tr("Serial port is not open."));
         return;
     }
 
     m_current = m_queue.dequeue();
-    m_activeBatchId = m_current->batchId;
     QMetaObject::invokeMethod(m_worker, "writeLine", Qt::QueuedConnection,
                               Q_ARG(int, m_current->id), Q_ARG(QString, m_current->line));
 }
 
 void SerialService::sendImmediate(const QString &line)
 {
-    if (!m_portOpen)
+    if (!m_portOpen || m_closing)
         return;
     // Bypasses the queue: trajectory commands run far faster than the ack round trip,
     // and their `OK: mit_cmd` / `OK: servo_cmd` replies are dropped by the matcher.
     QMetaObject::invokeMethod(m_worker, "writeLine", Qt::QueuedConnection, Q_ARG(int, -1),
                               Q_ARG(QString, line));
+}
+
+void SerialService::enqueueConfigExit()
+{
+    // EXIT answers only when the drive really was in CONFIG mode, so it cannot be
+    // acked; its stray reply never matches any other command's expected shape.
+    PendingCommand exit = bareCommand(QStringLiteral("EXIT"));
+    exit.expectAck = false;
+    exit.internal = true;
+    exit.id = m_nextCommandId++;
+    m_queue.prepend(exit);
+    pumpQueue();
 }
 
 void SerialService::completeCurrent(bool success, const QString &error)
@@ -138,50 +236,78 @@ void SerialService::completeCurrent(bool success, const QString &error)
         break;
     case CommandKind::Write:
         emit registerWritten(kSerialNodeId, command.token, success, error);
-        if (!success)
-            m_batchFailures << command.token;
         break;
     case CommandKind::Bare:
-        if (!success && command.expectAck)
+        if (!success && command.expectAck && !command.internal)
             emit linkError(tr("Command '%1' failed: %2").arg(command.token, error));
         break;
     }
 
     if (command.handshake) {
         m_handshakeDone = success;
-        // Discovery first: MainWindow's connected handler walks the device list, and
-        // on CAN the drives are already there by the time the result is reported.
-        if (success)
+        if (success) {
+            // A drive left in CONFIG mode by an interrupted session refuses is_on:1
+            // and log_on; EXIT goes out before anything MainWindow enqueues.
+            enqueueConfigExit();
+            // Discovery first: MainWindow's connected handler walks the device list,
+            // and on CAN the drives are already there by the time the result is
+            // reported.
             emit deviceDiscovered(kSerialNodeId);
+        }
         emit connectionResult(success,
                               success ? tr("Drive detected on %1.").arg(m_portName)
                                       : tr("No drive answered on %1: %2")
                                                 .arg(m_portName, error));
     }
 
-    // CONFIG failing means nothing else in the batch can be staged: drop the rest.
-    if (!success && command.kind == CommandKind::Bare && command.batchId != 0) {
-        failBatch(command.batchId, error);
-        pumpQueue();
-        return;
-    }
-
-    if (command.endsBatch) {
-        const bool ok = m_batchFailures.isEmpty();
-        const QString message =
-                ok ? QString()
-                   : tr("These registers were rejected by the drive: %1")
-                             .arg(m_batchFailures.join(QStringLiteral(", ")));
-        m_batchFailures.clear();
-        emit writeBatchFinished(kSerialNodeId, ok, message);
+    if (command.batchId != 0) {
+        if (!success && command.opensConfig) {
+            // Nothing else in the batch can be staged: drop the rest, and make sure
+            // the drive is not left half way into CONFIG mode with the motor off.
+            failBatch(command.batchId, tr("Could not enter CONFIG mode: %1").arg(error));
+            restoreLogStreaming();  // prepended: log_on, then EXIT in front of it
+            enqueueConfigExit();
+        } else {
+            if (command.closesConfig)
+                restoreLogStreaming();
+            finishBatchCommand(command, success);
+        }
     }
 
     pumpQueue();
 }
 
+void SerialService::restoreLogStreaming()
+{
+    if (!m_logStreaming || m_closing)
+        return;
+    PendingCommand logOn = bareCommand(QStringLiteral("log_on"));
+    logOn.internal = true;
+    logOn.id = m_nextCommandId++;
+    m_queue.prepend(logOn);
+}
+
+void SerialService::finishBatchCommand(const PendingCommand &command, bool success)
+{
+    auto it = m_batches.find(command.batchId);
+    if (it == m_batches.end())
+        return;
+    if (!success && command.kind == CommandKind::Write)
+        it->failures << command.token;
+    if (--it->pending > 0)
+        return;
+
+    const bool ok = it->failures.isEmpty();
+    const QString message =
+            ok ? QString()
+               : tr("These registers were rejected by the drive: %1")
+                         .arg(it->failures.join(QStringLiteral(", ")));
+    m_batches.erase(it);
+    emit writeBatchFinished(kSerialNodeId, ok, message);
+}
+
 void SerialService::failBatch(int batchId, const QString &error)
 {
-    // Drop every remaining command of this batch, but keep CONFIG-mode cleanup.
     QQueue<PendingCommand> kept;
     while (!m_queue.isEmpty()) {
         const PendingCommand command = m_queue.dequeue();
@@ -189,8 +315,8 @@ void SerialService::failBatch(int batchId, const QString &error)
             kept.enqueue(command);
     }
     m_queue = kept;
-    m_batchFailures.clear();
-    emit writeBatchFinished(kSerialNodeId, false, error);
+    if (m_batches.remove(batchId) > 0)
+        emit writeBatchFinished(kSerialNodeId, false, error);
 }
 
 void SerialService::abortAll(const QString &reason)
@@ -213,18 +339,19 @@ void SerialService::abortAll(const QString &reason)
         else if (command.kind == CommandKind::Write)
             emit registerWritten(kSerialNodeId, command.token, false, reason);
     }
-    if (m_activeBatchId != 0) {
-        m_activeBatchId = 0;
-        m_batchFailures.clear();
+    const int batches = m_batches.size();
+    m_batches.clear();
+    for (int i = 0; i < batches; ++i)
         emit writeBatchFinished(kSerialNodeId, false, reason);
-    }
 }
 
 // --- worker callbacks --------------------------------------------------------------
 
 void SerialService::onWorkerPortOpened(bool success, const QString &message)
 {
+    m_openPending = false;
     m_portOpen = success;
+    m_logStreaming = false;
     if (!success) {
         emit connectionResult(false, message);
         return;
@@ -243,9 +370,14 @@ void SerialService::onWorkerPortOpened(bool success, const QString &message)
 void SerialService::onWorkerPortClosed()
 {
     const bool wasOpen = m_portOpen;
+    const bool wasClosing = m_closing;
     m_portOpen = false;
     m_handshakeDone = false;
-    abortAll(tr("Serial connection lost."));
+    m_closing = false;
+    m_closeTimer.stop();
+    if (m_openPending)
+        return;  // the previous port going away on the way to a new one
+    abortAll(wasClosing ? tr("Disconnected.") : tr("Serial connection lost."));
     if (wasOpen) {
         emit deviceLost(kSerialNodeId);
         emit linkClosed();
@@ -262,7 +394,7 @@ void SerialService::onWorkerWriteFinished(int commandId, bool success, const QSt
     if (commandId < 0)
         return;  // immediate trajectory write, nothing waits on it
     if (!m_current.has_value() || m_current->id != commandId)
-        return;
+        return;  // already answered, or long since aborted
 
     if (!success) {
         completeCurrent(false, message);
@@ -292,22 +424,43 @@ void SerialService::onWorkerLine(const QString &line)
         return;
     }
 
+    if (line.startsWith(QLatin1String(kNotePrefix)))
+        emit linkError(line);  // informational, but the user should see it
+
     if (!m_current.has_value())
         return;  // unsolicited chatter, or an ack for an immediate trajectory command
 
     const PendingCommand &command = *m_current;
 
-    if (line.startsWith(QLatin1String(kOkPrefix))) {
-        const QString body = line.mid(static_cast<int>(qstrlen(kOkPrefix))).trimmed();
-        // `OK: <token>` for bare commands, `OK: <name>:<value>` for writes.
-        const QString token = body.section(QLatin1Char(':'), 0, 0).trimmed();
-        if (token == command.token)
+    switch (command.kind) {
+    case CommandKind::Bare:
+        if (command.acks.isEmpty()) {
+            // Generic `OK: <token>`.
+            if (line.startsWith(QLatin1String(kOkPrefix))
+                && line.mid(static_cast<int>(qstrlen(kOkPrefix)))
+                                   .section(QLatin1Char(':'), 0, 0)
+                                   .trimmed()
+                           == command.token) {
+                completeCurrent(true, QString());
+            }
+        } else if (startsWithAny(line, command.acks)) {
+            completeCurrent(true, QString());
+        }
+        return;
+
+    case CommandKind::Write: {
+        // `OK: <name>:<value>`
+        if (!line.startsWith(QLatin1String(kOkPrefix)))
+            return;
+        const QString body = line.mid(static_cast<int>(qstrlen(kOkPrefix)));
+        if (body.section(QLatin1Char(':'), 0, 0).trimmed() == command.token)
             completeCurrent(true, QString());
         return;
     }
 
-    if (command.kind != CommandKind::Read)
-        return;
+    case CommandKind::Read:
+        break;
+    }
 
     // Read reply: `<name>:<value>`, printed through "%s:%.*s" for every register type.
     const int separator = line.indexOf(QLatin1Char(':'));
@@ -351,47 +504,65 @@ void SerialService::writeRegisters(quint8, const RegisterWrites &writes)
         emit writeBatchFinished(kSerialNodeId, true, QString());
         return;
     }
-
-    const int batchId = m_nextBatchId++;
-    m_batchFailures.clear();
-
-    bool needsConfigMode = false;
-    for (const RegisterWrite &write : writes) {
-        if (RegisterCatalog::requiresConfigMode(write.first)) {
-            needsConfigMode = true;
-            break;
-        }
+    if (!m_portOpen || m_closing) {
+        const QString reason = m_portOpen ? tr("Disconnecting.") : tr("Serial port is not open.");
+        for (const RegisterWrite &write : writes)
+            emit registerWritten(kSerialNodeId, write.first, false, reason);
+        emit writeBatchFinished(kSerialNodeId, false, reason);
+        return;
     }
 
-    const auto bare = [&](const QString &text, bool endsBatch) {
-        PendingCommand command;
-        command.kind = CommandKind::Bare;
-        command.token = text;
-        command.line = text;
-        command.timeoutMs = kDefaultTimeoutMs;
-        command.batchId = batchId;
-        command.endsBatch = endsBatch;
-        enqueue(command);
-    };
+    // Config registers are staged inside CONFIG ... SAVE; runtime ones (is_on) go
+    // after SAVE, because CONFIG mode stops the motor and refuses them with
+    // `ERROR: RUNNING mode required`.
+    RegisterWrites configWrites;
+    RegisterWrites runtimeWrites;
+    for (const RegisterWrite &write : writes) {
+        if (RegisterCatalog::requiresConfigMode(write.first))
+            configWrites.append(write);
+        else
+            runtimeWrites.append(write);
+    }
+    const bool needsConfigMode = !configWrites.isEmpty();
 
-    if (needsConfigMode)
-        bare(QStringLiteral("CONFIG"), false);
+    const int batchId = m_nextBatchId++;
+    Batch &batch = m_batches[batchId];
+    batch.pending = writes.size() + (needsConfigMode ? 2 : 0);
 
-    for (int i = 0; i < writes.size(); ++i) {
-        const RegisterWrite &write = writes.at(i);
+    const auto enqueueWrite = [this, batchId](const RegisterWrite &write) {
         PendingCommand command;
         command.kind = CommandKind::Write;
         command.token = write.first;
         command.line = write.first + QLatin1Char(':') + RegisterCodec::format(write.second);
         command.timeoutMs = kDefaultTimeoutMs;
         command.batchId = batchId;
-        command.endsBatch = (!needsConfigMode && i == writes.size() - 1);
         enqueue(command);
+    };
+
+    if (needsConfigMode) {
+        // CONFIG stops the motor and answers `CONFIG MODE ENABLED`, never `OK:`.
+        PendingCommand config = bareCommand(QStringLiteral("CONFIG"),
+                                            {QStringLiteral("CONFIG MODE ENABLED"),
+                                             QStringLiteral("OK: CONFIG")});
+        config.batchId = batchId;
+        config.opensConfig = true;
+        enqueue(config);
+
+        for (const RegisterWrite &write : std::as_const(configWrites))
+            enqueueWrite(write);
+
+        // SAVE persists the staged values and leaves CONFIG mode. It prints an
+        // optional `Saved config` and always ends with the `NOTE: ...` line.
+        PendingCommand save = bareCommand(QStringLiteral("SAVE"),
+                                          {QStringLiteral("NOTE:"), QStringLiteral("OK: SAVE")});
+        save.batchId = batchId;
+        save.closesConfig = true;
+        save.timeoutMs = 3000;  // flash write
+        enqueue(save);
     }
 
-    // SAVE persists the staged values and leaves CONFIG mode.
-    if (needsConfigMode)
-        bare(QStringLiteral("SAVE"), true);
+    for (const RegisterWrite &write : std::as_const(runtimeWrites))
+        enqueueWrite(write);
 }
 
 void SerialService::sendServoSetpoint(quint8, ServoControlType type, float value)
@@ -415,10 +586,7 @@ void SerialService::sendMitCommand(quint8, float position, float velocity, float
 
 void SerialService::sendBareCommand(const QString &command, bool expectAck, int timeoutMs)
 {
-    PendingCommand pending;
-    pending.kind = CommandKind::Bare;
-    pending.token = command.section(QLatin1Char(' '), 0, 0);
-    pending.line = command;
+    PendingCommand pending = bareCommand(command);
     pending.timeoutMs = timeoutMs;
     pending.expectAck = expectAck;
     enqueue(pending);
@@ -426,5 +594,6 @@ void SerialService::sendBareCommand(const QString &command, bool expectAck, int 
 
 void SerialService::setLogStreaming(bool enabled)
 {
+    m_logStreaming = enabled;
     sendBareCommand(enabled ? QStringLiteral("log_on") : QStringLiteral("log_off"));
 }

@@ -176,6 +176,11 @@ private:
     SerialService *m_serial = nullptr;
     CyphalService *m_cyphal = nullptr;
     DeviceLink *m_link = nullptr;
+    /// The DeviceLink signal connections made by setLink(), so that only those are
+    /// dropped when the link changes (the services' own signals stay connected).
+    QList<QMetaObject::Connection> m_linkConnections;
+    /// closeEvent() is waiting for the link to shut down before the window goes.
+    bool m_closePending = false;
     FirmwareDownloader *m_downloader = nullptr;
     FirmwareFlasher *m_flasher = nullptr;
 

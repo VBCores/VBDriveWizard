@@ -139,7 +139,7 @@
          <item>
           <widget class="QTabWidget" name="ConfigTabWidget">
            <property name="currentIndex">
-            <number>3</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="BasicTab">
             <attribute name="title">
@@ -520,45 +520,8 @@
              <string>Advanced</string>
             </attribute>
             <layout class="QGridLayout" name="gridLayout_15">
-             <item row="0" column="0">
-              <widget class="QLabel" name="GearRatioLbl">
-               <property name="text">
-                <string>Gear Ratio</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QSpinBox" name="GearRatioSpinBox">
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="maximum">
-                <number>1000</number>
-               </property>
-               <property name="value">
-                <number>1</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="EncoderTypeLbl">
-               <property name="text">
-                <string>Encoder</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="4">
-              <widget class="RestoreLabel" name="RestoreEncoderTypeLbl"/>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="TorqueConstLbl">
-               <property name="text">
-                <string>Torque const</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="2">
-              <widget class="QDoubleSpinBox" name="TorqueConstDoubleSpinBox">
+             <item row="9" column="2">
+              <widget class="QDoubleSpinBox" name="FilterG1DoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
@@ -566,22 +529,31 @@
                 <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>1000.000000000000000</double>
+                <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
                 <double>0.001000000000000</double>
                </property>
               </widget>
              </item>
-             <item row="2" column="4">
-              <widget class="RestoreLabel" name="RestoreTorqueConstLbl"/>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="CurrentKpLbl">
-               <property name="text">
-                <string>Current Kp</string>
+             <item row="10" column="2">
+              <widget class="QDoubleSpinBox" name="FilterG2DoubleSpinBox">
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>100000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.001000000000000</double>
                </property>
               </widget>
+             </item>
+             <item row="12" column="4">
+              <widget class="RestoreLabel" name="RestoreCurrentLpfLbl"/>
              </item>
              <item row="3" column="2">
               <widget class="QDoubleSpinBox" name="CurrentKpDoubleSpinBox">
@@ -599,69 +571,23 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="4">
-              <widget class="RestoreLabel" name="RestoreCurrentKpLbl"/>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="CurrentKiLbl">
-               <property name="text">
-                <string>Current Ki</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="2">
-              <widget class="QDoubleSpinBox" name="CurrentKiDoubleSpinBox">
-               <property name="decimals">
-                <number>6</number>
-               </property>
-               <property name="minimum">
-                <double>0.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>100000.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.001000000000000</double>
-               </property>
-              </widget>
-             </item>
              <item row="4" column="4">
               <widget class="RestoreLabel" name="RestoreCurrentKiLbl"/>
              </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="PosOffsetLbl">
+             <item row="0" column="4">
+              <widget class="RestoreLabel" name="RestoreGearRatioLbl"/>
+             </item>
+             <item row="12" column="0">
+              <widget class="QLabel" name="CurrentLpfLbl">
                <property name="text">
-                <string>Position Offset</string>
+                <string>Current LPF Gain</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="2">
-              <widget class="QDoubleSpinBox" name="PosOffsetDoubleSpinBox">
-               <property name="decimals">
-                <number>4</number>
-               </property>
-               <property name="minimum">
-                <double>-100000.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>100000.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.010000000000000</double>
-               </property>
-              </widget>
+             <item row="13" column="4">
+              <widget class="RestoreLabel" name="RestoreCurrentKdLbl"/>
              </item>
-             <item row="5" column="4">
-              <widget class="RestoreLabel" name="RestorePosOffsetLbl"/>
-             </item>
-             <item row="6" column="0" colspan="2">
-              <widget class="QLabel" name="FilterALbl">
-               <property name="text">
-                <string>Main Filter Param A</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="2">
+             <item row="8" column="2">
               <widget class="QDoubleSpinBox" name="FilterADoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
@@ -677,154 +603,38 @@
                </property>
               </widget>
              </item>
-             <item row="6" column="4">
-              <widget class="RestoreLabel" name="RestoreFilterALbl"/>
+             <item row="1" column="4">
+              <widget class="RestoreLabel" name="RestoreEncoderTypeLbl"/>
              </item>
-             <item row="7" column="0">
-              <widget class="QLabel" name="FilterG1Lbl">
+             <item row="0" column="0">
+              <widget class="QLabel" name="GearRatioLbl">
                <property name="text">
-                <string>Filter Gain 1</string>
+                <string>Gear Ratio</string>
                </property>
               </widget>
              </item>
              <item row="7" column="2">
-              <widget class="QDoubleSpinBox" name="FilterG1DoubleSpinBox">
+              <widget class="QDoubleSpinBox" name="PosOffsetDoubleSpinBox">
                <property name="decimals">
-                <number>6</number>
+                <number>4</number>
                </property>
                <property name="minimum">
-                <double>0.000000000000000</double>
+                <double>-100000.000000000000000</double>
                </property>
                <property name="maximum">
                 <double>100000.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.001000000000000</double>
+                <double>0.010000000000000</double>
                </property>
               </widget>
              </item>
-             <item row="7" column="4">
-              <widget class="RestoreLabel" name="RestoreFilterG1Lbl"/>
-             </item>
-             <item row="8" column="0">
-              <widget class="QLabel" name="FilterG2Lbl">
+             <item row="4" column="0">
+              <widget class="QLabel" name="CurrentKiLbl">
                <property name="text">
-                <string>Filter Gain 2</string>
+                <string>Current Ki</string>
                </property>
               </widget>
-             </item>
-             <item row="8" column="2">
-              <widget class="QDoubleSpinBox" name="FilterG2DoubleSpinBox">
-               <property name="decimals">
-                <number>6</number>
-               </property>
-               <property name="minimum">
-                <double>0.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>100000.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.001000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="8" column="4">
-              <widget class="RestoreLabel" name="RestoreFilterG2Lbl"/>
-             </item>
-             <item row="9" column="0">
-              <widget class="QLabel" name="FilterG3Lbl">
-               <property name="text">
-                <string>Filter Gain 3</string>
-               </property>
-              </widget>
-             </item>
-             <item row="9" column="2">
-              <widget class="QDoubleSpinBox" name="FilterG3DoubleSpinBox">
-               <property name="decimals">
-                <number>6</number>
-               </property>
-               <property name="minimum">
-                <double>0.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>100000.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.001000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="9" column="4">
-              <widget class="RestoreLabel" name="RestoreFilterG3Lbl"/>
-             </item>
-             <item row="10" column="0">
-              <widget class="QLabel" name="CurrentLpfLbl">
-               <property name="text">
-                <string>Current LPF Gain</string>
-               </property>
-              </widget>
-             </item>
-             <item row="10" column="2">
-              <widget class="QDoubleSpinBox" name="CurrentLpfDoubleSpinBox">
-               <property name="decimals">
-                <number>6</number>
-               </property>
-               <property name="minimum">
-                <double>0.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>100000.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.001000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="10" column="4">
-              <widget class="RestoreLabel" name="RestoreCurrentLpfLbl"/>
-             </item>
-             <item row="12" column="1">
-              <spacer name="verticalSpacer_11">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>68</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="12" column="2">
-              <spacer name="verticalSpacer_12">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>68</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="12" column="4">
-              <spacer name="verticalSpacer_17">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>17</width>
-                 <height>106</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="0" column="4">
-              <widget class="RestoreLabel" name="RestoreGearRatioLbl"/>
              </item>
              <item row="1" column="2">
               <widget class="QComboBox" name="EncoderTypeComboBox">
@@ -845,15 +655,128 @@
                </item>
               </widget>
              </item>
-             <item row="11" column="0">
-              <widget class="QLabel" name="CurrentKdLbl">
+             <item row="8" column="0" colspan="2">
+              <widget class="QLabel" name="FilterALbl">
                <property name="text">
-                <string>Current Kd</string>
+                <string>Main Filter Param A</string>
+               </property>
+              </widget>
+             </item>
+             <item row="14" column="2">
+              <spacer name="verticalSpacer_12">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>68</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="14" column="4">
+              <spacer name="verticalSpacer_17">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>17</width>
+                 <height>106</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="14" column="1">
+              <spacer name="verticalSpacer_11">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>68</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="0" column="2">
+              <widget class="QSpinBox" name="GearRatioSpinBox">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="value">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="10" column="0">
+              <widget class="QLabel" name="FilterG2Lbl">
+               <property name="text">
+                <string>Filter Gain 2</string>
                </property>
               </widget>
              </item>
              <item row="11" column="2">
-              <widget class="QDoubleSpinBox" name="CurrentKdDoubleSpinBox">
+              <widget class="QDoubleSpinBox" name="FilterG3DoubleSpinBox">
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>100000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.001000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="EncoderTypeLbl">
+               <property name="text">
+                <string>Encoder</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="4">
+              <widget class="RestoreLabel" name="RestoreCurrentKpLbl"/>
+             </item>
+             <item row="7" column="4">
+              <widget class="RestoreLabel" name="RestorePosOffsetLbl"/>
+             </item>
+             <item row="2" column="4">
+              <widget class="RestoreLabel" name="RestoreTorqueConstLbl"/>
+             </item>
+             <item row="8" column="4">
+              <widget class="RestoreLabel" name="RestoreFilterALbl"/>
+             </item>
+             <item row="9" column="4">
+              <widget class="RestoreLabel" name="RestoreFilterG1Lbl"/>
+             </item>
+             <item row="2" column="2">
+              <widget class="QDoubleSpinBox" name="TorqueConstDoubleSpinBox">
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>1000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.001000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="12" column="2">
+              <widget class="QDoubleSpinBox" name="CurrentLpfDoubleSpinBox">
                <property name="decimals">
                 <number>6</number>
                </property>
@@ -869,7 +792,84 @@
               </widget>
              </item>
              <item row="11" column="4">
-              <widget class="RestoreLabel" name="RestoreCurrentKdLbl"/>
+              <widget class="RestoreLabel" name="RestoreFilterG3Lbl"/>
+             </item>
+             <item row="6" column="2">
+              <widget class="QDoubleSpinBox" name="CurrentKdDoubleSpinBox">
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>100000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.001000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QDoubleSpinBox" name="CurrentKiDoubleSpinBox">
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>100000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.001000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="0">
+              <widget class="QLabel" name="FilterG1Lbl">
+               <property name="text">
+                <string>Filter Gain 1</string>
+               </property>
+              </widget>
+             </item>
+             <item row="10" column="4">
+              <widget class="RestoreLabel" name="RestoreFilterG2Lbl"/>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="TorqueConstLbl">
+               <property name="text">
+                <string>Torque const</string>
+               </property>
+              </widget>
+             </item>
+             <item row="11" column="0">
+              <widget class="QLabel" name="FilterG3Lbl">
+               <property name="text">
+                <string>Filter Gain 3</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0">
+              <widget class="QLabel" name="PosOffsetLbl">
+               <property name="text">
+                <string>Position Offset</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="CurrentKpLbl">
+               <property name="text">
+                <string>Current Kp</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="CurrentKdLbl">
+               <property name="text">
+                <string>Current Kd</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -1563,7 +1563,7 @@
                    <item>
                     <widget class="QLabel" name="ServoUserTargetLbl">
                      <property name="text">
-                      <string>Target position:</string>
+                      <string>Target pos:</string>
                      </property>
                     </widget>
                    </item>

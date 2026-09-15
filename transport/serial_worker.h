@@ -5,6 +5,7 @@
 
 #include <QByteArray>
 #include <QObject>
+#include <QQueue>
 #include <QTimer>
 
 QT_BEGIN_NAMESPACE
@@ -53,10 +54,20 @@ private:
     QSerialPort *m_serial = nullptr;
     QByteArray m_readBuffer;
     TelemetryBatch m_pendingTelemetry;
-    QTimer m_batchTimer;
-    int m_pendingWriteId = -1;
-    qint64 m_pendingWriteBytes = 0;
-    qint64 m_writtenBytes = 0;
+    /// A child, not a member: the worker is moved to its thread after construction
+    /// and only children follow, and a timer must be started from its own thread.
+    QTimer *m_batchTimer = nullptr;
+
+    /// Writes whose bytes have not all been confirmed by bytesWritten() yet, oldest
+    /// first. Several can be in flight at once because immediate trajectory writes
+    /// (id -1) may be issued while a queued command is still being pushed out.
+    struct PendingWrite
+    {
+        int id;
+        qint64 size;
+    };
+    QQueue<PendingWrite> m_pendingWrites;
+    qint64 m_unconfirmedBytes = 0;  ///< bytes of the oldest pending write already acked
 };
 
 #endif // TRANSPORT_SERIAL_WORKER_H

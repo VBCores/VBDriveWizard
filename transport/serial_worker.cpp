@@ -15,9 +15,10 @@ constexpr auto kTelemetryPrefix = "state:";
 
 SerialWorker::SerialWorker(QObject *parent)
     : QObject(parent)
+    , m_batchTimer(new QTimer(this))
 {
-    m_batchTimer.setInterval(40);
-    connect(&m_batchTimer, &QTimer::timeout, this, &SerialWorker::flushTelemetry);
+    m_batchTimer->setInterval(40);
+    connect(m_batchTimer, &QTimer::timeout, this, &SerialWorker::flushTelemetry);
 }
 
 SerialWorker::~SerialWorker()
@@ -55,29 +56,29 @@ void SerialWorker::openPort(const QString &portName, int baudRate)
 
     m_readBuffer.clear();
     m_pendingTelemetry.clear();
-    m_pendingWriteId = -1;
-    m_pendingWriteBytes = 0;
-    m_writtenBytes = 0;
-    m_batchTimer.start();
+    m_pendingWrites.clear();
+    m_unconfirmedBytes = 0;
+    m_batchTimer->start();
 
     emit portOpened(true, tr("Port %1 opened at %2 baud.").arg(portName).arg(baudRate));
 }
 
 void SerialWorker::closePort()
 {
-    m_batchTimer.stop();
+    m_batchTimer->stop();
     flushTelemetry();
     if (m_serial && m_serial->isOpen()) {
         m_serial->close();
         emit portClosed();
     }
     m_readBuffer.clear();
-    m_pendingWriteId = -1;
+    m_pendingWrites.clear();
+    m_unconfirmedBytes = 0;
 }
 
 void SerialWorker::setBatchIntervalMs(int intervalMs)
 {
-    m_batchTimer.setInterval(qBound(10, intervalMs, 200));
+    m_batchTimer->setInterval(qBound(10, intervalMs, 200));
 }
 
 void SerialWorker::writeLine(int commandId, const QString &text)
@@ -91,31 +92,27 @@ void SerialWorker::writeLine(int commandId, const QString &text)
     if (!bytes.endsWith('\n'))
         bytes.append('\n');
 
-    m_pendingWriteId = commandId;
-    m_pendingWriteBytes = bytes.size();
-    m_writtenBytes = 0;
-
     if (m_serial->write(bytes) != bytes.size()) {
-        m_pendingWriteId = -1;
         emit writeFinished(commandId, false, m_serial->errorString());
         return;
     }
+    m_pendingWrites.enqueue({commandId, static_cast<qint64>(bytes.size())});
     // flush() only pushes; completion is confirmed by bytesWritten().
     m_serial->flush();
 }
 
 void SerialWorker::onBytesWritten(qint64 bytes)
 {
-    if (m_pendingWriteId < 0 || bytes <= 0)
-        return;
-    m_writtenBytes += bytes;
-    if (m_writtenBytes < m_pendingWriteBytes)
-        return;  // partial write, keep waiting
-    const int id = m_pendingWriteId;
-    m_pendingWriteId = -1;
-    m_pendingWriteBytes = 0;
-    m_writtenBytes = 0;
-    emit writeFinished(id, true, QString());
+    // bytesWritten() reports totals, not per-write chunks: a single notification
+    // can cover the tail of one line and the whole of the next.
+    m_unconfirmedBytes += bytes;
+    while (!m_pendingWrites.isEmpty() && m_unconfirmedBytes >= m_pendingWrites.head().size) {
+        const PendingWrite write = m_pendingWrites.dequeue();
+        m_unconfirmedBytes -= write.size;
+        emit writeFinished(write.id, true, QString());
+    }
+    if (m_pendingWrites.isEmpty())
+        m_unconfirmedBytes = 0;
 }
 
 void SerialWorker::onReadyRead()
@@ -209,7 +206,7 @@ void SerialWorker::onErrorOccurred(int errorCode)
     if (errorCode == static_cast<int>(QSerialPort::ResourceError)) {
         if (m_serial->isOpen())
             m_serial->close();
-        m_batchTimer.stop();
+        m_batchTimer->stop();
         emit portClosed();
     }
 }

@@ -40,6 +40,7 @@
 #include <QStatusBar>
 
 #include <cmath>
+#include <utility>
 
 namespace {
 
@@ -49,6 +50,9 @@ constexpr int kStatusRefreshHz = 20;
 /// on CAN and round trips on Serial, so they are polled far slower than the labels
 /// are repainted; the labels simply show the most recent values.
 constexpr int kRegisterPollHz = 5;
+/// Longest the window waits for the link to shut down on close before giving up;
+/// the Serial drain itself is bounded at 2 s by the service.
+constexpr int kCloseFallbackMs = 3000;
 
 /// Registers behind the STATUS panel and the non-telemetry plot signals.
 const QStringList &statusRegisters()
@@ -63,6 +67,19 @@ const QStringList &statusRegisters()
         QString::fromLatin1(registers::kEncoderShaft),
     };
     return names;
+}
+
+/// True once every CONFIGURATION register of the drive has been read, i.e. when a
+/// DeviceParamList snapshot can be frozen without holes. A snapshot taken earlier
+/// would flag everything read afterwards as a pending edit.
+bool configGroupComplete(const DeviceModel *device)
+{
+    const RegisterMap &known = device->deviceValues();
+    for (const QString &name : RegisterCatalog::configGroupNames()) {
+        if (!known.contains(name))
+            return false;
+    }
+    return true;
 }
 
 /// ang_dir is +1 or -1; the combo shows it as a rotation direction.
@@ -330,6 +347,13 @@ void MainWindow::retranslateDynamicTexts()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    if (m_closePending) {
+        // Second pass, issued by handleDisconnected() once the link is down.
+        saveSettings();
+        QMainWindow::closeEvent(event);
+        return;
+    }
+
     if (m_devices->anyUnsavedChanges()) {
         const auto answer = QMessageBox::question(
                 this, tr("Unsaved changes"),
@@ -345,10 +369,31 @@ void MainWindow::closeEvent(QCloseEvent *event)
     m_control->stopAll();
     if (m_link && m_link->isConnected()) {
         // Leave every drive disabled rather than spinning after the window closes.
+        // The link closes asynchronously (Serial drains `is_on:0` and `log_off`
+        // first), so the window waits for linkClosed and closes itself again then.
+        // Tearing the service down from the destructor instead would cut the
+        // commands off and could leave the drive enabled and streaming.
+        m_statusTimer.stop();
+        m_pollTimer.stop();
         for (DeviceModel *device : m_devices->devices()) {
             m_link->writeRegisters(device->nodeId(),
                                    {{QString::fromLatin1(registers::kIsOn),
                                      RegisterValue::fromBool(false)}});
+        }
+        m_link->closeLink();
+        if (m_link) {
+            // Still up: the close is asynchronous. The window stays (a hidden window
+            // cannot be close()d again) but takes no more input.
+            m_closePending = true;
+            setEnabled(false);
+            setStatusMessage(tr("Disconnecting..."));
+            // Safety net: never let an unresponsive link keep the window alive.
+            QTimer::singleShot(kCloseFallbackMs, this, [this] {
+                if (m_closePending)
+                    handleDisconnected();
+            });
+            event->ignore();
+            return;
         }
     }
     saveSettings();
@@ -693,8 +738,12 @@ void MainWindow::setLink(DeviceLink *link)
     if (m_link == link)
         return;
 
-    if (m_link)
-        m_link->disconnect(this);
+    // Only the DeviceLink connections go: `m_link->disconnect(this)` would also
+    // drop the services' own signals (connectionResult, deviceReappeared) that
+    // setupServices() wired once, and the next connect would never be reported.
+    for (const QMetaObject::Connection &connection : std::as_const(m_linkConnections))
+        disconnect(connection);
+    m_linkConnections.clear();
 
     m_link = link;
     m_control->setLink(link);
@@ -702,26 +751,36 @@ void MainWindow::setLink(DeviceLink *link)
     if (!m_link)
         return;
 
-    connect(m_link, &DeviceLink::registerRead, this, &MainWindow::onRegisterRead);
-    connect(m_link, &DeviceLink::registerWritten, this, &MainWindow::onRegisterWritten);
-    connect(m_link, &DeviceLink::writeBatchFinished, this, &MainWindow::onWriteBatchFinished);
-    connect(m_link, &DeviceLink::telemetryReceived, this, &MainWindow::onTelemetry);
-    connect(m_link, &DeviceLink::deviceDiscovered, this, &MainWindow::onDeviceDiscovered);
-    connect(m_link, &DeviceLink::deviceLost, this, &MainWindow::onDeviceLost);
-    connect(m_link, &DeviceLink::linkError, this, &MainWindow::onLinkError);
-    connect(m_link, &DeviceLink::logLine, this,
-            [this](const QString &line) { m_plot->appendLogLine(line); });
-    connect(m_link, &DeviceLink::linkClosed, this, &MainWindow::handleDisconnected);
+    m_linkConnections
+            << connect(m_link, &DeviceLink::registerRead, this, &MainWindow::onRegisterRead)
+            << connect(m_link, &DeviceLink::registerWritten, this,
+                       &MainWindow::onRegisterWritten)
+            << connect(m_link, &DeviceLink::writeBatchFinished, this,
+                       &MainWindow::onWriteBatchFinished)
+            << connect(m_link, &DeviceLink::telemetryReceived, this, &MainWindow::onTelemetry)
+            << connect(m_link, &DeviceLink::deviceDiscovered, this,
+                       &MainWindow::onDeviceDiscovered)
+            << connect(m_link, &DeviceLink::deviceLost, this, &MainWindow::onDeviceLost)
+            << connect(m_link, &DeviceLink::linkError, this, &MainWindow::onLinkError)
+            << connect(m_link, &DeviceLink::logLine, this,
+                       [this](const QString &line) { m_plot->appendLogLine(line); })
+            << connect(m_link, &DeviceLink::linkClosed, this, &MainWindow::handleDisconnected);
 }
 
 void MainWindow::onSerialConnectClicked()
 {
     if (m_link && m_link->kind() == LinkKind::Serial && m_link->isConnected()) {
-        // Explicit disconnect: leave the drive disabled first.
+        // Explicit disconnect: leave the drive disabled first. The service delivers
+        // the write and its own `log_off` before closing, and linkClosed() then
+        // brings the UI back to the disconnected state.
         m_control->stopAll();
+        m_statusTimer.stop();
+        m_pollTimer.stop();
         m_link->writeRegisters(SerialService::kSerialNodeId,
                                {{QString::fromLatin1(registers::kIsOn),
                                  RegisterValue::fromBool(false)}});
+        ui->SerialConnectBtn->setEnabled(false);
+        setStatusMessage(tr("Disconnecting..."));
         m_serial->closeLink();
         return;
     }
@@ -741,6 +800,8 @@ void MainWindow::onCanConnectClicked()
 {
     if (m_link && m_link->kind() == LinkKind::Can && m_link->isConnected()) {
         m_control->stopAll();
+        m_statusTimer.stop();
+        m_pollTimer.stop();
         for (DeviceModel *device : m_devices->devices()) {
             m_link->writeRegisters(device->nodeId(),
                                    {{QString::fromLatin1(registers::kIsOn),
@@ -766,6 +827,9 @@ void MainWindow::onCanConnectClicked()
 
 void MainWindow::handleConnected(LinkKind kind)
 {
+    if (!m_link || !m_link->isConnected())
+        return;  // closed again before the handshake was reported
+
     // Every discovered drive is enabled and fully read, which also fills the
     // DeviceParamList snapshot the Restore icons compare against.
     const QStringList configNames = RegisterCatalog::configGroupNames();
@@ -801,6 +865,9 @@ void MainWindow::handleDisconnected()
     m_connectionStatusLabel->setText(tr("Not connected"));
     setStatusMessage(tr("Disconnected."));
     updateUiState();
+
+    if (m_closePending)
+        close();  // closeEvent() deferred the close until the link was down
 }
 
 void MainWindow::updateUiState()
@@ -962,8 +1029,9 @@ void MainWindow::onDeviceSelected(DeviceModel *device)
     }
 
     // Selecting a drive re-freezes the DeviceParamList, unless edits are already
-    // pending on it - those must survive the round trip.
-    if (!device->hasSnapshot())
+    // pending on it - those must survive the round trip. A drive selected right at
+    // discovery has nothing read yet; its snapshot is taken by onRegisterRead().
+    if (!device->hasSnapshot() && configGroupComplete(device))
         device->captureSnapshot();
 
     refreshAllEditors();
@@ -1188,9 +1256,11 @@ void MainWindow::onRegisterRead(quint8 nodeId, const QString &name, const Regist
     DeviceModel *device = m_devices->ensureDevice(nodeId);
     device->setDeviceValue(name, value);
 
-    // The first full read of a drive establishes its DeviceParamList.
-    if (!device->hasSnapshot()
-        && device->deviceValues().size() >= RegisterCatalog::configGroupNames().size()) {
+    // The first full read of a drive establishes its DeviceParamList. Counting
+    // values is not enough: identity, profile and status registers arrive
+    // interleaved with the CONFIGURATION ones, and anything read after the
+    // snapshot but missing from it would show up as a pending edit.
+    if (!device->hasSnapshot() && configGroupComplete(device)) {
         device->captureSnapshot();
         if (device == m_devices->selected()) {
             refreshAllEditors();
@@ -1203,6 +1273,11 @@ void MainWindow::onRegisterRead(quint8 nodeId, const QString &name, const Regist
 
     if (name == QLatin1String(registers::kFirmwareRev))
         ui->CurFirmwareRevLabel->setText(value.toString());
+
+    // Only CONFIGURATION registers have editors and an edit state; the status
+    // registers polled in the background are display-only.
+    if (!bindingFor(name))
+        return;
 
     // Only adopt the value into the editor when the user has not edited that field.
     if (!device->isModified(name)) {
@@ -1232,6 +1307,11 @@ void MainWindow::onWriteBatchFinished(quint8 nodeId, bool ok, const QString &err
         // Restore icons deliberately stay visible after a successful write: the spec
         // requires the previous values to remain recoverable.
         setStatusMessage(tr("Registers written."));
+        return;
+    }
+    if (m_closePending || !m_link) {
+        // Nothing to fix any more; a modal box here would only get in the way.
+        setStatusMessage(error);
         return;
     }
     showError(tr("Some registers were not written"), error);
