@@ -5,6 +5,7 @@
 #include <QString>
 #include <QVector>
 
+#include <chrono>
 #include <limits>
 
 /// Which transport the application is currently talking to the drive over.
@@ -73,11 +74,23 @@ enum class TransientForm
 /// `state:` log line carries. All values are in drive-native units (rad, rad/s, N*m).
 struct TelemetrySample
 {
+    /// Microseconds: the drive's own clock on CAN, the host wall clock otherwise.
+    /// Only differences between samples of one batch are relied upon.
     qint64 t_us = 0;
     double position = 0.0;
     double velocity = 0.0;
     double torque = 0.0;
 };
+
+/// Host wall clock in microseconds, for samples the drive does not timestamp itself.
+/// Millisecond resolution is not enough: two lines parsed in the same millisecond
+/// would collapse onto one point of the plot.
+inline qint64 hostTimeUs()
+{
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+                   std::chrono::system_clock::now().time_since_epoch())
+            .count();
+}
 
 using TelemetryBatch = QVector<TelemetrySample>;
 

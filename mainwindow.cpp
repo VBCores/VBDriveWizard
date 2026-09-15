@@ -376,7 +376,7 @@ void MainWindow::retranslateDynamicTexts()
     if (connected && m_link->kind() == LinkKind::Can)
         ui->CanConnectBtn->setText(tr("Disconnect"));
 
-    ui->PausePltBtn->setText(m_plot->isLiveMode() ? tr("Pause") : tr("Resume"));
+    setPlotLive(m_plot->isLiveMode());  // refreshes the tool tip
     updateServoTargetLabel();
 
     if (!connected)
@@ -921,6 +921,7 @@ void MainWindow::handleConnected(LinkKind kind)
     m_pollTimer.start();
     m_connectionStatusLabel->setText(kind == LinkKind::Serial ? tr("Serial connected")
                                                               : tr("CAN connected"));
+    setPlotLive(true);
     updateUiState();
 }
 
@@ -931,14 +932,29 @@ void MainWindow::handleDisconnected()
     m_pollTimer.stop();
     m_devices->clear();
     m_awaitingReconnect.clear();
+    m_writesInFlight.clear();
     setLink(nullptr);
     m_connectionStatusLabel->setText(tr("Not connected"));
     setStatusMessage(tr("Disconnected."));
+    // Nothing feeds the plot any more; freeze it so the last picture can be
+    // inspected. handleConnected() sets it live again.
+    setPlotLive(false);
     updateUiState();
 
     if (m_closePending) {
         close();  // closeEvent() deferred the close until the link was down
         return;
+    }
+    if (m_emergencyStopPending) {
+        // Deferred so the modal dialog does not sit inside the link's close path
+        // (Serial reports the close twice: deviceLost, then linkClosed).
+        m_emergencyStopPending = false;
+        QTimer::singleShot(0, this, [this] {
+            QMessageBox::information(
+                    this, tr("Emergency stop"),
+                    tr("The drive has been stopped by the emergency stop. To resume, "
+                       "restart the drive and connect to it again."));
+        });
     }
     if (m_reconnectAfterFlash) {
         // The close that followed a flash is done; now the reopen. Deferred: the
@@ -992,7 +1008,9 @@ void MainWindow::updateUiState()
     // Always available, connection or not.
     ui->SavePltCsvBtn->setEnabled(true);
     ui->SavePltPngBtn->setEnabled(true);
-    ui->PausePltBtn->setEnabled(true);
+    // Disconnecting pauses the plot and nothing can resume it until a drive is
+    // back, so the button only makes sense while connected.
+    ui->PausePltBtn->setEnabled(connected);
     ui->SignalComboBox->setEnabled(true);
     ui->UnitsComboBox->setEnabled(true);
     ui->LanguageComboBox->setEnabled(true);
@@ -1091,11 +1109,9 @@ bool MainWindow::confirmLeavingDevice(DeviceModel *device)
     if (answer == QMessageBox::Cancel)
         return false;
     if (answer == QMessageBox::Yes) {
-        RegisterWrites writes;
-        for (const QString &name : device->modifiedNames())
-            writes.append({name, device->editValue(name)});
+        const RegisterWrites writes = pendingWrites(device);
         if (m_link && !writes.isEmpty())
-            m_link->writeRegisters(device->nodeId(), writes);
+            writeConfigToDrive(device, writes);
     }
     return true;
 }
@@ -1164,11 +1180,7 @@ void MainWindow::onWriteRegisters()
     if (!m_link || !device)
         return;
 
-    RegisterWrites writes;
-    for (const QString &name : device->modifiedNames()) {
-        if (RegisterCatalog::isWritable(name))
-            writes.append({name, device->editValue(name)});
-    }
+    const RegisterWrites writes = pendingWrites(device);
     if (writes.isEmpty()) {
         setStatusMessage(tr("No changes to write."));
         return;
@@ -1176,8 +1188,28 @@ void MainWindow::onWriteRegisters()
     writeConfigToDrive(device, writes);
 }
 
+RegisterWrites MainWindow::pendingWrites(const DeviceModel *device) const
+{
+    // Everything the editors show that the drive does not have yet. Not the
+    // modified (Restore-icon) set: that one is relative to the snapshot, which
+    // stays put across Writes, so a value loaded from a profile that happens to
+    // equal the snapshot would never be sent although the drive runs with
+    // something else.
+    RegisterWrites writes;
+    for (const QString &name : device->pendingWriteNames()) {
+        if (RegisterCatalog::isWritable(name))
+            writes.append({name, device->editValue(name)});
+    }
+    return writes;
+}
+
 void MainWindow::writeConfigToDrive(DeviceModel *device, const RegisterWrites &writes)
 {
+    RegisterMap &inFlight = m_writesInFlight[device->nodeId()];
+    inFlight.clear();
+    for (const RegisterWrite &write : writes)
+        inFlight.insert(write.first, write.second);
+
     ui->WriteRegBtn->setEnabled(false);
     ui->SetOriginBtn->setEnabled(false);
     if (m_link->kind() == LinkKind::Serial) {
@@ -1391,22 +1423,29 @@ void MainWindow::onRegisterRead(quint8 nodeId, const QString &name, const Regist
 void MainWindow::onRegisterWritten(quint8 nodeId, const QString &name, bool ok,
                                    const QString &error)
 {
-    Q_UNUSED(nodeId);
     if (ok)
         return;
     // The value stays editable and its Restore icon stays visible, so the user can
-    // still get the old value back.
+    // still get the old value back. It also stays pending, so the next Write
+    // sends it again.
+    m_writesInFlight[nodeId].remove(name);
     setStatusMessage(tr("Could not write '%1': %2").arg(name, error));
 }
 
 void MainWindow::onWriteBatchFinished(quint8 nodeId, bool ok, const QString &error)
 {
-    Q_UNUSED(nodeId);
+    const RegisterMap written = m_writesInFlight.take(nodeId);
     ui->WriteRegBtn->setEnabled(true);
     ui->SetOriginBtn->setEnabled(true);
     if (ok) {
+        // What was acknowledged is now what the drive runs with, so it is no
+        // longer pending; on Serial the re-read after the reboot confirms it.
         // Restore icons deliberately stay visible after a successful write: the spec
         // requires the previous values to remain recoverable.
+        if (DeviceModel *device = m_devices->device(nodeId)) {
+            for (auto it = written.constBegin(); it != written.constEnd(); ++it)
+                device->setDeviceValue(it.key(), it.value());
+        }
         setStatusMessage(tr("Registers written."));
         return;
     }
@@ -2015,12 +2054,24 @@ void MainWindow::onEmergencyStop()
     m_control->stopAll();
     if (!m_link)
         return;
+    m_statusTimer.stop();
+    m_pollTimer.stop();
     // Every drive, not only the selected one.
     for (DeviceModel *device : m_devices->devices()) {
         m_link->writeRegisters(device->nodeId(), {{QString::fromLatin1(registers::kIsOn),
                                                    RegisterValue::fromBool(false)}});
     }
     setStatusMessage(tr("Emergency stop: all drives disabled."), 10000);
+    if (!m_link->isConnected())
+        return;
+    // The link goes down with the drives: the session is over until the drive has
+    // been power-cycled and connected to again. handleDisconnected() tells the
+    // user so once the close (asynchronous on Serial) has finished.
+    m_emergencyStopPending = true;
+    ui->EmergStopPushButton->setEnabled(false);
+    ui->SerialConnectBtn->setEnabled(false);
+    ui->CanConnectBtn->setEnabled(false);
+    m_link->closeLink();
 }
 
 void MainWindow::onSetpointProduced(quint8 nodeId, const TrajectoryOutput &output)
@@ -2121,9 +2172,16 @@ void MainWindow::convertControlEditors(AngleUnit from, AngleUnit to)
 
 void MainWindow::onPausePlot()
 {
-    const bool live = !m_plot->isLiveMode();
+    setPlotLive(!m_plot->isLiveMode());
+}
+
+void MainWindow::setPlotLive(bool live)
+{
     m_plot->setLiveMode(live);
-    ui->PausePltBtn->setText(live ? tr("Pause") : tr("Resume"));
+    // The button shows the action it will take: pause a live plot, play a paused one.
+    ui->PausePltBtn->setIcon(QIcon(live ? QStringLiteral(":/icons/pause_white.svg")
+                                        : QStringLiteral(":/icons/play_white.svg")));
+    ui->PausePltBtn->setToolTip(live ? tr("Pause the plot") : tr("Resume the plot"));
 }
 
 void MainWindow::onSavePlotCsv()

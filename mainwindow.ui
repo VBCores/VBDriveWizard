@@ -45,8 +45,27 @@
          </item>
          <item row="0" column="3">
           <widget class="QPushButton" name="SerialRefreshBtn">
-           <property name="text">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
             <string>Refresh</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="icons.qrc">
+             <normaloff>:/icons/refresh_white.svg</normaloff>:/icons/refresh_white.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>16</width>
+             <height>16</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -75,8 +94,27 @@
            <property name="enabled">
             <bool>false</bool>
            </property>
-           <property name="text">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
             <string>Refresh</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="icons.qrc">
+             <normaloff>:/icons/refresh_white.svg</normaloff>:/icons/refresh_white.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>16</width>
+             <height>16</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -98,7 +136,7 @@
              </property>
              <property name="icon">
               <iconset resource="icons.qrc">
-               <normaloff>:/icons/refresh.svg</normaloff>:/icons/refresh.svg</iconset>
+               <normaloff>:/icons/refresh_blue.svg</normaloff>:/icons/refresh_blue.svg</iconset>
              </property>
             </widget>
            </item>
@@ -145,7 +183,7 @@
          <item>
           <widget class="QTabWidget" name="ConfigTabWidget">
            <property name="currentIndex">
-            <number>3</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="BasicTab">
             <attribute name="title">
@@ -1166,8 +1204,21 @@
          </item>
          <item>
           <widget class="QPushButton" name="PreferencesBtn">
-           <property name="text">
+           <property name="toolTip">
             <string>Preferences</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="icons.qrc">
+             <normaloff>:/icons/settings_white.svg</normaloff>:/icons/settings_white.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>16</width>
+             <height>16</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -1224,8 +1275,21 @@
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QPushButton" name="PausePltBtn">
+           <property name="whatsThis">
+            <string>Play/Pause Plot Data</string>
+           </property>
            <property name="text">
-            <string>Pause</string>
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="icons.qrc">
+             <normaloff>:/icons/pause_white.svg</normaloff>:/icons/pause_white.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
            </property>
           </widget>
          </item>

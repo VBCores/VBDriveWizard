@@ -1402,6 +1402,26 @@ Start calibration?</source>
         <translation>急停：已关闭所有驱动器。</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="0"/>
+        <source>Pause the plot</source>
+        <translation>暂停绘图</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="0"/>
+        <source>Resume the plot</source>
+        <translation>继续绘图</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="0"/>
+        <source>Emergency stop</source>
+        <translation>急停</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="0"/>
+        <source>The drive has been stopped by the emergency stop. To resume, restart the drive and connect to it again.</source>
+        <translation>驱动器已被急停。要恢复工作，请重启驱动器并重新连接。</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="2042"/>
         <source>Stop</source>
         <translation>停止</translation>

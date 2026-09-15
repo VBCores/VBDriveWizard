@@ -74,7 +74,9 @@ private:
     };
 
     void configureForSignal();
-    void push(double primary, bool hasSecondary, double secondary);
+    /// Seconds on the plot clock, the key for anything sampled right now.
+    double nowKey() const;
+    void push(double key, double primary, bool hasSecondary, double secondary);
     /// Multiplies every buffered and plotted value, and the value axis, by `factor`.
     void rescaleValues(double factor);
     double displayScale() const;
@@ -105,6 +107,10 @@ private:
     bool m_haveLastKey = false;
     int m_ticksSinceRescale = 0;
     int m_rescaleIntervalTicks = 15;
+
+    /// Plot-clock seconds minus sample-clock seconds; see appendTelemetry().
+    double m_telemetryOffset = 0.0;
+    bool m_haveTelemetryOffset = false;
 
     /// Latest set-point, held between telemetry samples so the two traces share keys.
     double m_lastSetpoint = 0.0;

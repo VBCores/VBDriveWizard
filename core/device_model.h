@@ -17,7 +17,8 @@
 ///                     selected, and deliberately *not* refreshed by Read;
 ///  * `editState`    - what the UI currently shows. A Restore icon appears wherever
 ///                     editState differs from snapshot, and survives both Write and a
-///                     temporary loss of the drive.
+///                     temporary loss of the drive. Write, on the other hand, sends
+///                     wherever editState differs from deviceValues.
 class DeviceModel : public QObject
 {
     Q_OBJECT
@@ -60,6 +61,15 @@ public:
     bool isModified(const QString &name) const;
     /// Names of every register whose edit state diverges from the snapshot.
     QStringList modifiedNames() const;
+
+    /// True when the editor holds something other than what the drive last reported,
+    /// i.e. Write has to send it. This deliberately compares against the device
+    /// values and not the snapshot: after a Write the snapshot is stale, so a field
+    /// edited (or loaded from a profile) back to its snapshot value still differs
+    /// from the drive and must go out even though its Restore icon is hidden.
+    bool needsWrite(const QString &name) const;
+    /// Names of every register that needsWrite().
+    QStringList pendingWriteNames() const;
     bool hasUnsavedChanges() const;
 
     /// Reverts one register to its snapshot value. No-op without a snapshot entry.

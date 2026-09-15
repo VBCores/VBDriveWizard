@@ -1410,6 +1410,26 @@ Start calibration?</source>
         <translation>Аварийная остановка: все приводы выключены.</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="0"/>
+        <source>Pause the plot</source>
+        <translation>Приостановить график</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="0"/>
+        <source>Resume the plot</source>
+        <translation>Возобновить график</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="0"/>
+        <source>Emergency stop</source>
+        <translation>Экстренная остановка</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="0"/>
+        <source>The drive has been stopped by the emergency stop. To resume, restart the drive and connect to it again.</source>
+        <translation>Привод экстренно остановлен. Для возобновления работы перезагрузите привод и заново подключитесь к нему</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="2042"/>
         <source>Stop</source>
         <translation>Стоп</translation>

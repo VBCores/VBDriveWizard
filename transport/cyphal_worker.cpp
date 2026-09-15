@@ -13,7 +13,6 @@
 #include <voltbro/foc/Servo_1_0.hpp>
 #include <voltbro/foc/State_1_0.hpp>
 
-#include <QDateTime>
 #include <QMutexLocker>
 
 #include <cstring>
@@ -186,7 +185,7 @@ void CyphalBridge::subscribeAll()
         TelemetrySample sample;
         sample.t_us = state.timestamp.microsecond != 0
                 ? static_cast<qint64>(state.timestamp.microsecond)
-                : QDateTime::currentMSecsSinceEpoch() * 1000;
+                : hostTimeUs();
         sample.position = state.pos.radian;
         sample.velocity = state.vel.radian_per_second;
         sample.torque = state._torq.newton_meter;

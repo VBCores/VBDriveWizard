@@ -83,12 +83,31 @@ QStringList DeviceModel::modifiedNames() const
     return names;
 }
 
+bool DeviceModel::needsWrite(const QString &name) const
+{
+    const auto edited = m_editState.constFind(name);
+    if (edited == m_editState.constEnd())
+        return false;
+    const auto reported = m_deviceValues.constFind(name);
+    if (reported == m_deviceValues.constEnd())
+        return true;  // the drive never reported it: let it decide
+    return *edited != *reported;
+}
+
+QStringList DeviceModel::pendingWriteNames() const
+{
+    QStringList names;
+    for (auto it = m_editState.constBegin(); it != m_editState.constEnd(); ++it) {
+        if (needsWrite(it.key()))
+            names << it.key();
+    }
+    return names;
+}
+
 bool DeviceModel::hasUnsavedChanges() const
 {
-    if (!m_hasSnapshot)
-        return false;
     for (auto it = m_editState.constBegin(); it != m_editState.constEnd(); ++it) {
-        if (isModified(it.key()))
+        if (needsWrite(it.key()))
             return true;
     }
     return false;

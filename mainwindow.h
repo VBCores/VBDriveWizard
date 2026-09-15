@@ -114,6 +114,8 @@ private:
     // --- configuration actions ---
     void onReadRegisters();
     void onWriteRegisters();
+    /// Writable registers whose editor differs from what the drive last reported.
+    RegisterWrites pendingWrites(const DeviceModel *device) const;
     /// Sends config registers the way the Write button does: on Serial that is
     /// CONFIG -> writes -> APPLY, with the drive rebooting to take them.
     void writeConfigToDrive(DeviceModel *device, const RegisterWrites &writes);
@@ -188,6 +190,9 @@ private:
     /// Re-expresses the angular control-tab spin boxes in the new display unit.
     void convertControlEditors(AngleUnit from, AngleUnit to);
     void onPausePlot();
+    /// Live: the plot follows the drive. Paused: it keeps its picture for the user.
+    /// Disconnecting pauses it; a new connection sets it live again.
+    void setPlotLive(bool live);
     void onSavePlotCsv();
     void onSavePlotPng();
 
@@ -208,6 +213,9 @@ private:
     QList<QMetaObject::Connection> m_linkConnections;
     /// closeEvent() is waiting for the link to shut down before the window goes.
     bool m_closePending = false;
+    /// The emergency stop is closing the link; handleDisconnected() then tells the
+    /// user to power-cycle the drive and connect again.
+    bool m_emergencyStopPending = false;
     FirmwareDownloader *m_downloader = nullptr;
     FirmwareFlasher *m_flasher = nullptr;
 
@@ -239,6 +247,9 @@ private:
     QLabel *m_connectionStatusLabel = nullptr;
     /// Node whose heartbeat was lost and which the user asked to wait for.
     QHash<quint8, bool> m_awaitingReconnect;
+    /// Values of the config batch in flight per node, adopted as the drive's own
+    /// once the batch succeeds (the link reports only the name of a written register).
+    QHash<quint8, RegisterMap> m_writesInFlight;
 };
 
 #endif // MAINWINDOW_H

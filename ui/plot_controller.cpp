@@ -16,6 +16,9 @@ namespace {
 constexpr double kYAxisMargin = 1.2;
 constexpr int kExportDpi = 96;
 constexpr int kMaxLogLines = 2000;
+/// A telemetry sample delivered this much later than the offset predicts is not late:
+/// its clock has restarted, and the offset is re-estimated.
+constexpr double kTelemetryResyncS = 1.0;
 } // namespace
 
 PlotController::PlotController(QObject *parent)
@@ -284,6 +287,7 @@ void PlotController::clear()
 {
     m_pending.clear();
     m_haveLastKey = false;
+    m_haveTelemetryOffset = false;
     m_lastKey = 0.0;
     m_haveSetpoint = false;
     m_lastSetpoint = 0.0;
@@ -296,13 +300,18 @@ void PlotController::clear()
 
 // --- ingest -------------------------------------------------------------------------
 
-void PlotController::push(double primary, bool hasSecondary, double secondary)
+double PlotController::nowKey() const
+{
+    return static_cast<double>(m_clock.nsecsElapsed()) * 1e-9;
+}
+
+void PlotController::push(double key, double primary, bool hasSecondary, double secondary)
 {
     if (!m_liveMode || !m_initialized)
         return;
 
     Pending pending;
-    pending.key = static_cast<double>(m_clock.nsecsElapsed()) * 1e-9;
+    pending.key = key;
     pending.primary = primary;
     pending.hasSecondary = hasSecondary;
     pending.secondary = secondary;
@@ -314,25 +323,28 @@ void PlotController::appendTelemetry(const TelemetryBatch &samples)
 {
     if (samples.isEmpty())
         return;
-
-    double raw = 0.0;
-    switch (m_signal) {
-    case PlotSignal::Position:
-        raw = samples.last().position;
-        break;
-    case PlotSignal::Velocity:
-        raw = samples.last().velocity;
-        break;
-    case PlotSignal::Torque:
-        raw = samples.last().torque;
-        break;
-    default:
+    if (m_signal != PlotSignal::Position && m_signal != PlotSignal::Velocity
+        && m_signal != PlotSignal::Torque) {
         return;  // this signal is not fed by telemetry
     }
 
     const double scale = displayScale();
-    // A batch carries several samples; they are spread across the batch interval by
-    // the arrival clock rather than collapsed onto one key.
+    // A batch carries several samples produced over the whole batch interval, so
+    // each is keyed by its own timestamp rather than by the moment the batch landed.
+    // The sample clock (the drive's on CAN, the host's on Serial) is mapped onto the
+    // plot clock by the smallest delivery delay seen (the newest sample of a batch
+    // has the smallest one): delivery never runs ahead of sampling, so the minimum is
+    // the best estimate of the offset between the two, and with it a steady sample
+    // rate comes out as evenly spaced points. A delay that jumps far beyond that
+    // estimate means the sample clock restarted, and the offset is taken afresh so
+    // the trace simply continues from "now".
+    const double delay = nowKey() - static_cast<double>(samples.last().t_us) * 1e-6;
+    if (!m_haveTelemetryOffset || delay < m_telemetryOffset
+        || delay - m_telemetryOffset > kTelemetryResyncS) {
+        m_telemetryOffset = delay;
+        m_haveTelemetryOffset = true;
+    }
+
     for (const TelemetrySample &sample : samples) {
         double value = 0.0;
         switch (m_signal) {
@@ -348,9 +360,9 @@ void PlotController::appendTelemetry(const TelemetryBatch &samples)
         default:
             break;
         }
-        push(value * scale, m_haveSetpoint, m_lastSetpoint * scale);
+        push(static_cast<double>(sample.t_us) * 1e-6 + m_telemetryOffset, value * scale,
+             m_haveSetpoint, m_lastSetpoint * scale);
     }
-    Q_UNUSED(raw);
 }
 
 void PlotController::appendStatus(const DeviceStatus &status)
@@ -359,17 +371,18 @@ void PlotController::appendStatus(const DeviceStatus &status)
     case PlotSignal::Temperature:
         if (std::isnan(status.tempMcu))
             return;
-        push(status.tempMcu, !std::isnan(status.tempStator), status.tempStator);
+        push(nowKey(), status.tempMcu, !std::isnan(status.tempStator), status.tempStator);
         break;
     case PlotSignal::Current:
         if (std::isnan(status.busCurrent))
             return;
-        push(status.busCurrent, false, 0.0);
+        push(nowKey(), status.busCurrent, false, 0.0);
         break;
     case PlotSignal::Encoder:
         if (std::isnan(status.encoderRotor))
             return;
-        push(status.encoderRotor, !std::isnan(status.encoderShaft), status.encoderShaft);
+        push(nowKey(), status.encoderRotor, !std::isnan(status.encoderShaft),
+             status.encoderShaft);
         break;
     default:
         break;

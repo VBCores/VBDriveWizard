@@ -1,6 +1,5 @@
 #include "transport/serial_worker.h"
 
-#include <QDateTime>
 #include <QSerialPort>
 #include <QStringList>
 
@@ -179,7 +178,7 @@ bool SerialWorker::parseTelemetry(const QString &line, TelemetrySample *out) con
     if (!ok || !std::isfinite(torque))
         return false;
 
-    out->t_us = QDateTime::currentMSecsSinceEpoch() * 1000;
+    out->t_us = hostTimeUs();
     out->position = position;
     out->velocity = velocity;
     out->torque = torque;
