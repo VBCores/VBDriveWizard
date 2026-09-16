@@ -103,16 +103,22 @@ QString sliderStyle()
 /// the panels nested inside one - a border inside a border inside a border is what
 /// made the CONTROL and CONFIGURATION columns look busy. The nested titles carry the
 /// grouping on their own.
+///
+/// The padding here is the whole inset of a card: the layouts inside a QGroupBox
+/// carry no margins of their own, so this is the only gap between the frame and the
+/// first row. A nested box has no frame to inset from, only a title to clear, and
+/// the title is drawn in the margin band above the box - so that band has to be as
+/// tall as the title (roughly font size + 11 px) or the first row is drawn under it.
 QString cardStyle()
 {
     return QStringLiteral(
             "QGroupBox { border: 1px solid #E2E8F0; border-radius: 10px;"
-            " background-color: #FFFFFF; margin-top: 16px; padding: 8px 6px 6px 6px;"
+            " background-color: #FFFFFF; margin-top: 16px; padding: 8px;"
             " font-weight: 600; }"
             "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left;"
             " left: 10px; padding: 0 4px; color: #64748B; }"
             "QGroupBox QGroupBox { border: none; background-color: transparent;"
-            " margin-top: 12px; padding: 2px 0 0 0; }"
+            " margin-top: 22px; padding: 0; }"
             // Qt does not merge two rules for the same subcontrol the way CSS
             // cascades, so the nested title repeats the colour it wants.
             "QGroupBox QGroupBox::title { left: 0px; padding: 0 4px 0 0; color: #64748B; }");
@@ -287,9 +293,13 @@ void ThemeManager::applyApplicationTheme(QApplication &app, const UiSettings &se
                 " border-color: #4D535C; }"
                 "QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox { border-radius: 4px;"
                 " padding: 3px; }"
+                // As in the light theme, the card padding is the only inset the
+                // content gets, and a nested box needs a margin band tall enough
+                // for its own title.
                 "QGroupBox { border: 1px solid #51565F; border-radius: 8px;"
-                " margin-top: 10px; font-weight: 600; }"
+                " margin-top: 20px; padding: 8px; font-weight: 600; }"
                 "QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 3px; }"
+                "QGroupBox QGroupBox { border: none; margin-top: 22px; padding: 0; }"
                 "QPushButton#EmergStopPushButton { background-color: #A8232A;"
                 " border-color: #C4383F; color: #FFF1F1; font-weight: 700;"
                 " font-size: %2pt; }"
