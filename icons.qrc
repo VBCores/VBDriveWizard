@@ -9,6 +9,9 @@
         <file alias="pause_white.svg">icons/pause_white.svg</file>
         <file alias="settings_white.svg">icons/settings_white.svg</file>
         <file alias="restore.svg">icons/restore.svg</file>
+        <file alias="check_white.svg">icons/check_white.svg</file>
+        <file alias="radio_dot.svg">icons/radio_dot.svg</file>
+        <file alias="radio_dot_disabled.svg">icons/radio_dot_disabled.svg</file>
         <file alias="spin_up_dark.svg">icons/spin_up_dark.svg</file>
         <file alias="spin_down_dark.svg">icons/spin_down_dark.svg</file>
         <file alias="spin_up_dark_disabled.svg">icons/spin_up_dark_disabled.svg</file>

@@ -1119,6 +1119,10 @@ VBDrive 使用基于 CAN FD 的 Cyphal，因此需要支持 FD 的适配器。</
         <translation>继续</translation>
     </message>
     <message>
+        <source>No drives found - press refresh</source>
+        <translation>未找到设备 - 请点击刷新</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="382"/>
         <location filename="../mainwindow.cpp" line="934"/>
         <source>Not connected</source>

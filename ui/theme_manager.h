@@ -27,6 +27,10 @@ public:
     static QColor foregroundColor(const QString &theme);
     static QColor backgroundColor(const QString &theme);
     static QColor gridColor(const QString &theme);
+    /// Plot chrome: the axis lines and the text on them are separate roles, so the
+    /// axes can recede into the card while the labels stay readable.
+    static QColor axisColor(const QString &theme);
+    static QColor axisLabelColor(const QString &theme);
     /// Series colours for the plot: measured value, then set-point.
     static QColor measuredColor(const QString &theme);
     static QColor setpointColor(const QString &theme);

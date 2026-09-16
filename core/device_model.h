@@ -35,6 +35,14 @@ public:
     /// Model with the gear ratio appended, e.g. "M4310R36" - what DeviceList shows.
     QString displayName() const;
 
+    /// The CAN node id the drive reports in its `node_id` register - what the ID
+    /// column of DeviceList shows - or -1 while that register has not been read yet.
+    /// This is not the same as nodeId(): over Serial the transport addresses the
+    /// single drive as 0, so the register is the only place the drive's CAN id
+    /// comes from, and after a node id write the register leads the transport until
+    /// the drive is rediscovered.
+    int canId() const;
+
     // --- values reported by the drive ---
     const RegisterMap &deviceValues() const { return m_deviceValues; }
     RegisterValue deviceValue(const QString &name) const { return m_deviceValues.value(name); }

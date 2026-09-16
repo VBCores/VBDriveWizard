@@ -20,6 +20,12 @@ RestoreLabel::RestoreLabel(QWidget *parent)
     setCursor(Qt::PointingHandCursor);
     setToolTip(tr("Restore the value this field had when the drive was selected"));
     setFixedSize(kIconSize, kIconSize);
+    // MainWindow toggles visibility as the bound editor diverges from the snapshot, so
+    // the layout has to keep the slot reserved -- otherwise every appearance nudges the
+    // surrounding rows sideways.
+    QSizePolicy policy = sizePolicy();
+    policy.setRetainSizeWhenHidden(true);
+    setSizePolicy(policy);
     setScaledContents(false);
     setText(QString());
     refreshPixmap();

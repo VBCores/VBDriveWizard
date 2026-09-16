@@ -70,11 +70,21 @@ private:
     void setupServices();
     void setupRegisterBindings();
     void setupConnectionUi();
+    /// Sizes both Connect buttons to their longest caption. "Disconnect" is wider than
+    /// "Connect", and CONNECTION is the widest box in the left column, so without this
+    /// the whole column - and with it the plot - jumps every time a link opens or closes.
+    void lockConnectButtonWidths();
+    /// Shows the entry a port combo has elided away, or the reason an interface is
+    /// unusable, as the combo's tool tip.
+    void updateComboToolTip(QComboBox *combo);
     void setupConfigUi();
     void setupControlUi();
     void setupPlotUi();
     void setupFirmwareUi();
     void setupDeviceListUi();
+    /// Typography of the STATUS panel: muted captions, values flush right, units
+    /// last. The three roles are tagged with a `role` property the stylesheet reads.
+    void setupStatusPanelUi();
 
     // --- settings, theme, language ---
     void loadSettings();
@@ -129,6 +139,11 @@ private:
     // --- devices ---
     void rebuildDeviceList();
     void onDeviceListSelectionChanged();
+    /// A click on a DeviceList column header: sort by that column, or reverse the
+    /// order when it is already the one being sorted by.
+    void onDeviceListSortRequested(int column);
+    /// Points the header's sort arrow at whatever DeviceManager is ordering by.
+    void syncDeviceListSortIndicator();
     void onDeviceSelected(DeviceModel *device);
     void onDeviceLost(quint8 nodeId);
     void onDeviceReappeared(quint8 nodeId);
@@ -160,7 +175,26 @@ private:
     void onServoUserStart();
     void onControlParamsEdited();
     void onServoControlTypeChanged();
+    /// The gain editors follow the servo control type, and stay disabled entirely
+    /// while the servo configuration is locked.
+    void updateServoGainEnables();
     void updateServoTargetLabel();
+    /// What a running trajectory freezes behind it. Serial only: there the settings
+    /// are register writes that would land while the drive is being fed set-points,
+    /// and the register actions share the one line those set-points go down.
+    enum class ControlLock {
+        None,
+        /// Servo sin / meander / triangle: its own control type, transient form and
+        /// feedback gains, plus the MIT tab.
+        ServoWaveform,
+        /// Any MIT trajectory: the Servo tab.
+        Mit,
+    };
+    /// Both locks also close Read, Write and Set Origin; Stop lifts them.
+    void updateControlLock();
+    void applyControlLock(ControlLock lock);
+    /// Records what is now running on `nodeId`, and re-evaluates the lock.
+    void setRunningControlLock(quint8 nodeId, const TrajectoryParams &params);
     /// Servo tab with the User trajectory tab in front: edits there are not live.
     bool servoUserTabActive() const;
     /// Sliders step their spin box in hundredths over a fixed useful span; the
@@ -198,6 +232,10 @@ private:
 
     void showError(const QString &title, const QString &text);
     void setStatusMessage(const QString &message, int timeoutMs = 5000);
+    /// Link state as a badge in the status bar: a coloured dot plus the text. It is a
+    /// permanent widget, so showMessage() never hides it the way it hides left-hand
+    /// ones.
+    void showConnectionBadge(bool connected, const QString &text);
 
     Ui::MainWindow *ui;
     TranslationController *m_translation = nullptr;  // owned by main()
@@ -245,8 +283,16 @@ private:
     /// Checked state and value the voltage row started with (see the Restore icon).
     QPair<bool, double> m_voltageLimitBaseline{false, 0.0};
     QLabel *m_connectionStatusLabel = nullptr;
+    /// Transient messages. They are a widget rather than QStatusBar::showMessage(),
+    /// because a shown message hides every left-hand widget - including the badge.
+    QLabel *m_statusMessageLabel = nullptr;
+    QTimer m_statusMessageTimer;  ///< clears the message when its timeout expires
     /// Node whose heartbeat was lost and which the user asked to wait for.
     QHash<quint8, bool> m_awaitingReconnect;
+    /// What each node's running trajectory locks; what updateControlLock() reads.
+    QHash<quint8, ControlLock> m_runningLocks;
+    /// The lock the selected drive's trajectory currently imposes on the UI.
+    ControlLock m_controlLock = ControlLock::None;
     /// Values of the config batch in flight per node, adopted as the drive's own
     /// once the batch succeeds (the link reports only the name of a written register).
     QHash<quint8, RegisterMap> m_writesInFlight;

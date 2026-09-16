@@ -85,11 +85,12 @@ void DeviceManager::selectNode(quint8 nodeId)
     select(device(nodeId));
 }
 
-void DeviceManager::setSortKey(SortKey key)
+void DeviceManager::setSort(SortKey key, Qt::SortOrder order)
 {
-    if (m_sortKey == key)
+    if (m_sortKey == key && m_sortOrder == order)
         return;
     m_sortKey = key;
+    m_sortOrder = order;
     resort();
     emit listChanged();
 }
@@ -98,13 +99,21 @@ void DeviceManager::resort()
 {
     std::sort(m_devices.begin(), m_devices.end(),
               [this](const DeviceModel *a, const DeviceModel *b) {
+                  int cmp = 0;
                   if (m_sortKey == SortKey::Model) {
-                      const int cmp = a->displayName().compare(b->displayName(),
-                                                               Qt::CaseInsensitive);
-                      if (cmp != 0)
-                          return cmp < 0;
+                      cmp = a->displayName().compare(b->displayName(), Qt::CaseInsensitive);
+                  } else {
+                      // The column shows what the drive reports, so that is what it
+                      // sorts by; a drive whose node_id has not arrived yet (-1) sits
+                      // at the ascending end until its first read lands.
+                      cmp = a->canId() - b->canId();
                   }
-                  return a->nodeId() < b->nodeId();
+                  // Two drives can share a model and, for a moment after a node id
+                  // write, an id; the transport address they were discovered at is
+                  // unique and keeps the order from flickering between rebuilds.
+                  if (cmp == 0)
+                      cmp = int(a->nodeId()) - int(b->nodeId());
+                  return m_sortOrder == Qt::AscendingOrder ? cmp < 0 : cmp > 0;
               });
 }
 

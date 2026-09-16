@@ -20,6 +20,9 @@
 #include "ui/theme_manager.h"
 #include "ui/translation_controller.h"
 
+#include <QAbstractItemView>
+#include <QStyle>
+#include <QStyledItemDelegate>
 #include <QApplication>
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -27,22 +30,33 @@
 #include <QDir>
 #include <QDoubleSpinBox>
 #include <QFileDialog>
+#include <QGridLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
-#include <QListWidgetItem>
-#include <QMenu>
+#include <QHeaderView>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QScreen>
 #include <QSerialPortInfo>
 #include <QSignalBlocker>
 #include <QSlider>
 #include <QSpinBox>
 #include <QStatusBar>
+#include <QTreeWidget>
 
 #include <cmath>
 #include <utility>
 
 namespace {
+
+/// The two ControlTabWidget tabs, in the order the .ui declares them.
+constexpr int kServoTabIndex = 0;
+constexpr int kMitTabIndex = 1;
+
+/// The two DeviceList columns, in the order the .ui declares them.
+constexpr int kDeviceModelColumn = 0;
+constexpr int kDeviceCanIdColumn = 1;
 
 /// STATUS refresh rate required by the spec.
 constexpr int kStatusRefreshHz = 20;
@@ -90,6 +104,34 @@ bool configGroupComplete(const DeviceModel *device)
     return true;
 }
 
+/// Width of the port and interface combo boxes, in characters. A port entry carries a
+/// long description ("ttyACM0 (STM32 STLink)") which would otherwise set the width of
+/// the whole CONNECTION panel, and with it of the left column.
+constexpr int kPortComboChars = 10;
+
+/// The full text of a combo entry, shown in the popup and the tool tip while the
+/// closed box keeps the short form.
+constexpr int kLongLabelRole = Qt::UserRole + 1;
+
+/// QComboBox paints the current entry's Qt::DisplayRole into the closed box and does
+/// not elide it: too long a label is simply cut mid-word. So the short form is what
+/// the model holds, and the popup puts the long one back through this delegate, which
+/// leaves every other part of the painting to the style.
+class LongLabelDelegate : public QStyledItemDelegate
+{
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+
+protected:
+    void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override
+    {
+        QStyledItemDelegate::initStyleOption(option, index);
+        const QString full = index.data(kLongLabelRole).toString();
+        if (!full.isEmpty())
+            option->text = full;
+    }
+};
+
 /// ang_dir is +1 or -1; the combo shows it as a rotation direction.
 constexpr int kDirectionCcw = 1;
 constexpr int kDirectionCw = -1;
@@ -101,6 +143,38 @@ QString formatNumber(double value, int decimals)
     return QString::number(value, 'f', decimals);
 }
 
+/// The popup inherits the width of the closed box, which is deliberately too narrow
+/// for the long form of an entry. Widening the view widens the popup's container with
+/// it, because the container takes its minimum size from its layout. Measuring the
+/// text beats QAbstractItemView::sizeHintForColumn(), which caches what it saw while
+/// the list was still being filled.
+void widenPopupToContents(QComboBox *combo)
+{
+    QAbstractItemView *view = combo->view();
+    if (!view)
+        return;
+    const QFontMetrics metrics(view->font());
+    int widest = 0;
+    for (int i = 0; i < combo->count(); ++i) {
+        const QString full = combo->itemData(i, kLongLabelRole).toString();
+        widest = qMax(widest, metrics.horizontalAdvance(full.isEmpty() ? combo->itemText(i)
+                                                                       : full));
+    }
+    if (widest == 0)
+        return;
+    // Item padding from the stylesheet, plus room for the scroll bar a long list gets.
+    const int scrollBar = combo->style()->pixelMetric(QStyle::PM_ScrollBarExtent, nullptr, view);
+    view->setMinimumWidth(widest + 16 + scrollBar + 2 * view->frameWidth());
+}
+
+/// The waveform trajectories: unlike the User target, which is applied once, these
+/// keep the drive taking a stream of set-points until Stop is pressed.
+bool isWaveformForm(TrajectoryForm form)
+{
+    return form == TrajectoryForm::Sin || form == TrajectoryForm::Meander
+            || form == TrajectoryForm::Triangle;
+}
+
 } // namespace
 
 MainWindow::MainWindow(TranslationController *translationController, QWidget *parent)
@@ -110,8 +184,18 @@ MainWindow::MainWindow(TranslationController *translationController, QWidget *pa
 {
     ui->setupUi(this);
 
+    // Link state on the left, transient messages on the right.
     m_connectionStatusLabel = new QLabel(this);
-    statusBar()->addPermanentWidget(m_connectionStatusLabel);
+    statusBar()->addWidget(m_connectionStatusLabel);
+    showConnectionBadge(false, tr("Not connected"));
+
+    m_statusMessageLabel = new QLabel(this);
+    m_statusMessageLabel->setProperty("role", "caption");
+    m_statusMessageLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    statusBar()->addPermanentWidget(m_statusMessageLabel, 1);
+    m_statusMessageTimer.setSingleShot(true);
+    connect(&m_statusMessageTimer, &QTimer::timeout, this,
+            [this] { m_statusMessageLabel->clear(); });
 
     setupServices();
     setupRegisterBindings();
@@ -121,6 +205,7 @@ MainWindow::MainWindow(TranslationController *translationController, QWidget *pa
     setupPlotUi();
     setupFirmwareUi();
     setupDeviceListUi();
+    setupStatusPanelUi();
 
     loadSettings();
 
@@ -330,6 +415,8 @@ void MainWindow::applyUiSettings()
     m_serial->setTelemetryBatchIntervalMs(
             qBound(10, 1000 / qMax(1, m_config.ui.plot_draw_rate_hz), 100));
     updateLogo();
+    // A new font size changes how wide the captions are.
+    lockConnectButtonWidths();
 }
 
 void MainWindow::updateLogo()
@@ -380,10 +467,11 @@ void MainWindow::retranslateDynamicTexts()
     updateServoTargetLabel();
 
     if (!connected)
-        m_connectionStatusLabel->setText(tr("Not connected"));
+        showConnectionBadge(false, tr("Not connected"));
 
     updateStatusLabels();
     rebuildDeviceList();
+    lockConnectButtonWidths();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -446,9 +534,20 @@ void MainWindow::showError(const QString &title, const QString &text)
     QMessageBox::warning(this, title, text);
 }
 
+void MainWindow::showConnectionBadge(bool connected, const QString &text)
+{
+    const QString dot = connected ? QStringLiteral("#2FB344") : QStringLiteral("#94A3B8");
+    m_connectionStatusLabel->setText(QStringLiteral("<span style=\"color:%1\">&#9679;</span>"
+                                                    "&nbsp;%2")
+                                             .arg(dot, text.toHtmlEscaped()));
+}
+
 void MainWindow::setStatusMessage(const QString &message, int timeoutMs)
 {
-    statusBar()->showMessage(message, timeoutMs);
+    m_statusMessageLabel->setText(message);
+    m_statusMessageTimer.stop();
+    if (timeoutMs > 0)
+        m_statusMessageTimer.start(timeoutMs);
 }
 
 // --- register bindings -----------------------------------------------------------------
@@ -755,12 +854,46 @@ void MainWindow::refreshAllRestoreIcons()
 
 void MainWindow::setupConnectionUi()
 {
+    for (QComboBox *combo : {ui->SerialCombo, ui->CanCombo}) {
+        combo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+        combo->setMinimumContentsLength(kPortComboChars);
+        combo->setItemDelegate(new LongLabelDelegate(combo));
+        connect(combo, &QComboBox::currentIndexChanged, this,
+                [this, combo] { updateComboToolTip(combo); });
+    }
+
     connect(ui->SerialRefreshBtn, &QPushButton::clicked, this, &MainWindow::refreshSerialPorts);
     connect(ui->CanRefreshBtn, &QPushButton::clicked, this, &MainWindow::refreshCanInterfaces);
     connect(ui->SerialConnectBtn, &QPushButton::clicked, this,
             &MainWindow::onSerialConnectClicked);
     connect(ui->CanConnectBtn, &QPushButton::clicked, this, &MainWindow::onCanConnectClicked);
     connect(ui->SerialRadioBtn, &QRadioButton::toggled, this, [this] { updateUiState(); });
+}
+
+void MainWindow::lockConnectButtonWidths()
+{
+    // Re-measured rather than cached: the captions change with the language and their
+    // width with the font size, and both can change while the window is up.
+    for (QPushButton *button : {ui->SerialConnectBtn, ui->CanConnectBtn}) {
+        const QString current = button->text();
+        button->setMinimumWidth(0);
+        button->setMaximumWidth(QWIDGETSIZE_MAX);
+        int widest = 0;
+        for (const QString &caption : {tr("Connect"), tr("Disconnect")}) {
+            button->setText(caption);
+            widest = qMax(widest, button->sizeHint().width());
+        }
+        button->setText(current);
+        button->setFixedWidth(widest);
+    }
+}
+
+void MainWindow::updateComboToolTip(QComboBox *combo)
+{
+    // The CAN list puts the reason an interface cannot be used in the item's tool tip;
+    // that beats repeating the label.
+    const QString itemTip = combo->currentData(Qt::ToolTipRole).toString();
+    combo->setToolTip(itemTip.isEmpty() ? combo->currentText() : itemTip);
 }
 
 void MainWindow::refreshSerialPorts()
@@ -771,11 +904,18 @@ void MainWindow::refreshSerialPorts()
         const QString label = info.description().isEmpty()
                 ? info.portName()
                 : QStringLiteral("%1 (%2)").arg(info.portName(), info.description());
-        ui->SerialCombo->addItem(label, info.portName());
+        // The port name identifies the port; the description only confirms it, so the
+        // closed box shows the name and the popup and tool tip carry the whole label.
+        ui->SerialCombo->addItem(info.portName(), info.portName());
+        const int added = ui->SerialCombo->count() - 1;
+        ui->SerialCombo->setItemData(added, label, kLongLabelRole);
+        ui->SerialCombo->setItemData(added, label, Qt::ToolTipRole);
     }
     const int index = ui->SerialCombo->findData(previous);
     if (index >= 0)
         ui->SerialCombo->setCurrentIndex(index);
+    updateComboToolTip(ui->SerialCombo);
+    widenPopupToContents(ui->SerialCombo);
 }
 
 void MainWindow::refreshCanInterfaces()
@@ -796,6 +936,8 @@ void MainWindow::refreshCanInterfaces()
     const int index = ui->CanCombo->findData(previous);
     if (index >= 0)
         ui->CanCombo->setCurrentIndex(index);
+    updateComboToolTip(ui->CanCombo);
+    widenPopupToContents(ui->CanCombo);
 }
 
 void MainWindow::setLink(DeviceLink *link)
@@ -919,8 +1061,8 @@ void MainWindow::handleConnected(LinkKind kind)
 
     m_statusTimer.start();
     m_pollTimer.start();
-    m_connectionStatusLabel->setText(kind == LinkKind::Serial ? tr("Serial connected")
-                                                              : tr("CAN connected"));
+    showConnectionBadge(true, kind == LinkKind::Serial ? tr("Serial connected")
+                                                       : tr("CAN connected"));
     setPlotLive(true);
     updateUiState();
 }
@@ -933,8 +1075,9 @@ void MainWindow::handleDisconnected()
     m_devices->clear();
     m_awaitingReconnect.clear();
     m_writesInFlight.clear();
+    m_runningLocks.clear();
     setLink(nullptr);
-    m_connectionStatusLabel->setText(tr("Not connected"));
+    showConnectionBadge(false, tr("Not connected"));
     setStatusMessage(tr("Disconnected."));
     // Nothing feeds the plot any more; freeze it so the last picture can be
     // inspected. handleConnected() sets it live again.
@@ -1017,71 +1160,151 @@ void MainWindow::updateUiState()
     ui->PreferencesBtn->setEnabled(true);
 
     onServoControlTypeChanged();
+    updateControlLock();
 }
 
 // --- devices ---------------------------------------------------------------------------
 
 void MainWindow::setupDeviceListUi()
 {
-    connect(ui->DeviceList, &QListWidget::itemSelectionChanged, this,
+    connect(ui->DeviceList, &QTreeWidget::itemSelectionChanged, this,
             &MainWindow::onDeviceListSelectionChanged);
     connect(ui->RefreshDeviceBtn, &QPushButton::clicked, this, [this] {
         if (m_link && m_link->kind() == LinkKind::Can)
             m_cyphal->rescan();
     });
 
-    // The list widget has no header to click, so the sort key lives in a context menu.
-    ui->DeviceList->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->DeviceList, &QListWidget::customContextMenuRequested, this,
-            [this](const QPoint &pos) {
-                QMenu menu(this);
-                QAction *byModel = menu.addAction(tr("Sort by model"));
-                QAction *byNode = menu.addAction(tr("Sort by Node ID"));
-                byModel->setCheckable(true);
-                byNode->setCheckable(true);
-                byModel->setChecked(m_devices->sortKey() == DeviceManager::SortKey::Model);
-                byNode->setChecked(m_devices->sortKey() == DeviceManager::SortKey::NodeId);
-                QAction *chosen = menu.exec(ui->DeviceList->mapToGlobal(pos));
-                if (chosen == byModel)
-                    m_devices->setSortKey(DeviceManager::SortKey::Model);
-                else if (chosen == byNode)
-                    m_devices->setSortKey(DeviceManager::SortKey::NodeId);
-            });
+    // A flat two-column list rather than a tree: no branch indicators, no indent, and
+    // the whole row reacts as one so a click on the id selects the drive as well.
+    ui->DeviceList->setRootIsDecorated(false);
+    ui->DeviceList->setIndentation(0);
+    ui->DeviceList->setUniformRowHeights(true);
+    ui->DeviceList->setAllColumnsShowFocus(true);
+    ui->DeviceList->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->DeviceList->setSelectionMode(QAbstractItemView::SingleSelection);
+    // The order comes from DeviceManager, which is what rebuildDeviceList() walks.
+    // Letting the widget sort itself as well would fight with it on every insert and
+    // would sort the id column as the text "10" < "9".
+    ui->DeviceList->setSortingEnabled(false);
+    ui->DeviceList->headerItem()->setTextAlignment(kDeviceCanIdColumn,
+                                                   Qt::AlignRight | Qt::AlignVCenter);
+
+    QHeaderView *header = ui->DeviceList->header();
+    header->setSectionsClickable(true);
+    header->setSectionsMovable(false);
+    header->setStretchLastSection(false);
+    // The model name takes the slack; the id column is only ever a few digits wide.
+    header->setSectionResizeMode(kDeviceModelColumn, QHeaderView::Stretch);
+    header->setSectionResizeMode(kDeviceCanIdColumn, QHeaderView::ResizeToContents);
+    header->setSortIndicatorShown(true);
+    connect(header, &QHeaderView::sectionClicked, this,
+            &MainWindow::onDeviceListSortRequested);
+    syncDeviceListSortIndicator();
+}
+
+void MainWindow::setupStatusPanelUi()
+{
+    // The panel is a three-column grid built in the .ui file; the object names are
+    // what tells the columns apart: <name>CaptionLbl, <name>Lbl, <name>UnitLbl.
+    const QList<QLabel *> labels = ui->StatusGroupBox->findChildren<QLabel *>();
+    for (QLabel *label : labels) {
+        const QString name = label->objectName();
+        if (name.endsWith(QLatin1String("CaptionLbl"))) {
+            label->setProperty("role", "caption");
+        } else if (name.endsWith(QLatin1String("UnitLbl"))) {
+            label->setProperty("role", "unit");
+        } else {
+            label->setProperty("role", "value");
+            // Numbers line up on their last digit, which is what makes a column of
+            // readings scannable.
+            label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        }
+    }
+
+    if (auto *grid = qobject_cast<QGridLayout *>(ui->StatusGroupBox->layout())) {
+        grid->setColumnStretch(1, 1);      // the value column takes the slack
+        grid->setColumnMinimumWidth(2, 32);  // units keep their own lane
+        grid->setHorizontalSpacing(10);
+        grid->setVerticalSpacing(6);
+    }
 }
 
 void MainWindow::rebuildDeviceList()
 {
     m_rebuildingDeviceList = true;
     ui->DeviceList->clear();
+    syncDeviceListSortIndicator();
 
     for (DeviceModel *device : m_devices->devices()) {
-        // QListWidget has no columns, so the two fields the spec asks for are laid out
-        // as padded text: model on the left, node id on the right.
-        auto *item = new QListWidgetItem(
-                QStringLiteral("%1\tID %2")
-                        .arg(device->displayName(), -14)
-                        .arg(device->nodeId()));
-        item->setData(Qt::UserRole, device->nodeId());
+        // The id column shows what the drive reports in `node_id`, not the transport
+        // address, which is always 0 on Serial; a dash stands in until that register
+        // has been read.
+        const int canId = device->canId();
+        auto *item = new QTreeWidgetItem;
+        item->setText(kDeviceModelColumn, device->displayName());
+        item->setText(kDeviceCanIdColumn,
+                      canId >= 0 ? QString::number(canId) : QStringLiteral("-"));
+        item->setTextAlignment(kDeviceCanIdColumn, Qt::AlignRight | Qt::AlignVCenter);
+        item->setData(kDeviceModelColumn, Qt::UserRole, device->nodeId());
         if (!device->isOnline()) {
-            item->setText(item->text() + tr("  (no heartbeat)"));
-            item->setForeground(Qt::gray);
+            item->setText(kDeviceModelColumn,
+                          item->text(kDeviceModelColumn) + tr("  (no heartbeat)"));
+            for (int column = 0; column < ui->DeviceList->columnCount(); ++column)
+                item->setForeground(column, Qt::gray);
         }
-        ui->DeviceList->addItem(item);
+        ui->DeviceList->addTopLevelItem(item);
         if (device == m_devices->selected())
             ui->DeviceList->setCurrentItem(item);
     }
+
+    if (ui->DeviceList->topLevelItemCount() == 0) {
+        // An empty white box says nothing; this says what to do about it. NoItemFlags
+        // keeps the placeholder out of selection, so onDeviceListSelectionChanged()
+        // never sees it.
+        auto *placeholder = new QTreeWidgetItem;
+        placeholder->setText(kDeviceModelColumn, tr("No drives found - press refresh"));
+        placeholder->setFlags(Qt::NoItemFlags);
+        placeholder->setForeground(kDeviceModelColumn, QColor(0x94, 0xA3, 0xB8));
+        placeholder->setTextAlignment(kDeviceModelColumn, Qt::AlignCenter);
+        ui->DeviceList->addTopLevelItem(placeholder);
+        // The message is about the list, not about one column of it.
+        placeholder->setFirstColumnSpanned(true);
+    }
     m_rebuildingDeviceList = false;
+}
+
+void MainWindow::onDeviceListSortRequested(int column)
+{
+    const auto key = (column == kDeviceCanIdColumn) ? DeviceManager::SortKey::CanId
+                                                    : DeviceManager::SortKey::Model;
+    // Clicking the column that already orders the list reverses it, the way a header
+    // behaves everywhere else; a different column starts ascending.
+    const bool reverse = (key == m_devices->sortKey()
+                          && m_devices->sortOrder() == Qt::AscendingOrder);
+    // setSort() reports the new order through listChanged(), which rebuilds the list
+    // and moves the indicator with it.
+    m_devices->setSort(key, reverse ? Qt::DescendingOrder : Qt::AscendingOrder);
+}
+
+void MainWindow::syncDeviceListSortIndicator()
+{
+    const int column = (m_devices->sortKey() == DeviceManager::SortKey::CanId)
+            ? kDeviceCanIdColumn
+            : kDeviceModelColumn;
+    QSignalBlocker blocker(ui->DeviceList->header());
+    ui->DeviceList->header()->setSortIndicator(column, m_devices->sortOrder());
 }
 
 void MainWindow::onDeviceListSelectionChanged()
 {
     if (m_rebuildingDeviceList)
         return;
-    QListWidgetItem *item = ui->DeviceList->currentItem();
+    QTreeWidgetItem *item = ui->DeviceList->currentItem();
     if (!item)
         return;
 
-    const auto nodeId = static_cast<quint8>(item->data(Qt::UserRole).toUInt());
+    const auto nodeId =
+            static_cast<quint8>(item->data(kDeviceModelColumn, Qt::UserRole).toUInt());
     DeviceModel *target = m_devices->device(nodeId);
     DeviceModel *current = m_devices->selected();
     if (!target || target == current)
@@ -1124,6 +1347,7 @@ void MainWindow::onDeviceSelected(DeviceModel *device)
                 binding.restore->setVisible(false);
         }
         updateStatusLabels();
+        updateControlLock();
         return;
     }
 
@@ -1141,6 +1365,7 @@ void MainWindow::onDeviceSelected(DeviceModel *device)
         m_link->readRegisters(device->nodeId(),
                               {QString::fromLatin1(registers::kFirmwareRev)});
     }
+    updateControlLock();
     rebuildDeviceList();
 }
 
@@ -1435,8 +1660,9 @@ void MainWindow::onRegisterWritten(quint8 nodeId, const QString &name, bool ok,
 void MainWindow::onWriteBatchFinished(quint8 nodeId, bool ok, const QString &error)
 {
     const RegisterMap written = m_writesInFlight.take(nodeId);
-    ui->WriteRegBtn->setEnabled(true);
-    ui->SetOriginBtn->setEnabled(true);
+    const bool registerActions = m_controlLock == ControlLock::None;
+    ui->WriteRegBtn->setEnabled(registerActions);
+    ui->SetOriginBtn->setEnabled(registerActions);
     if (ok) {
         // What was acknowledged is now what the drive runs with, so it is no
         // longer pending; on Serial the re-read after the reboot confirms it.
@@ -1752,11 +1978,13 @@ void MainWindow::setupControlUi()
     onMitTrajectoryChanged();
 }
 
-void MainWindow::onServoControlTypeChanged()
+void MainWindow::updateServoGainEnables()
 {
     // Position uses all three gains, Velocity only Kp and Ki, Torque none at all.
-    const bool position = ui->ServoPositionRadioBtn->isChecked();
-    const bool velocity = ui->ServoVelocityRadioBtn->isChecked();
+    // A locked servo configuration overrides all of that: nothing is editable.
+    const bool unlocked = m_controlLock != ControlLock::ServoWaveform;
+    const bool position = ui->ServoPositionRadioBtn->isChecked() && unlocked;
+    const bool velocity = ui->ServoVelocityRadioBtn->isChecked() && unlocked;
     const bool anyGains = position || velocity;
 
     ui->ServoKpDoubleSpinBox->setEnabled(anyGains);
@@ -1766,7 +1994,11 @@ void MainWindow::onServoControlTypeChanged()
     ui->ServoKdDoubleSpinBox->setEnabled(position);
     ui->ServoKdSlider->setEnabled(position);
     ui->ServoGainsSetBtn->setEnabled(anyGains);
+}
 
+void MainWindow::onServoControlTypeChanged()
+{
+    updateServoGainEnables();
     updateServoTargetLabel();
     updateControlSliderRanges();
     onControlParamsEdited();
@@ -1786,6 +2018,69 @@ bool MainWindow::servoUserTabActive() const
 {
     return ui->ControlTabWidget->currentIndex() == 0
             && ui->RefTrajectoryTabWidget->currentIndex() == 0;
+}
+
+void MainWindow::applyControlLock(ControlLock lock)
+{
+    if (m_controlLock == lock)
+        return;
+    m_controlLock = lock;
+
+    const bool servoLocked = lock == ControlLock::ServoWaveform;
+    const bool mitLocked = lock == ControlLock::Mit;
+
+    // The panels themselves stay as they are - only what sits inside them stops
+    // reacting, so the titles and the values on display remain readable.
+    for (QGroupBox *box : {ui->ServoControlTypeGroupBox, ui->TransientFormGroupBox,
+                           ui->FeedbackGainsGroupBox}) {
+        const QList<QWidget *> children = box->findChildren<QWidget *>();
+        for (QWidget *child : children)
+            child->setEnabled(!servoLocked);
+    }
+    // Unlocking hands the gains back to the control type rather than to everything.
+    updateServoGainEnables();
+
+    // The other protocol is a second set-point stream into the same drive, so the
+    // tab it lives on is closed for as long as this one is running.
+    ui->ControlTabWidget->setTabEnabled(kMitTabIndex, !servoLocked);
+    ui->ControlTabWidget->setTabEnabled(kServoTabIndex, !mitLocked);
+    // Register traffic shares the Serial line with the set-points, and a Write goes
+    // through CONFIG -> APPLY, which reboots the drive out from under the motion.
+    const bool registers = lock == ControlLock::None;
+    ui->ReadRegBtn->setEnabled(registers);
+    ui->WriteRegBtn->setEnabled(registers);
+    ui->SetOriginBtn->setEnabled(registers);
+}
+
+void MainWindow::updateControlLock()
+{
+    // Serial only: there the servo settings are register writes that would land while
+    // the drive is being fed set-points, and the register actions share the one line
+    // the set-points go down. Pressing Stop clears the node and lifts the lock.
+    const DeviceModel *device = m_devices->selected();
+    const bool serial = m_link && m_link->isConnected() && m_link->kind() == LinkKind::Serial;
+    if (!serial || !device || !m_control->isRunning(device->nodeId())) {
+        applyControlLock(ControlLock::None);
+        return;
+    }
+    applyControlLock(m_runningLocks.value(device->nodeId(), ControlLock::None));
+}
+
+void MainWindow::setRunningControlLock(quint8 nodeId, const TrajectoryParams &params)
+{
+    // MIT streams whatever its form is, including Step; on Servo the User target is
+    // applied once and leaves nothing running that the settings could disturb.
+    ControlLock lock = ControlLock::None;
+    if (params.protocol == ControlProtocol::Mit)
+        lock = ControlLock::Mit;
+    else if (isWaveformForm(params.form))
+        lock = ControlLock::ServoWaveform;
+
+    if (lock == ControlLock::None)
+        m_runningLocks.remove(nodeId);
+    else
+        m_runningLocks.insert(nodeId, lock);
+    updateControlLock();
 }
 
 void MainWindow::setSliderRange(QSlider *slider, QDoubleSpinBox *spin, double min, double max)
@@ -1848,10 +2143,12 @@ void MainWindow::updateControlSliderRanges()
 
 void MainWindow::onMitTrajectoryChanged()
 {
-    // Step maps one-to-one onto mit_cmd; the other shapes drive one quantity.
+    // Step maps one-to-one onto mit_cmd; the other shapes drive one quantity. The
+    // two target panels are the pages of one stack, so only the one that belongs to
+    // the selected shape is on screen and the column is as tall as the taller page
+    // rather than as tall as both.
     const bool step = ui->MitStepRadioBtn->isChecked();
-    ui->StepTargetsGroupBox->setVisible(step);
-    ui->TrajectoryTargetsGroupBox->setVisible(!step);
+    ui->MitTargetsStack->setCurrentWidget(step ? ui->MitStepPage : ui->MitTrajectoryPage);
     // "+derivative" only means anything when the waveform drives position.
     ui->MitDerivativeCheckBox->setEnabled(ui->MitTrajPositionRadioBtn->isChecked());
     updateControlSliderRanges();
@@ -1973,6 +2270,7 @@ void MainWindow::onTrajectoryStart(ControlProtocol protocol)
     }
 
     m_control->start(nodeId, params);
+    setRunningControlLock(nodeId, params);
 }
 
 void MainWindow::onServoUserStart()
@@ -1984,7 +2282,9 @@ void MainWindow::onServoUserStart()
     // Whatever is running keeps running; the press only swaps in the new target.
     const quint8 nodeId = device->nodeId();
     if (m_control->isRunning(nodeId)) {
-        m_control->updateParams(nodeId, collectServoParams());
+        const TrajectoryParams params = collectServoParams();
+        m_control->updateParams(nodeId, params);
+        setRunningControlLock(nodeId, params);
         return;
     }
     onTrajectoryStart(ControlProtocol::Servo);
@@ -1999,8 +2299,12 @@ void MainWindow::onControlParamsEdited()
     if (!device)
         return;
     const quint8 nodeId = device->nodeId();
-    if (m_control->isRunning(nodeId))
-        m_control->updateParams(nodeId, collectCurrentParams());
+    if (!m_control->isRunning(nodeId))
+        return;
+    const TrajectoryParams params = collectCurrentParams();
+    m_control->updateParams(nodeId, params);
+    // Switching trajectory tabs mid-run changes the shape, and with it the lock.
+    setRunningControlLock(nodeId, params);
 }
 
 void MainWindow::onServoGainsSet()
@@ -2081,11 +2385,16 @@ void MainWindow::onSetpointProduced(quint8 nodeId, const TrajectoryOutput &outpu
         return;
     // Native units: the plot scales the set-point together with the sample it is
     // drawn against.
-    m_plot->appendSetpoint(output.primary, output.primaryType);
+    m_plot->appendSetpoint(output.primary, output.primaryType, output.t_us);
 }
 
 void MainWindow::onTrajectoryRunningChanged(quint8 nodeId, bool running)
 {
+    // Stop releases the servo configuration, whichever drive was running.
+    if (!running)
+        m_runningLocks.remove(nodeId);
+    updateControlLock();
+
     DeviceModel *device = m_devices->selected();
     if (!device || device->nodeId() != nodeId)
         return;

@@ -1120,6 +1120,10 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
         <translation>Resume</translation>
     </message>
     <message>
+        <source>No drives found - press refresh</source>
+        <translation>No drives found - press refresh</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="382"/>
         <location filename="../mainwindow.cpp" line="934"/>
         <source>Not connected</source>

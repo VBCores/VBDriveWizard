@@ -10,6 +10,7 @@
 #include <QTextStream>
 #include <QVBoxLayout>
 
+#include <algorithm>
 #include <cmath>
 
 namespace {
@@ -19,6 +20,10 @@ constexpr int kMaxLogLines = 2000;
 /// A telemetry sample delivered this much later than the offset predicts is not late:
 /// its clock has restarted, and the offset is re-estimated.
 constexpr double kTelemetryResyncS = 1.0;
+/// How much set-point history is kept for interpolation. Only the span between the
+/// oldest unresolved telemetry sample and now is really needed - one batch interval -
+/// so a second is generous and keeps the buffer small.
+constexpr double kSetpointHistoryS = 1.0;
 } // namespace
 
 PlotController::PlotController(QObject *parent)
@@ -289,8 +294,9 @@ void PlotController::clear()
     m_haveLastKey = false;
     m_haveTelemetryOffset = false;
     m_lastKey = 0.0;
-    m_haveSetpoint = false;
-    m_lastSetpoint = 0.0;
+    m_setpoints.clear();
+    m_haveSetpointOffset = false;
+    m_setpointOffset = 0.0;
     if (!m_initialized)
         return;
     m_primary->data()->clear();
@@ -303,6 +309,47 @@ void PlotController::clear()
 double PlotController::nowKey() const
 {
     return static_cast<double>(m_clock.nsecsElapsed()) * 1e-9;
+}
+
+double PlotController::mapToPlotClock(qint64 t_us, double *offset, bool *haveOffset) const
+{
+    // The sample clock (the drive's on CAN, the host's on Serial and for set-points)
+    // is mapped onto the plot clock by the smallest delivery delay seen: delivery
+    // never runs ahead of sampling, so the minimum is the best estimate of the offset
+    // between the two, and with it a steady sample rate comes out as evenly spaced
+    // points. A delay that jumps far beyond that estimate means the sample clock
+    // restarted, and the offset is taken afresh so the trace continues from "now".
+    const double seconds = static_cast<double>(t_us) * 1e-6;
+    const double delay = nowKey() - seconds;
+    if (!*haveOffset || delay < *offset || delay - *offset > kTelemetryResyncS) {
+        *offset = delay;
+        *haveOffset = true;
+    }
+    return seconds + *offset;
+}
+
+bool PlotController::setpointAt(double key, double *value) const
+{
+    if (m_setpoints.isEmpty())
+        return false;
+    if (key <= m_setpoints.first().key) {
+        *value = m_setpoints.first().value;
+        return true;
+    }
+    if (key >= m_setpoints.last().key) {
+        *value = m_setpoints.last().value;
+        return true;
+    }
+    const auto after = std::lower_bound(m_setpoints.cbegin(), m_setpoints.cend(), key,
+                                        [](const SetpointSample &sample, double k) {
+                                            return sample.key < k;
+                                        });
+    const SetpointSample &hi = *after;
+    const SetpointSample &lo = *(after - 1);
+    const double span = hi.key - lo.key;
+    const double alpha = span > 0.0 ? (key - lo.key) / span : 0.0;
+    *value = lo.value + (hi.value - lo.value) * alpha;
+    return true;
 }
 
 void PlotController::push(double key, double primary, bool hasSecondary, double secondary)
@@ -329,21 +376,10 @@ void PlotController::appendTelemetry(const TelemetryBatch &samples)
     }
 
     const double scale = displayScale();
-    // A batch carries several samples produced over the whole batch interval, so
-    // each is keyed by its own timestamp rather than by the moment the batch landed.
-    // The sample clock (the drive's on CAN, the host's on Serial) is mapped onto the
-    // plot clock by the smallest delivery delay seen (the newest sample of a batch
-    // has the smallest one): delivery never runs ahead of sampling, so the minimum is
-    // the best estimate of the offset between the two, and with it a steady sample
-    // rate comes out as evenly spaced points. A delay that jumps far beyond that
-    // estimate means the sample clock restarted, and the offset is taken afresh so
-    // the trace simply continues from "now".
-    const double delay = nowKey() - static_cast<double>(samples.last().t_us) * 1e-6;
-    if (!m_haveTelemetryOffset || delay < m_telemetryOffset
-        || delay - m_telemetryOffset > kTelemetryResyncS) {
-        m_telemetryOffset = delay;
-        m_haveTelemetryOffset = true;
-    }
+    // A batch carries several samples produced over the whole batch interval, so each
+    // is keyed by its own timestamp rather than by the moment the batch landed. The
+    // offset is estimated from the newest sample, which has the smallest delay.
+    mapToPlotClock(samples.last().t_us, &m_telemetryOffset, &m_haveTelemetryOffset);
 
     for (const TelemetrySample &sample : samples) {
         double value = 0.0;
@@ -360,8 +396,10 @@ void PlotController::appendTelemetry(const TelemetryBatch &samples)
         default:
             break;
         }
-        push(static_cast<double>(sample.t_us) * 1e-6 + m_telemetryOffset, value * scale,
-             m_haveSetpoint, m_lastSetpoint * scale);
+        const double key = static_cast<double>(sample.t_us) * 1e-6 + m_telemetryOffset;
+        double setpoint = 0.0;
+        const bool haveSetpoint = setpointAt(key, &setpoint);
+        push(key, value * scale, haveSetpoint, setpoint * scale);
     }
 }
 
@@ -389,19 +427,38 @@ void PlotController::appendStatus(const DeviceStatus &status)
     }
 }
 
-void PlotController::appendSetpoint(double value, ServoControlType type)
+void PlotController::appendSetpoint(double value, ServoControlType type, qint64 t_us)
 {
-    // Only remembered when it belongs to the signal on screen; the trace itself is
-    // emitted alongside the next telemetry sample so both share a key. Kept in
-    // native units and scaled together with that sample.
+    // Only kept when it belongs to the signal on screen; the trace itself is emitted
+    // alongside the telemetry samples so both share keys. Kept in native units and
+    // scaled together with the sample it is drawn against.
     const bool matches = (m_signal == PlotSignal::Position && type == ServoControlType::Position)
             || (m_signal == PlotSignal::Velocity && type == ServoControlType::Velocity)
             || (m_signal == PlotSignal::Torque
                 && (type == ServoControlType::Torque || type == ServoControlType::Voltage));
     if (!matches)
         return;
-    m_lastSetpoint = value;
-    m_haveSetpoint = true;
+
+    SetpointSample sample;
+    sample.key = mapToPlotClock(t_us, &m_setpointOffset, &m_haveSetpointOffset);
+    sample.value = value;
+
+    // Shrinking the offset estimate can pull a key back behind the previous one; the
+    // history has to stay sorted for setpointAt(), so such a report replaces the last
+    // one instead of being appended out of order.
+    if (!m_setpoints.isEmpty() && sample.key <= m_setpoints.last().key)
+        m_setpoints.last().value = sample.value;
+    else
+        m_setpoints.push_back(sample);
+
+    const double oldest = m_setpoints.last().key - kSetpointHistoryS;
+    int drop = 0;
+    // One report before `oldest` is kept, so a key inside the window still has a
+    // sample on each side to interpolate between.
+    while (drop + 1 < m_setpoints.size() && m_setpoints.at(drop + 1).key < oldest)
+        ++drop;
+    if (drop > 0)
+        m_setpoints.remove(0, drop);
 }
 
 void PlotController::appendLogLine(const QString &line)

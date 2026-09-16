@@ -27,13 +27,22 @@ QString DeviceModel::displayName() const
     return QStringLiteral("%1R%2").arg(model).arg(gear.toUInt32());
 }
 
+int DeviceModel::canId() const
+{
+    const RegisterValue id = m_deviceValues.value(QString::fromLatin1(registers::kNodeId));
+    if (id.isEmpty())
+        return -1;
+    return static_cast<int>(id.toUInt32());
+}
+
 void DeviceModel::setDeviceValue(const QString &name, const RegisterValue &value)
 {
     if (m_deviceValues.value(name) == value && m_deviceValues.contains(name))
         return;
     m_deviceValues.insert(name, value);
     emit deviceValueChanged(name);
-    if (name == QLatin1String(registers::kModel) || name == QLatin1String(registers::kGear))
+    if (name == QLatin1String(registers::kModel) || name == QLatin1String(registers::kGear)
+        || name == QLatin1String(registers::kNodeId))
         emit identityChanged();
 }
 

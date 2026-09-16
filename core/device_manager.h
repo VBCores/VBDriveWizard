@@ -17,10 +17,12 @@ class DeviceManager : public QObject
     Q_OBJECT
 
 public:
+    /// What the list is ordered by - the two columns DeviceList offers, so a click
+    /// on a column header maps straight onto it.
     enum class SortKey
     {
         Model,
-        NodeId
+        CanId
     };
 
     explicit DeviceManager(QObject *parent = nullptr);
@@ -44,7 +46,11 @@ public:
     void selectNode(quint8 nodeId);
 
     SortKey sortKey() const { return m_sortKey; }
-    void setSortKey(SortKey key);
+    Qt::SortOrder sortOrder() const { return m_sortOrder; }
+    /// Re-orders the list and reports it through listChanged(). Both halves of the
+    /// order live here rather than in the view, because rebuildDeviceList() walks
+    /// devices() and the widget itself does no sorting.
+    void setSort(SortKey key, Qt::SortOrder order);
 
     /// True when any drive - not only the selected one - has pending edits.
     bool anyUnsavedChanges() const;
@@ -62,7 +68,8 @@ private:
 
     QList<DeviceModel *> m_devices;
     DeviceModel *m_selected = nullptr;
-    SortKey m_sortKey = SortKey::NodeId;
+    SortKey m_sortKey = SortKey::CanId;
+    Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
 
 #endif // CORE_DEVICE_MANAGER_H

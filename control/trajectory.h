@@ -52,22 +52,64 @@ struct TrajectoryOutput
     /// set-point trace.
     double primary = 0.0;
     ServoControlType primaryType = ServoControlType::Position;
+    /// Host wall clock (hostTimeUs()) at the moment the command was produced, in the
+    /// same clock as TelemetrySample::t_us. The plot needs it to place the set-point
+    /// on the same time base as the measurement instead of at delivery time.
+    qint64 t_us = 0;
 };
 
 Q_DECLARE_METATYPE(TrajectoryParams)
 Q_DECLARE_METATYPE(TrajectoryOutput)
 
+/// The part of the waveform the generator carries between commands.
+///
+/// Phase is integrated rather than recomputed from the elapsed time, and amplitude and
+/// frequency lag the values in TrajectoryParams, so that an edit never moves the
+/// set-point in a single step.
+struct TrajectoryState
+{
+    /// Position inside the period, in cycles, kept in [0, 1).
+    double phase = 0.0;
+    /// Amplitude actually in use, slewing towards TrajectoryParams::amplitude.
+    double amplitude = 0.0;
+    /// Frequency actually in use, slewing towards TrajectoryParams::frequency.
+    double frequency = 0.0;
+};
+
 namespace Trajectory {
 
-/// Waveform value at time `t` (seconds since the trajectory started).
-double value(const TrajectoryParams &params, double t);
+/// Waveform value for the given state.
+double value(const TrajectoryParams &params, const TrajectoryState &state);
 
 /// Analytic time derivative of value(), used for the MIT "+derivative" option.
-double derivative(const TrajectoryParams &params, double t);
+double derivative(const TrajectoryParams &params, const TrajectoryState &state);
 
-/// Builds the full command for time `t`.
-TrajectoryOutput evaluate(const TrajectoryParams &params, double t);
+/// Builds the full command for the given state.
+TrajectoryOutput evaluate(const TrajectoryParams &params, const TrajectoryState &state);
 
 } // namespace Trajectory
+
+/// Produces the reference trajectory one command at a time, continuously.
+///
+/// Evaluating a waveform as f(2*pi*frequency*t) makes the set-point jump the moment the
+/// user edits the frequency: the same instant t suddenly maps to a different phase, and
+/// the drive is asked to follow a step. The generator instead integrates the phase, so a
+/// frequency edit only changes how fast the phase advances from where it already is, and
+/// slews amplitude and frequency towards the requested values over a short time constant,
+/// so an edit of either spreads over many command cycles instead of one.
+class TrajectoryGenerator
+{
+public:
+    /// Advances the state by `dt` seconds and returns the command for the new instant.
+    /// The first call adopts the requested amplitude and frequency directly - there is
+    /// nothing yet to move away from.
+    TrajectoryOutput step(const TrajectoryParams &params, double dt);
+
+    const TrajectoryState &state() const { return m_state; }
+
+private:
+    TrajectoryState m_state;
+    bool m_primed = false;
+};
 
 #endif // CONTROL_TRAJECTORY_H

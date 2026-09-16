@@ -46,7 +46,9 @@ public:
     bool isPaused() const { return m_paused.load(std::memory_order_relaxed); }
 
 signals:
-    /// The most recent set-point, throttled to roughly 50 Hz for the plot.
+    /// The most recent set-point, throttled to roughly 100 Hz for the plot, and
+    /// stamped with its production time so the plot can place it on the telemetry
+    /// time base rather than at delivery time.
     void setpointProduced(quint8 nodeId, const TrajectoryOutput &output);
     void runningChanged(quint8 nodeId, bool running);
 

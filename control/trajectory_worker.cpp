@@ -9,7 +9,9 @@
 
 namespace {
 /// Set-points are published to the plot at about this rate, not at the command rate.
-constexpr int kSetpointReportHz = 50;
+/// Matched to the telemetry rate: anything slower shows up as visible steps on a
+/// triangle, because the plot draws one set-point point per telemetry sample.
+constexpr int kSetpointReportHz = 100;
 } // namespace
 
 TrajectoryWorker::TrajectoryWorker(quint8 nodeId, DeviceLink *link, int rateHz)
@@ -75,18 +77,30 @@ void TrajectoryWorker::run()
     const auto period = std::chrono::nanoseconds(1'000'000'000LL / m_rateHz);
     const int reportEvery = qMax(1, m_rateHz / kSetpointReportHz);
 
-    const auto startTime = clock::now();
-    auto nextDeadline = startTime;
+    // The waveform is generated incrementally instead of from the elapsed time, so that
+    // editing frequency or amplitude bends the reference from where it is rather than
+    // jumping it. Keeping the generator here makes it this thread's alone.
+    TrajectoryGenerator generator;
+
+    auto nextDeadline = clock::now();
+    auto lastStep = nextDeadline;
     qint64 tick = 0;
 
     while (!m_stopRequested.load(std::memory_order_relaxed)) {
         nextDeadline += period;
 
+        // Measured rather than assumed: a cycle that overran must advance the phase by
+        // the time it really took, or the trajectory slows down under load. Read even
+        // while paused, so that resuming starts from one period and not from the whole
+        // length of the pause.
+        const auto stepTime = clock::now();
+        const double dt = std::chrono::duration<double>(stepTime - lastStep).count();
+        lastStep = stepTime;
+
         if (!m_paused.load(std::memory_order_relaxed)) {
-            const double t =
-                    std::chrono::duration<double>(clock::now() - startTime).count();
             const TrajectoryParams params = currentParams();
-            const TrajectoryOutput output = Trajectory::evaluate(params, t);
+            TrajectoryOutput output = generator.step(params, dt);
+            output.t_us = hostTimeUs();
 
             if (m_link) {
                 if (params.protocol == ControlProtocol::Servo) {

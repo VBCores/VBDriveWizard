@@ -1121,6 +1121,10 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
         <translation>Продолжить</translation>
     </message>
     <message>
+        <source>No drives found - press refresh</source>
+        <translation>Устройства не найдены - нажмите обновить</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="382"/>
         <location filename="../mainwindow.cpp" line="934"/>
         <source>Not connected</source>
