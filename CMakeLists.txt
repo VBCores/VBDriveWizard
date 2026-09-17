@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(VBDriveWizard VERSION 1.0 LANGUAGES C CXX)
+project(VBDriveWizard VERSION 0.0.1 LANGUAGES C CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -120,9 +120,14 @@ cyphal_add_dsdl_types(VBDriveWizard
 
 # Lets the application find the bundled registers/*.yaml and the default config
 # when it is run straight out of the build directory (pattern taken from RWIP_GUI).
-target_compile_definitions(VBDriveWizard PRIVATE
-    VBDRIVEWIZARD_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
-)
+# Turned off for packaged builds so the installed binary never prefers a stale
+# source checkout over /usr/share.
+option(VBDRIVEWIZARD_DEV_PATHS "Look up registers/config/firmwares in the source tree" ON)
+if(VBDRIVEWIZARD_DEV_PATHS)
+    target_compile_definitions(VBDriveWizard PRIVATE
+        VBDRIVEWIZARD_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+endif()
 
 target_link_libraries(VBDriveWizard PRIVATE
     Qt6::Widgets
@@ -154,6 +159,9 @@ qt_add_translations(VBDriveWizard
 set_target_properties(VBDriveWizard PROPERTIES WIN32_EXECUTABLE TRUE)
 
 include(GNUInstallDirs)
+# Debian policy expects 0755 directories; otherwise the build umask leaks into the package.
+set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 install(TARGETS VBDriveWizard RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY registers/ DESTINATION ${CMAKE_INSTALL_DATADIR}/VBDriveWizard/registers)
 # GNOME/KDE take the dock and launcher icon from the .desktop entry matched by the
@@ -167,3 +175,40 @@ if(UNIX AND NOT APPLE)
 endif()
 
 qt_finalize_executable(VBDriveWizard)
+
+# ---------------------------------------------------------------------------
+# Packaging (Debian/Ubuntu)
+# ---------------------------------------------------------------------------
+if(UNIX AND NOT APPLE)
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_PACKAGE_NAME "vbdrivewizard")
+    set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+    set(CPACK_PACKAGE_CONTACT "Voltbro <info@voltbro.com>")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Configuration and tuning tool for Voltbro VBDrive")
+    # CPack indents continuation lines itself, so no leading spaces here.
+    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
+"Desktop GUI for checking and configuring Voltbro VBDrive servo drives over
+USB serial or Cyphal/CAN: register editing, telemetry plots, trajectory
+control and firmware updates.
+.
+Serial access requires membership in the dialout group:
+sudo usermod -aG dialout $USER (then log out and back in).")
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/VBCores/VBDriveWizard")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
+    set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+    # Without this CPack stages under /usr/local, where desktop entries and
+    # icons are not guaranteed to be picked up.
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+    set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+    # The SVG icon/image plugins are loaded at runtime, so dpkg-shlibdeps
+    # cannot see them; icons.qrc is mostly SVG.
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6svg6")
+    set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "qt6-wayland, qt6-gtk-platformtheme")
+    set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/debian/postinst"
+        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/debian/postrm")
+    set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION ON)
+    set(CPACK_STRIP_FILES ON)
+    include(CPack)
+endif()

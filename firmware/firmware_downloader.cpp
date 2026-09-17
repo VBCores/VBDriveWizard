@@ -10,6 +10,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QSaveFile>
+#include <QStandardPaths>
 #include <QUrl>
 
 FirmwareDownloader::FirmwareDownloader(QObject *parent)
@@ -30,11 +31,13 @@ QString FirmwareDownloader::firmwareDirectory()
         if (QFileInfo::exists(path))
             return QDir(path).absolutePath();
     }
-    const QString fallback = candidates.isEmpty()
-            ? QCoreApplication::applicationDirPath()
-            : candidates.first();
-    QDir().mkpath(fallback);
-    return QDir(fallback).absolutePath();
+    // Installed builds live under /usr/bin, which is not writable by the user.
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (dir.isEmpty())
+        dir = QCoreApplication::applicationDirPath();
+    dir += QStringLiteral("/firmwares");
+    QDir().mkpath(dir);
+    return QDir(dir).absolutePath();
 }
 
 void FirmwareDownloader::downloadLatest(const QString &targetDirectory)

@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     // Set before anything reads QStandardPaths::AppConfigLocation.
     app.setApplicationName(QStringLiteral("VBDriveWizard"));
     app.setOrganizationName(QStringLiteral("Voltbro"));
-    app.setApplicationVersion(QStringLiteral("1.0"));
+    app.setApplicationVersion(QStringLiteral("0.0.1"));
     // Matches VBDriveWizard.desktop: on Wayland (and GNOME's dock on X11) the taskbar
     // icon comes from that entry, so the app id has to be set for it to be found.
     app.setDesktopFileName(QStringLiteral("VBDriveWizard"));

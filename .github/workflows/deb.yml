@@ -1,0 +1,62 @@
+name: Debian package
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deb:
+    # Ubuntu 24.04 ships Qt 6.4, the same version the package targets.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake ninja-build build-essential \
+            qt6-base-dev qt6-serialport-dev qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools \
+            libqt6svg6 libyaml-cpp-dev libgl1-mesa-dev \
+            dpkg-dev lintian pipx
+          pipx install nunavut==2.3.1
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DVBDRIVEWIZARD_DEV_PATHS=OFF
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Package
+        run: cpack --config build/CPackConfig.cmake -B build
+
+      - name: Lint package
+        run: lintian --tag-display-limit 0 build/*.deb || true
+
+      - name: Install and smoke-test
+        run: |
+          sudo apt-get install -y ./build/*.deb
+          test -x /usr/bin/VBDriveWizard
+          test -f /usr/share/applications/VBDriveWizard.desktop
+          test -f /usr/share/icons/hicolor/512x512/apps/VBDriveWizard.png
+          test -d /usr/share/VBDriveWizard/registers
+          QT_QPA_PLATFORM=offscreen timeout 10 /usr/bin/VBDriveWizard || [ $? -eq 124 ]
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vbdrivewizard-deb
+          path: build/*.deb
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/*.deb
