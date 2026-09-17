@@ -18,7 +18,7 @@ RestoreLabel::RestoreLabel(QWidget *parent)
     m_source = QIcon(QStringLiteral(":/icons/restore.svg"))
                        .pixmap(QSize(kIconSize, kIconSize));
     setCursor(Qt::PointingHandCursor);
-    setToolTip(tr("Restore the value this field had when the drive was selected"));
+    setToolTip(tr("Restore the value this field had when the actuator was selected"));
     setFixedSize(kIconSize, kIconSize);
     // MainWindow toggles visibility as the bound editor diverges from the snapshot, so
     // the layout has to keep the slot reserved -- otherwise every appearance nudges the

@@ -103,7 +103,7 @@ bool RegisterYaml::save(const QString &path, const RegisterMap &values, QString 
     QTextStream out(&file);
     out.setLocale(QLocale::c());
     out << "# VBDrive register profile written by VBDriveWizard.\n"
-        << "# Values are in the drive's native units (radians, rad/s, N*m, A).\n"
+        << "# Values are in the actuator's native units (radians, rad/s, N*m, A).\n"
         << "# 'nan' means the limit is not set.\n\n";
 
     // Written in catalog order so profiles diff cleanly against each other.

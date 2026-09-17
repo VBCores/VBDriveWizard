@@ -74,21 +74,21 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message numerus="yes">
         <location filename="../transport/cyphal_service.cpp" line="111"/>
-        <source>Found %n drive(s) on %1.</source>
+        <source>Found %n actuator(s) on %1.</source>
         <translation>
-            <numerusform>Found %n drive(s) on %1.</numerusform>
+            <numerusform>Found %n actuator(s) on %1.</numerusform>
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="135"/>
-        <source>The drive stopped answering.</source>
-        <translation>The drive stopped answering.</translation>
+        <source>The actuator stopped answering.</source>
+        <translation>The actuator stopped answering.</translation>
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="142"/>
-        <source>The drive did not answer register &apos;%1&apos; in time.</source>
-        <translation>The drive did not answer register &apos;%1&apos; in time.</translation>
+        <source>The actuator did not answer register &apos;%1&apos; in time.</source>
+        <translation>The actuator did not answer register &apos;%1&apos; in time.</translation>
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="170"/>
@@ -97,8 +97,8 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="193"/>
-        <source>The drive did not accept the value.</source>
-        <translation>The drive did not accept the value.</translation>
+        <source>The actuator did not accept the value.</source>
+        <translation>The actuator did not accept the value.</translation>
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="194"/>
@@ -107,21 +107,21 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="203"/>
-        <source>Register &apos;%1&apos; is not available on this drive.</source>
-        <translation>Register &apos;%1&apos; is not available on this drive.</translation>
+        <source>Register &apos;%1&apos; is not available on this actuator.</source>
+        <translation>Register &apos;%1&apos; is not available on this actuator.</translation>
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="231"/>
-        <source>These registers were rejected by the drive: %1</source>
-        <translation>These registers were rejected by the drive: %1</translation>
+        <source>These registers were rejected by the actuator: %1</source>
+        <translation>These registers were rejected by the actuator: %1</translation>
     </message>
 </context>
 <context>
     <name>DeviceModel</name>
     <message>
         <location filename="../core/device_model.cpp" line="21"/>
-        <source>Unknown drive</source>
-        <translation>Unknown drive</translation>
+        <source>Unknown actuator</source>
+        <translation>Unknown actuator</translation>
     </message>
 </context>
 <context>
@@ -616,8 +616,8 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     <message>
         <location filename="../mainwindow.ui" line="1254"/>
         <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2309"/>
-        <source>Current Version:</source>
-        <translation>Current Version:</translation>
+        <source>Current Revision:</source>
+        <translation>Current Revision:</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1261"/>
@@ -1086,10 +1086,10 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="276"/>
-        <source>The drive did not answer after flashing; connect again by hand.
+        <source>The actuator did not answer after flashing; connect again by hand.
 
 %1</source>
-        <translation>The drive did not answer after flashing; connect again by hand.
+        <translation>The actuator did not answer after flashing; connect again by hand.
 
 %1</translation>
     </message>
@@ -1131,8 +1131,8 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1308"/>
-        <source>No drives found - press refresh</source>
-        <translation>No drives found - press refresh</translation>
+        <source>No actuators found - press refresh</source>
+        <translation>No actuators found - press refresh</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="198"/>
@@ -1149,9 +1149,9 @@ VBDrive uses Cyphal over CAN FD, so an FD-capable adapter is required.</translat
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="518"/>
-        <source>Some register changes have not been written to the drive.
+        <source>Some register changes have not been written to the actuator.
 Close anyway?</source>
-        <translation>Some register changes have not been written to the drive.
+        <translation>Some register changes have not been written to the actuator.
 Close anyway?</translation>
     </message>
     <message>
@@ -1177,8 +1177,8 @@ Close anyway?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1066"/>
-        <source>Listening for drives on %1...</source>
-        <translation>Listening for drives on %1...</translation>
+        <source>Listening for actuators on %1...</source>
+        <translation>Listening for actuators on %1...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1095"/>
@@ -1210,9 +1210,9 @@ Close anyway?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1370"/>
-        <source>Drive %1 has register changes that were not written.
+        <source>Actuator %1 has register changes that were not written.
 Write them before switching?</source>
-        <translation>Drive %1 has register changes that were not written.
+        <translation>Actuator %1 has register changes that were not written.
 Write them before switching?</translation>
     </message>
     <message>
@@ -1227,9 +1227,9 @@ Write them before switching?</translation>
     </message>
     <message numerus="yes">
         <location filename="../mainwindow.cpp" line="1489"/>
-        <source>Writing %n register(s), the drive restarts to apply them...</source>
+        <source>Writing %n register(s), the actuator restarts to apply them...</source>
         <translation>
-            <numerusform>Writing %n register(s), the drive restarts to apply them...</numerusform>
+            <numerusform>Writing %n register(s), the actuator restarts to apply them...</numerusform>
             <numerusform></numerusform>
         </translation>
     </message>
@@ -1253,17 +1253,17 @@ Write them before switching?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1532"/>
-        <source>Calibration moves the motor and cannot be cancelled. The drive stops answering until it finishes.
+        <source>Calibration moves the motor and cannot be cancelled. The actuator stops answering until it finishes.
 
 Start calibration?</source>
-        <translation>Calibration moves the motor and cannot be cancelled. The drive stops answering until it finishes.
+        <translation>Calibration moves the motor and cannot be cancelled. The actuator stops answering until it finishes.
 
 Start calibration?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1541"/>
-        <source>Calibration started; the drive will not answer until it is done.</source>
-        <translation>Calibration started; the drive will not answer until it is done.</translation>
+        <source>Calibration started; the actuator will not answer until it is done.</source>
+        <translation>Calibration started; the actuator will not answer until it is done.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1563"/>
@@ -1341,23 +1341,23 @@ Start calibration?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1732"/>
-        <source>The drive is not calibrated. Please calibrate the drive to start working.</source>
-        <translation>The drive is not calibrated. Please calibrate the drive to start working.</translation>
+        <source>The actuator is not calibrated. Please calibrate the actuator to start working.</source>
+        <translation>The actuator is not calibrated. Please calibrate the actuator to start working.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1736"/>
-        <source>Drive not calibrated</source>
-        <translation>Drive not calibrated</translation>
+        <source>Actuator not calibrated</source>
+        <translation>Actuator not calibrated</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1784"/>
-        <source>Drive lost</source>
-        <translation>Drive lost</translation>
+        <source>Actuator lost</source>
+        <translation>Actuator lost</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1785"/>
-        <source>Drive %1 (node %2) stopped sending heartbeats.</source>
-        <translation>Drive %1 (node %2) stopped sending heartbeats.</translation>
+        <source>Actuator %1 (node %2) stopped sending heartbeats.</source>
+        <translation>Actuator %1 (node %2) stopped sending heartbeats.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1788"/>
@@ -1371,8 +1371,8 @@ Start calibration?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1791"/>
-        <source>Remove drive</source>
-        <translation>Remove drive</translation>
+        <source>Remove actuator</source>
+        <translation>Remove actuator</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1803"/>
@@ -1381,8 +1381,8 @@ Start calibration?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1825"/>
-        <source>The drive restarted with the new settings.</source>
-        <translation>The drive restarted with the new settings.</translation>
+        <source>The actuator restarted with the new settings.</source>
+        <translation>The actuator restarted with the new settings.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1838"/>
@@ -1426,8 +1426,8 @@ Start calibration?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2451"/>
-        <source>Emergency stop: all drives disabled.</source>
-        <translation>Emergency stop: all drives disabled.</translation>
+        <source>Emergency stop: all actuators disabled.</source>
+        <translation>Emergency stop: all actuators disabled.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2578"/>
@@ -1451,18 +1451,18 @@ Start calibration?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="350"/>
-        <source>Restart the drive and press OK.</source>
-        <translation>Restart the drive and press OK.</translation>
+        <source>Restart the actuator and press OK.</source>
+        <translation>Restart the actuator and press OK.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="364"/>
-        <source>%1 Connect to the drive from CONNECTION.</source>
-        <translation>%1 Connect to the drive from CONNECTION.</translation>
+        <source>%1 Connect to the actuator from CONNECTION.</source>
+        <translation>%1 Connect to the actuator from CONNECTION.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1129"/>
-        <source>The drive has been stopped by the emergency stop. To resume, restart the drive and connect to it again.</source>
-        <translation>The drive has been stopped by the emergency stop. To resume, restart the drive and connect to it again.</translation>
+        <source>The actuator has been stopped by the emergency stop. To resume, restart the actuator and connect to it again.</source>
+        <translation>The actuator has been stopped by the emergency stop. To resume, restart the actuator and connect to it again.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2486"/>
@@ -1541,8 +1541,8 @@ Start calibration?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2682"/>
-        <source>Reconnecting to the flashed drive...</source>
-        <translation>Reconnecting to the flashed drive...</translation>
+        <source>Reconnecting to the flashed actuator...</source>
+        <translation>Reconnecting to the flashed actuator...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2708"/>
@@ -1764,9 +1764,9 @@ VBDrive is programmed over SWD with an ST-Link.</translation>
     <message>
         <location filename="../ui/preferences_dialog.cpp" line="27"/>
         <source>Node ID this application announces on the CAN bus.
-It must not collide with any drive.</source>
+It must not collide with any actuator.</source>
         <translation>Node ID this application announces on the CAN bus.
-It must not collide with any drive.</translation>
+It must not collide with any actuator.</translation>
     </message>
 </context>
 <context>
@@ -1817,8 +1817,8 @@ It must not collide with any drive.</translation>
     <name>RestoreLabel</name>
     <message>
         <location filename="../ui/restore_label.cpp" line="21"/>
-        <source>Restore the value this field had when the drive was selected</source>
-        <translation>Restore the value this field had when the drive was selected</translation>
+        <source>Restore the value this field had when the actuator was selected</source>
+        <translation>Restore the value this field had when the actuator was selected</translation>
     </message>
 </context>
 <context>
@@ -1830,13 +1830,13 @@ It must not collide with any drive.</translation>
     </message>
     <message>
         <location filename="../ui/restore_model_dialog.ui" line="35"/>
-        <source>Load the factory register profile for this drive model. The values are placed in the editors; nothing is written to the drive until you press Write.</source>
-        <translation>Load the factory register profile for this drive model. The values are placed in the editors; nothing is written to the drive until you press Write.</translation>
+        <source>Load the factory register profile for this actuator model. The values are placed in the editors; nothing is written to the actuator until you press Write.</source>
+        <translation>Load the factory register profile for this actuator model. The values are placed in the editors; nothing is written to the actuator until you press Write.</translation>
     </message>
     <message>
         <location filename="../ui/restore_model_dialog.ui" line="62"/>
-        <source>Drive model:</source>
-        <translation>Drive model:</translation>
+        <source>Actuator model:</source>
+        <translation>Actuator model:</translation>
     </message>
     <message>
         <location filename="../ui/restore_model_dialog.ui" line="70"/>
@@ -1890,18 +1890,18 @@ It must not collide with any drive.</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="299"/>
-        <source>The drive did not answer after restarting: %1</source>
-        <translation>The drive did not answer after restarting: %1</translation>
+        <source>The actuator did not answer after restarting: %1</source>
+        <translation>The actuator did not answer after restarting: %1</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="323"/>
-        <source>Drive detected on %1.</source>
-        <translation>Drive detected on %1.</translation>
+        <source>Actuator detected on %1.</source>
+        <translation>Actuator detected on %1.</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="324"/>
-        <source>No drive answered on %1: %2</source>
-        <translation>No drive answered on %1: %2</translation>
+        <source>No actuator answered on %1: %2</source>
+        <translation>No actuator answered on %1: %2</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="332"/>
@@ -1910,8 +1910,8 @@ It must not collide with any drive.</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="392"/>
-        <source>These registers were rejected by the drive: %1</source>
-        <translation>These registers were rejected by the drive: %1</translation>
+        <source>These registers were rejected by the actuator: %1</source>
+        <translation>These registers were rejected by the actuator: %1</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="498"/>
@@ -1920,13 +1920,13 @@ It must not collide with any drive.</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="523"/>
-        <source>The drive did not come back after restarting.</source>
-        <translation>The drive did not come back after restarting.</translation>
+        <source>The actuator did not come back after restarting.</source>
+        <translation>The actuator did not come back after restarting.</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="580"/>
-        <source>The drive did not answer in time.</source>
-        <translation>The drive did not answer in time.</translation>
+        <source>The actuator did not answer in time.</source>
+        <translation>The actuator did not answer in time.</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="665"/>

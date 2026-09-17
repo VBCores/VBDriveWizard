@@ -1,5 +1,5 @@
 # VBDrive register profile written by VBDriveWizard.
-# Values are in the drive's native units (radians, rad/s, N*m, A).
+# Values are in the actuator's native units (radians, rad/s, N*m, A).
 # 'nan' means the limit is not set.
 
 gear: 36

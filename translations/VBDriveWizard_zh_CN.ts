@@ -74,19 +74,19 @@ VBDrive 使用基于 CAN FD 的 Cyphal，因此需要支持 FD 的适配器。</
     </message>
     <message numerus="yes">
         <location filename="../transport/cyphal_service.cpp" line="111"/>
-        <source>Found %n drive(s) on %1.</source>
+        <source>Found %n actuator(s) on %1.</source>
         <translation>
             <numerusform>在 %1 上找到 %n 个驱动器。</numerusform>
         </translation>
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="135"/>
-        <source>The drive stopped answering.</source>
+        <source>The actuator stopped answering.</source>
         <translation>驱动器停止响应。</translation>
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="142"/>
-        <source>The drive did not answer register &apos;%1&apos; in time.</source>
+        <source>The actuator did not answer register &apos;%1&apos; in time.</source>
         <translation>驱动器未及时响应寄存器“%1”。</translation>
     </message>
     <message>
@@ -96,7 +96,7 @@ VBDrive 使用基于 CAN FD 的 Cyphal，因此需要支持 FD 的适配器。</
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="193"/>
-        <source>The drive did not accept the value.</source>
+        <source>The actuator did not accept the value.</source>
         <translation>驱动器未接受该值。</translation>
     </message>
     <message>
@@ -106,12 +106,12 @@ VBDrive 使用基于 CAN FD 的 Cyphal，因此需要支持 FD 的适配器。</
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="203"/>
-        <source>Register &apos;%1&apos; is not available on this drive.</source>
+        <source>Register &apos;%1&apos; is not available on this actuator.</source>
         <translation>该驱动器上没有寄存器“%1”。</translation>
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="231"/>
-        <source>These registers were rejected by the drive: %1</source>
+        <source>These registers were rejected by the actuator: %1</source>
         <translation>驱动器拒绝了这些寄存器：%1</translation>
     </message>
 </context>
@@ -119,7 +119,7 @@ VBDrive 使用基于 CAN FD 的 Cyphal，因此需要支持 FD 的适配器。</
     <name>DeviceModel</name>
     <message>
         <location filename="../core/device_model.cpp" line="21"/>
-        <source>Unknown drive</source>
+        <source>Unknown actuator</source>
         <translation>未知驱动器</translation>
     </message>
 </context>
@@ -615,7 +615,7 @@ VBDrive 使用基于 CAN FD 的 Cyphal，因此需要支持 FD 的适配器。</
     <message>
         <location filename="../mainwindow.ui" line="1254"/>
         <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2309"/>
-        <source>Current Version:</source>
+        <source>Current Revision:</source>
         <translation>当前版本：</translation>
     </message>
     <message>
@@ -1085,7 +1085,7 @@ VBDrive 使用基于 CAN FD 的 Cyphal，因此需要支持 FD 的适配器。</
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="276"/>
-        <source>The drive did not answer after flashing; connect again by hand.
+        <source>The actuator did not answer after flashing; connect again by hand.
 
 %1</source>
         <translation>烧录后驱动器没有响应；请手动重新连接。
@@ -1130,7 +1130,7 @@ VBDrive 使用基于 CAN FD 的 Cyphal，因此需要支持 FD 的适配器。</
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1308"/>
-        <source>No drives found - press refresh</source>
+        <source>No actuators found - press refresh</source>
         <translation>未找到设备 - 请点击刷新</translation>
     </message>
     <message>
@@ -1148,7 +1148,7 @@ VBDrive 使用基于 CAN FD 的 Cyphal，因此需要支持 FD 的适配器。</
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="518"/>
-        <source>Some register changes have not been written to the drive.
+        <source>Some register changes have not been written to the actuator.
 Close anyway?</source>
         <translation>部分寄存器更改尚未写入驱动器。
 仍要关闭吗？</translation>
@@ -1176,7 +1176,7 @@ Close anyway?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1066"/>
-        <source>Listening for drives on %1...</source>
+        <source>Listening for actuators on %1...</source>
         <translation>正在 %1 上搜索驱动器...</translation>
     </message>
     <message>
@@ -1209,7 +1209,7 @@ Close anyway?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1370"/>
-        <source>Drive %1 has register changes that were not written.
+        <source>Actuator %1 has register changes that were not written.
 Write them before switching?</source>
         <translation>驱动器 %1 有未写入的寄存器更改。
 切换前是否写入？</translation>
@@ -1226,7 +1226,7 @@ Write them before switching?</source>
     </message>
     <message numerus="yes">
         <location filename="../mainwindow.cpp" line="1489"/>
-        <source>Writing %n register(s), the drive restarts to apply them...</source>
+        <source>Writing %n register(s), the actuator restarts to apply them...</source>
         <translation>
             <numerusform>正在写入 %n 个寄存器，驱动器将重启以应用...</numerusform>
         </translation>
@@ -1250,7 +1250,7 @@ Write them before switching?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1532"/>
-        <source>Calibration moves the motor and cannot be cancelled. The drive stops answering until it finishes.
+        <source>Calibration moves the motor and cannot be cancelled. The actuator stops answering until it finishes.
 
 Start calibration?</source>
         <translation>校准会转动电机且无法取消。驱动器在校准完成前不会响应。
@@ -1259,7 +1259,7 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1541"/>
-        <source>Calibration started; the drive will not answer until it is done.</source>
+        <source>Calibration started; the actuator will not answer until it is done.</source>
         <translation>校准已开始，驱动器在完成前不会响应。</translation>
     </message>
     <message>
@@ -1337,22 +1337,22 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1732"/>
-        <source>The drive is not calibrated. Please calibrate the drive to start working.</source>
+        <source>The actuator is not calibrated. Please calibrate the actuator to start working.</source>
         <translation>驱动器未校准。请先校准驱动器，然后再开始工作。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1736"/>
-        <source>Drive not calibrated</source>
+        <source>Actuator not calibrated</source>
         <translation>驱动器未校准</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1784"/>
-        <source>Drive lost</source>
+        <source>Actuator lost</source>
         <translation>驱动器失联</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1785"/>
-        <source>Drive %1 (node %2) stopped sending heartbeats.</source>
+        <source>Actuator %1 (node %2) stopped sending heartbeats.</source>
         <translation>驱动器 %1（节点 %2）停止发送心跳。</translation>
     </message>
     <message>
@@ -1367,7 +1367,7 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1791"/>
-        <source>Remove drive</source>
+        <source>Remove actuator</source>
         <translation>移除驱动器</translation>
     </message>
     <message>
@@ -1377,7 +1377,7 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1825"/>
-        <source>The drive restarted with the new settings.</source>
+        <source>The actuator restarted with the new settings.</source>
         <translation>驱动器已使用新设置重启。</translation>
     </message>
     <message>
@@ -1422,7 +1422,7 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2451"/>
-        <source>Emergency stop: all drives disabled.</source>
+        <source>Emergency stop: all actuators disabled.</source>
         <translation>急停：已关闭所有驱动器。</translation>
     </message>
     <message>
@@ -1447,17 +1447,17 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="350"/>
-        <source>Restart the drive and press OK.</source>
+        <source>Restart the actuator and press OK.</source>
         <translation>请重启驱动器，然后按“确定”。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="364"/>
-        <source>%1 Connect to the drive from CONNECTION.</source>
+        <source>%1 Connect to the actuator from CONNECTION.</source>
         <translation>%1 请在“连接”面板中连接驱动器。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1129"/>
-        <source>The drive has been stopped by the emergency stop. To resume, restart the drive and connect to it again.</source>
+        <source>The actuator has been stopped by the emergency stop. To resume, restart the actuator and connect to it again.</source>
         <translation>驱动器已被急停。要恢复工作，请重启驱动器并重新连接。</translation>
     </message>
     <message>
@@ -1537,7 +1537,7 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2682"/>
-        <source>Reconnecting to the flashed drive...</source>
+        <source>Reconnecting to the flashed actuator...</source>
         <translation>正在重新连接已烧录的驱动器...</translation>
     </message>
     <message>
@@ -1760,7 +1760,7 @@ VBDrive 通过 ST-Link 以 SWD 方式烧录。</translation>
     <message>
         <location filename="../ui/preferences_dialog.cpp" line="27"/>
         <source>Node ID this application announces on the CAN bus.
-It must not collide with any drive.</source>
+It must not collide with any actuator.</source>
         <translation>本程序在 CAN 总线上声明的 Node ID。
 不得与任何驱动器冲突。</translation>
     </message>
@@ -1813,7 +1813,7 @@ It must not collide with any drive.</source>
     <name>RestoreLabel</name>
     <message>
         <location filename="../ui/restore_label.cpp" line="21"/>
-        <source>Restore the value this field had when the drive was selected</source>
+        <source>Restore the value this field had when the actuator was selected</source>
         <translation>恢复选择该驱动器时此字段的值</translation>
     </message>
 </context>
@@ -1826,12 +1826,12 @@ It must not collide with any drive.</source>
     </message>
     <message>
         <location filename="../ui/restore_model_dialog.ui" line="35"/>
-        <source>Load the factory register profile for this drive model. The values are placed in the editors; nothing is written to the drive until you press Write.</source>
+        <source>Load the factory register profile for this actuator model. The values are placed in the editors; nothing is written to the actuator until you press Write.</source>
         <translation>加载该型号驱动器的出厂寄存器配置。数值会填入编辑框；在按下“写入”之前不会写入驱动器。</translation>
     </message>
     <message>
         <location filename="../ui/restore_model_dialog.ui" line="62"/>
-        <source>Drive model:</source>
+        <source>Actuator model:</source>
         <translation>驱动器型号：</translation>
     </message>
     <message>
@@ -1886,17 +1886,17 @@ It must not collide with any drive.</source>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="299"/>
-        <source>The drive did not answer after restarting: %1</source>
+        <source>The actuator did not answer after restarting: %1</source>
         <translation>驱动器重启后没有响应：%1</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="323"/>
-        <source>Drive detected on %1.</source>
+        <source>Actuator detected on %1.</source>
         <translation>在 %1 上检测到驱动器。</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="324"/>
-        <source>No drive answered on %1: %2</source>
+        <source>No actuator answered on %1: %2</source>
         <translation>%1 上没有驱动器响应：%2</translation>
     </message>
     <message>
@@ -1906,7 +1906,7 @@ It must not collide with any drive.</source>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="392"/>
-        <source>These registers were rejected by the drive: %1</source>
+        <source>These registers were rejected by the actuator: %1</source>
         <translation>驱动器拒绝了这些寄存器：%1</translation>
     </message>
     <message>
@@ -1916,12 +1916,12 @@ It must not collide with any drive.</source>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="523"/>
-        <source>The drive did not come back after restarting.</source>
+        <source>The actuator did not come back after restarting.</source>
         <translation>驱动器重启后未恢复连接。</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="580"/>
-        <source>The drive did not answer in time.</source>
+        <source>The actuator did not answer in time.</source>
         <translation>驱动器未及时响应。</translation>
     </message>
     <message>

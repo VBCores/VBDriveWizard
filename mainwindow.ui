@@ -1251,7 +1251,7 @@
                   <item>
                    <widget class="QLabel" name="CurFirmwareRevCaptionLbl">
                     <property name="text">
-                     <string>Current Version:</string>
+                     <string>Current Revision:</string>
                     </property>
                    </widget>
                   </item>

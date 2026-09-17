@@ -108,7 +108,7 @@ void CyphalService::onDiscoveryFinished()
         return;
     }
     emit connectionResult(true,
-                          tr("Found %n drive(s) on %1.", nullptr, m_nodes.size())
+                          tr("Found %n actuator(s) on %1.", nullptr, m_nodes.size())
                                   .arg(m_interfaceName));
 }
 
@@ -132,14 +132,14 @@ void CyphalService::onMaintenanceTick()
         if (!node.lost && node.lastHeartbeatMs != 0
             && now - node.lastHeartbeatMs > kHeartbeatTimeoutMs) {
             node.lost = true;
-            failAllFor(nodeId, tr("The drive stopped answering."));
+            failAllFor(nodeId, tr("The actuator stopped answering."));
             emit deviceLost(nodeId);
             continue;
         }
 
         if (node.inFlight.has_value() && now > node.inFlight->deadlineMs) {
             finish(nodeId, false, RegisterValue{},
-                   tr("The drive did not answer register '%1' in time.")
+                   tr("The actuator did not answer register '%1' in time.")
                            .arg(node.inFlight->name));
             continue;
         }
@@ -190,7 +190,7 @@ void CyphalService::onAccessResponse(quint8 nodeId, int transferId, const Regist
         // take the written value, means the write was refused.
         if (value.isEmpty()) {
             finish(nodeId, false, value,
-                   writable ? tr("The drive did not accept the value.")
+                   writable ? tr("The actuator did not accept the value.")
                             : tr("Register '%1' is read-only.").arg(request.name));
             return;
         }
@@ -200,7 +200,7 @@ void CyphalService::onAccessResponse(quint8 nodeId, int transferId, const Regist
 
     if (value.isEmpty()) {
         finish(nodeId, false, value,
-               tr("Register '%1' is not available on this drive.").arg(request.name));
+               tr("Register '%1' is not available on this actuator.").arg(request.name));
         return;
     }
     finish(nodeId, true, value, QString());
@@ -228,7 +228,7 @@ void CyphalService::finish(quint8 nodeId, bool ok, const RegisterValue &value,
         const bool batchOk = node.batchFailures.isEmpty();
         const QString message = batchOk
                 ? QString()
-                : tr("These registers were rejected by the drive: %1")
+                : tr("These registers were rejected by the actuator: %1")
                           .arg(node.batchFailures.join(QStringLiteral(", ")));
         node.batchFailures.clear();
         emit writeBatchFinished(nodeId, batchOk, message);

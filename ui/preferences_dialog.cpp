@@ -25,7 +25,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
             tr("OpenOCD target script. VBDrive uses an STM32G431VB."));
     ui->LocalNodeIdSpinBox->setToolTip(
             tr("Node ID this application announces on the CAN bus.\n"
-               "It must not collide with any drive."));
+               "It must not collide with any actuator."));
 
     // The platform style decorates standard buttons with icons; keep them text-only.
     for (QAbstractButton *button : ui->ButtonBox->buttons())

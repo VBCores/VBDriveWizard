@@ -273,7 +273,7 @@ void MainWindow::setupServices()
                     m_flashReconnectPending = false;
                     m_flashSerialPort.clear();
                     showError(tr("Reconnect failed"),
-                              tr("The drive did not answer after flashing; connect again "
+                              tr("The actuator did not answer after flashing; connect again "
                                  "by hand.\n\n%1")
                                       .arg(message));
                     return;
@@ -347,7 +347,7 @@ void MainWindow::setupServices()
                 // while the dialog is up is handled as any other disconnect; the
                 // reconnect below then starts from a closed link.
                 QMessageBox::information(this, tr("Firmware flashed"),
-                                         tr("Restart the drive and press OK."));
+                                         tr("Restart the actuator and press OK."));
                 if (!m_flashSerialPort.isEmpty()) {
                     // The drive has been reset into the new image: whatever the
                     // link knew about it is stale, so it is reconnected from scratch.
@@ -361,7 +361,7 @@ void MainWindow::setupServices()
                     // Flashed with no link and no port to go back to: the drive may
                     // have just enumerated, so the list is refreshed for the user.
                     refreshSerialPorts();
-                    setStatusMessage(tr("%1 Connect to the drive from CONNECTION.")
+                    setStatusMessage(tr("%1 Connect to the actuator from CONNECTION.")
                                              .arg(message));
                 }
             });
@@ -515,7 +515,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if (m_devices->anyUnsavedChanges()) {
         const auto answer = QMessageBox::question(
                 this, tr("Unsaved changes"),
-                tr("Some register changes have not been written to the drive.\n"
+                tr("Some register changes have not been written to the actuator.\n"
                    "Close anyway?"),
                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         if (answer != QMessageBox::Yes) {
@@ -1063,7 +1063,7 @@ void MainWindow::onCanConnectClicked()
 
     setLink(m_cyphal);
     ui->CanConnectBtn->setEnabled(false);
-    setStatusMessage(tr("Listening for drives on %1...").arg(interfaceName));
+    setStatusMessage(tr("Listening for actuators on %1...").arg(interfaceName));
     m_cyphal->connectToInterface(interfaceName,
                                  static_cast<quint8>(m_config.ui.local_node_id));
 }
@@ -1128,8 +1128,8 @@ void MainWindow::handleDisconnected()
         QTimer::singleShot(0, this, [this] {
             QMessageBox::information(
                     this, tr("Emergency stop"),
-                    tr("The drive has been stopped by the emergency stop. To resume, "
-                       "restart the drive and connect to it again."));
+                    tr("The actuator has been stopped by the emergency stop. To resume, "
+                       "restart the actuator and connect to it again."));
         });
     }
     if (m_reconnectAfterFlash) {
@@ -1307,7 +1307,7 @@ void MainWindow::rebuildDeviceList()
         // keeps the placeholder out of selection, so onDeviceListSelectionChanged()
         // never sees it.
         auto *placeholder = new QTreeWidgetItem;
-        placeholder->setText(kDeviceModelColumn, tr("No drives found - press refresh"));
+        placeholder->setText(kDeviceModelColumn, tr("No actuators found - press refresh"));
         placeholder->setFlags(Qt::NoItemFlags);
         placeholder->setForeground(kDeviceModelColumn, QColor(0x94, 0xA3, 0xB8));
         placeholder->setTextAlignment(kDeviceModelColumn, Qt::AlignCenter);
@@ -1369,7 +1369,7 @@ bool MainWindow::confirmLeavingDevice(DeviceModel *device)
 
     const auto answer = QMessageBox::question(
             this, tr("Unsaved changes"),
-            tr("Drive %1 has register changes that were not written.\n"
+            tr("Actuator %1 has register changes that were not written.\n"
                "Write them before switching?")
                     .arg(device->displayName()),
             QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Cancel);
@@ -1488,7 +1488,7 @@ void MainWindow::writeConfigToDrive(DeviceModel *device, const RegisterWrites &w
         // be spamming a drive that refuses to move and is then gone for a moment.
         m_control->stop(device->nodeId());
         m_link->writeRegisters(device->nodeId(), writes);
-        setStatusMessage(tr("Writing %n register(s), the drive restarts to apply them...",
+        setStatusMessage(tr("Writing %n register(s), the actuator restarts to apply them...",
                             nullptr, writes.size()));
         return;
     }
@@ -1531,7 +1531,7 @@ void MainWindow::onCalibrate()
 
     const auto answer = QMessageBox::question(
             this, tr("Calibrate sensor"),
-            tr("Calibration moves the motor and cannot be cancelled. The drive stops "
+            tr("Calibration moves the motor and cannot be cancelled. The actuator stops "
                "answering until it finishes.\n\nStart calibration?"),
             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
     if (answer != QMessageBox::Yes)
@@ -1540,7 +1540,7 @@ void MainWindow::onCalibrate()
     // The drive discards all input for the duration, so nothing is awaited. The
     // progress bar is already in the layout, hidden, for the planned staged protocol.
     m_serial->sendBareCommand(QStringLiteral("CALIBRATE"), false);
-    setStatusMessage(tr("Calibration started; the drive will not answer until it is done."));
+    setStatusMessage(tr("Calibration started; the actuator will not answer until it is done."));
 }
 
 void MainWindow::applyProfile(const RegisterMap &values)
@@ -1731,14 +1731,14 @@ void MainWindow::onWriteBatchFinished(quint8 nodeId, bool ok, const QString &err
 void MainWindow::onDriveNotCalibrated(quint8)
 {
     const QString text =
-            tr("The drive is not calibrated. Please calibrate the drive to start working.");
+            tr("The actuator is not calibrated. Please calibrate the actuator to start working.");
     setStatusMessage(text, 0);
     // Connecting enables the drive twice (discovery, then the connected handler) and
     // disconnecting disables it; each is refused the same way, one dialog is enough.
     if (m_driveNotCalibrated || m_closePending || !m_link)
         return;
     m_driveNotCalibrated = true;
-    showError(tr("Drive not calibrated"), text);
+    showError(tr("Actuator not calibrated"), text);
 }
 
 void MainWindow::onTelemetry(quint8 nodeId, const TelemetryBatch &samples)
@@ -1786,14 +1786,14 @@ void MainWindow::onDeviceLost(quint8 nodeId)
 
     QMessageBox box(this);
     box.setIcon(QMessageBox::Warning);
-    box.setWindowTitle(tr("Drive lost"));
-    box.setText(tr("Drive %1 (node %2) stopped sending heartbeats.")
+    box.setWindowTitle(tr("Actuator lost"));
+    box.setText(tr("Actuator %1 (node %2) stopped sending heartbeats.")
                         .arg(device->displayName())
                         .arg(nodeId));
     box.setInformativeText(tr("Wait for it to come back, keeping your unsaved register "
                               "changes, or drop it and discard them?"));
     QPushButton *wait = box.addButton(tr("Reconnect"), QMessageBox::AcceptRole);
-    QPushButton *drop = box.addButton(tr("Remove drive"), QMessageBox::DestructiveRole);
+    QPushButton *drop = box.addButton(tr("Remove actuator"), QMessageBox::DestructiveRole);
     box.setDefaultButton(wait);
     box.exec();
 
@@ -1827,7 +1827,7 @@ void MainWindow::onDriveRebooted()
                                      RegisterValue::fromBool(true)}});
     m_link->readRegisters(nodeId, RegisterCatalog::configGroupNames());
     m_link->readRegisters(nodeId, RegisterCatalog::profileNames());
-    setStatusMessage(tr("The drive restarted with the new settings."));
+    setStatusMessage(tr("The actuator restarted with the new settings."));
 }
 
 void MainWindow::onDeviceReappeared(quint8 nodeId)
@@ -2453,7 +2453,7 @@ void MainWindow::onEmergencyStop()
         m_link->writeRegisters(device->nodeId(), {{QString::fromLatin1(registers::kIsOn),
                                                    RegisterValue::fromBool(false)}});
     }
-    setStatusMessage(tr("Emergency stop: all drives disabled."), 10000);
+    setStatusMessage(tr("Emergency stop: all actuators disabled."), 10000);
     if (!m_link->isConnected())
         return;
     // The link goes down with the drives: the session is over until the drive has
@@ -2684,7 +2684,7 @@ void MainWindow::reconnectAfterFlash()
         m_control->stopAll();
         m_statusTimer.stop();
         m_pollTimer.stop();
-        setStatusMessage(tr("Reconnecting to the flashed drive..."), 0);
+        setStatusMessage(tr("Reconnecting to the flashed actuator..."), 0);
         m_serial->closeLink();
         return;
     }

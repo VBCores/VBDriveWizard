@@ -32,7 +32,7 @@
    <item>
     <widget class="QLabel" name="HintLabel">
      <property name="text">
-      <string>Load the factory register profile for this drive model. The values are placed in the editors; nothing is written to the drive until you press Write.</string>
+      <string>Load the factory register profile for this actuator model. The values are placed in the editors; nothing is written to the actuator until you press Write.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -59,7 +59,7 @@
      <item>
       <widget class="QLabel" name="ModelCaptionLabel">
        <property name="text">
-        <string>Drive model:</string>
+        <string>Actuator model:</string>
        </property>
       </widget>
      </item>

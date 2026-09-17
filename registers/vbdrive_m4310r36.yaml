@@ -9,9 +9,9 @@
 # written, so these are starting points, not tuning. Verify them against the actual
 # mechanics and current/torque limits before driving a load.
 #
-# Values are in the drive's native units (radians, rad/s, N*m, A).
+# Values are in the actuator's native units (radians, rad/s, N*m, A).
 
-# --- drive geometry and limits ---
+# --- actuator geometry and limits ---
 gear: 36
 max_i: 0.3
 max_spd: 1000.0

@@ -74,7 +74,7 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     </message>
     <message numerus="yes">
         <location filename="../transport/cyphal_service.cpp" line="111"/>
-        <source>Found %n drive(s) on %1.</source>
+        <source>Found %n actuator(s) on %1.</source>
         <translation>
             <numerusform>Найден %n привод на %1.</numerusform>
             <numerusform>Найдено %n привода на %1.</numerusform>
@@ -83,12 +83,12 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="135"/>
-        <source>The drive stopped answering.</source>
+        <source>The actuator stopped answering.</source>
         <translation>Привод перестал отвечать.</translation>
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="142"/>
-        <source>The drive did not answer register &apos;%1&apos; in time.</source>
+        <source>The actuator did not answer register &apos;%1&apos; in time.</source>
         <translation>Привод не ответил на регистр «%1» за отведённое время.</translation>
     </message>
     <message>
@@ -98,7 +98,7 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="193"/>
-        <source>The drive did not accept the value.</source>
+        <source>The actuator did not accept the value.</source>
         <translation>Привод не принял значение.</translation>
     </message>
     <message>
@@ -108,12 +108,12 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="203"/>
-        <source>Register &apos;%1&apos; is not available on this drive.</source>
+        <source>Register &apos;%1&apos; is not available on this actuator.</source>
         <translation>Регистр «%1» недоступен на этом приводе.</translation>
     </message>
     <message>
         <location filename="../transport/cyphal_service.cpp" line="231"/>
-        <source>These registers were rejected by the drive: %1</source>
+        <source>These registers were rejected by the actuator: %1</source>
         <translation>Привод отклонил запись регистров: %1</translation>
     </message>
 </context>
@@ -121,7 +121,7 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     <name>DeviceModel</name>
     <message>
         <location filename="../core/device_model.cpp" line="21"/>
-        <source>Unknown drive</source>
+        <source>Unknown actuator</source>
         <translation>Неизвестный привод</translation>
     </message>
 </context>
@@ -617,7 +617,7 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     <message>
         <location filename="../mainwindow.ui" line="1254"/>
         <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2309"/>
-        <source>Current Version:</source>
+        <source>Current Revision:</source>
         <translation>Текущая версия:</translation>
     </message>
     <message>
@@ -1087,7 +1087,7 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="276"/>
-        <source>The drive did not answer after flashing; connect again by hand.
+        <source>The actuator did not answer after flashing; connect again by hand.
 
 %1</source>
         <translation>Привод не ответил после прошивки; подключитесь заново вручную.
@@ -1132,7 +1132,7 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1308"/>
-        <source>No drives found - press refresh</source>
+        <source>No actuators found - press refresh</source>
         <translation>Устройства не найдены - нажмите обновить</translation>
     </message>
     <message>
@@ -1150,7 +1150,7 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="518"/>
-        <source>Some register changes have not been written to the drive.
+        <source>Some register changes have not been written to the actuator.
 Close anyway?</source>
         <translation>Часть изменений регистров не записана в привод.
 Всё равно закрыть?</translation>
@@ -1178,7 +1178,7 @@ Close anyway?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1066"/>
-        <source>Listening for drives on %1...</source>
+        <source>Listening for actuators on %1...</source>
         <translation>Поиск приводов на %1...</translation>
     </message>
     <message>
@@ -1211,7 +1211,7 @@ Close anyway?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1370"/>
-        <source>Drive %1 has register changes that were not written.
+        <source>Actuator %1 has register changes that were not written.
 Write them before switching?</source>
         <translation>У привода %1 есть незаписанные изменения регистров.
 Записать их перед переключением?</translation>
@@ -1228,7 +1228,7 @@ Write them before switching?</source>
     </message>
     <message numerus="yes">
         <location filename="../mainwindow.cpp" line="1489"/>
-        <source>Writing %n register(s), the drive restarts to apply them...</source>
+        <source>Writing %n register(s), the actuator restarts to apply them...</source>
         <translation>
             <numerusform>Запись %n регистра, привод перезапустится для применения...</numerusform>
             <numerusform>Запись %n регистров, привод перезапустится для применения...</numerusform>
@@ -1256,7 +1256,7 @@ Write them before switching?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1532"/>
-        <source>Calibration moves the motor and cannot be cancelled. The drive stops answering until it finishes.
+        <source>Calibration moves the motor and cannot be cancelled. The actuator stops answering until it finishes.
 
 Start calibration?</source>
         <translation>Калибровка вращает двигатель и не может быть прервана. Привод не отвечает до её завершения.
@@ -1265,7 +1265,7 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1541"/>
-        <source>Calibration started; the drive will not answer until it is done.</source>
+        <source>Calibration started; the actuator will not answer until it is done.</source>
         <translation>Калибровка запущена; привод не будет отвечать до её окончания.</translation>
     </message>
     <message>
@@ -1345,22 +1345,22 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1732"/>
-        <source>The drive is not calibrated. Please calibrate the drive to start working.</source>
+        <source>The actuator is not calibrated. Please calibrate the actuator to start working.</source>
         <translation>Привод не откалиброван. Пожалуйста, откалибруйте привод, чтобы начать работу.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1736"/>
-        <source>Drive not calibrated</source>
+        <source>Actuator not calibrated</source>
         <translation>Привод не откалиброван</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1784"/>
-        <source>Drive lost</source>
+        <source>Actuator lost</source>
         <translation>Связь с приводом потеряна</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1785"/>
-        <source>Drive %1 (node %2) stopped sending heartbeats.</source>
+        <source>Actuator %1 (node %2) stopped sending heartbeats.</source>
         <translation>Привод %1 (узел %2) перестал отправлять heartbeat.</translation>
     </message>
     <message>
@@ -1375,7 +1375,7 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1791"/>
-        <source>Remove drive</source>
+        <source>Remove actuator</source>
         <translation>Убрать привод</translation>
     </message>
     <message>
@@ -1385,7 +1385,7 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1825"/>
-        <source>The drive restarted with the new settings.</source>
+        <source>The actuator restarted with the new settings.</source>
         <translation>Привод перезапущен с новыми настройками.</translation>
     </message>
     <message>
@@ -1430,7 +1430,7 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2451"/>
-        <source>Emergency stop: all drives disabled.</source>
+        <source>Emergency stop: all actuators disabled.</source>
         <translation>Аварийная остановка: все приводы выключены.</translation>
     </message>
     <message>
@@ -1455,17 +1455,17 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="350"/>
-        <source>Restart the drive and press OK.</source>
+        <source>Restart the actuator and press OK.</source>
         <translation>Перезапустите привод и нажмите OK.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="364"/>
-        <source>%1 Connect to the drive from CONNECTION.</source>
+        <source>%1 Connect to the actuator from CONNECTION.</source>
         <translation>%1 Подключитесь к приводу в панели ПОДКЛЮЧЕНИЕ.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1129"/>
-        <source>The drive has been stopped by the emergency stop. To resume, restart the drive and connect to it again.</source>
+        <source>The actuator has been stopped by the emergency stop. To resume, restart the actuator and connect to it again.</source>
         <translation>Привод экстренно остановлен. Для возобновления работы перезагрузите привод и заново подключитесь к нему</translation>
     </message>
     <message>
@@ -1545,7 +1545,7 @@ Start calibration?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2682"/>
-        <source>Reconnecting to the flashed drive...</source>
+        <source>Reconnecting to the flashed actuator...</source>
         <translation>Переподключение к прошитому приводу...</translation>
     </message>
     <message>
@@ -1768,7 +1768,7 @@ VBDrive программируется по SWD через ST-Link.</translation
     <message>
         <location filename="../ui/preferences_dialog.cpp" line="27"/>
         <source>Node ID this application announces on the CAN bus.
-It must not collide with any drive.</source>
+It must not collide with any actuator.</source>
         <translation>Node ID, который приложение объявляет на шине CAN.
 Он не должен совпадать с Node ID приводов.</translation>
     </message>
@@ -1821,7 +1821,7 @@ It must not collide with any drive.</source>
     <name>RestoreLabel</name>
     <message>
         <location filename="../ui/restore_label.cpp" line="21"/>
-        <source>Restore the value this field had when the drive was selected</source>
+        <source>Restore the value this field had when the actuator was selected</source>
         <translation>Вернуть значение, которое было при выборе привода</translation>
     </message>
 </context>
@@ -1834,12 +1834,12 @@ It must not collide with any drive.</source>
     </message>
     <message>
         <location filename="../ui/restore_model_dialog.ui" line="35"/>
-        <source>Load the factory register profile for this drive model. The values are placed in the editors; nothing is written to the drive until you press Write.</source>
+        <source>Load the factory register profile for this actuator model. The values are placed in the editors; nothing is written to the actuator until you press Write.</source>
         <translation>Загрузить заводской профиль регистров для этой модели привода. Значения попадут в поля; в привод ничего не записывается, пока вы не нажмёте «Записать».</translation>
     </message>
     <message>
         <location filename="../ui/restore_model_dialog.ui" line="62"/>
-        <source>Drive model:</source>
+        <source>Actuator model:</source>
         <translation>Модель привода:</translation>
     </message>
     <message>
@@ -1894,17 +1894,17 @@ It must not collide with any drive.</source>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="299"/>
-        <source>The drive did not answer after restarting: %1</source>
+        <source>The actuator did not answer after restarting: %1</source>
         <translation>Привод не ответил после перезапуска: %1</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="323"/>
-        <source>Drive detected on %1.</source>
+        <source>Actuator detected on %1.</source>
         <translation>Привод обнаружен на %1.</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="324"/>
-        <source>No drive answered on %1: %2</source>
+        <source>No actuator answered on %1: %2</source>
         <translation>На %1 ни один привод не ответил: %2</translation>
     </message>
     <message>
@@ -1914,7 +1914,7 @@ It must not collide with any drive.</source>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="392"/>
-        <source>These registers were rejected by the drive: %1</source>
+        <source>These registers were rejected by the actuator: %1</source>
         <translation>Привод отклонил запись регистров: %1</translation>
     </message>
     <message>
@@ -1924,12 +1924,12 @@ It must not collide with any drive.</source>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="523"/>
-        <source>The drive did not come back after restarting.</source>
+        <source>The actuator did not come back after restarting.</source>
         <translation>Привод не вернулся после перезапуска.</translation>
     </message>
     <message>
         <location filename="../transport/serial_service.cpp" line="580"/>
-        <source>The drive did not answer in time.</source>
+        <source>The actuator did not answer in time.</source>
         <translation>Привод не ответил за отведённое время.</translation>
     </message>
     <message>

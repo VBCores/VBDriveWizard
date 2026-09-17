@@ -298,7 +298,7 @@ void SerialService::completeCurrent(bool success, const QString &error)
             // Opened while the drive was still starting up (it answers nothing for
             // about a second after the banner): ask again until the window closes.
             if (m_reopenDeadline.hasExpired()) {
-                giveUpReopen(tr("The drive did not answer after restarting: %1").arg(error));
+                giveUpReopen(tr("The actuator did not answer after restarting: %1").arg(error));
                 return;
             }
             PendingCommand retry = command;
@@ -322,8 +322,8 @@ void SerialService::completeCurrent(bool success, const QString &error)
             emit deviceDiscovered(kSerialNodeId);
         }
         emit connectionResult(success,
-                              success ? tr("Drive detected on %1.").arg(m_portName)
-                                      : tr("No drive answered on %1: %2")
+                              success ? tr("Actuator detected on %1.").arg(m_portName)
+                                      : tr("No actuator answered on %1: %2")
                                                 .arg(m_portName, error));
     }
 
@@ -393,7 +393,7 @@ void SerialService::finishBatchCommand(const PendingCommand &command, bool succe
     const QString message =
             ok || notCalibrated
                     ? QString()
-                    : tr("These registers were rejected by the drive: %1")
+                    : tr("These registers were rejected by the actuator: %1")
                               .arg(it->failures.join(QStringLiteral(", ")));
     m_batches.erase(it);
     if (notCalibrated)
@@ -525,7 +525,7 @@ void SerialService::onReopenTimeout()
     if (!m_reopening)
         return;
     if (m_reopenDeadline.hasExpired()) {
-        giveUpReopen(tr("The drive did not come back after restarting."));
+        giveUpReopen(tr("The actuator did not come back after restarting."));
         return;
     }
     QMetaObject::invokeMethod(m_worker, "openPort", Qt::QueuedConnection,
@@ -582,7 +582,7 @@ void SerialService::onWorkerWriteFinished(int commandId, bool success, const QSt
 
 void SerialService::onResponseTimeout()
 {
-    completeCurrent(false, tr("The drive did not answer in time."));
+    completeCurrent(false, tr("The actuator did not answer in time."));
 }
 
 bool SerialService::isStrayRunningModeError(const QString &line,

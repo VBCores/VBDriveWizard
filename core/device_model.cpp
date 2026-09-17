@@ -18,7 +18,7 @@ QString DeviceModel::displayName() const
 {
     const QString model = modelName();
     if (model.isEmpty())
-        return tr("Unknown drive");
+        return tr("Unknown actuator");
 
     // vbdrive_model is just "M4310"; the R-suffix the user recognises is the gear ratio.
     const RegisterValue gear = m_deviceValues.value(QString::fromLatin1(registers::kGear));
