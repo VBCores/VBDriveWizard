@@ -33,6 +33,8 @@ constexpr int kReopenWindowMs = 10000;
 
 /// What the drive answers to servo_cmd / mit_cmd / log_on / is_on:1 in CONFIG mode.
 constexpr auto kRunningModeRequired = "ERROR: RUNNING mode required";
+/// The same, as completeCurrent() reports it: without the prefix.
+constexpr auto kRunningModeRequiredReason = "RUNNING mode required";
 
 bool startsWithAny(const QString &line, const QStringList &prefixes)
 {
@@ -281,8 +283,10 @@ void SerialService::completeCurrent(bool success, const QString &error)
         emit registerWritten(kSerialNodeId, command.token, success, error);
         break;
     case CommandKind::Bare:
-        if (!success && command.expectAck && !command.internal)
+        if (!success && command.expectAck && !command.internal
+            && !(m_notCalibrated && error == QLatin1String(kRunningModeRequiredReason))) {
             emit linkError(tr("Command '%1' failed: %2").arg(command.token, error));
+        }
         break;
     }
 
@@ -333,7 +337,7 @@ void SerialService::completeCurrent(bool success, const QString &error)
         } else {
             if (command.closesConfig)
                 restoreLogStreaming();
-            finishBatchCommand(command, success);
+            finishBatchCommand(command, success, error);
         }
     }
 
@@ -363,22 +367,37 @@ void SerialService::restoreLogStreaming()
     m_queue.prepend(logOn);
 }
 
-void SerialService::finishBatchCommand(const PendingCommand &command, bool success)
+void SerialService::finishBatchCommand(const PendingCommand &command, bool success,
+                                       const QString &error)
 {
     auto it = m_batches.find(command.batchId);
     if (it == m_batches.end())
         return;
+    if (command.kind == CommandKind::Write && !RegisterCatalog::requiresConfigMode(command.token)) {
+        // A runtime register (is_on) is refused with this error outside CONFIG only
+        // in NOT_CALIBRATED: the drive boots there when its calibration record is
+        // missing, and EXIT leads back to it, so it is a state, not a rejection.
+        // The state ends with CALIBRATE, which shows as the next such write going through.
+        if (success)
+            m_notCalibrated = false;
+        else if (error == QLatin1String(kRunningModeRequiredReason))
+            it->notCalibrated = m_notCalibrated = true;
+    }
     if (!success && command.kind == CommandKind::Write)
         it->failures << command.token;
     if (--it->pending > 0)
         return;
 
     const bool ok = it->failures.isEmpty();
+    const bool notCalibrated = it->notCalibrated;
     const QString message =
-            ok ? QString()
-               : tr("These registers were rejected by the drive: %1")
-                         .arg(it->failures.join(QStringLiteral(", ")));
+            ok || notCalibrated
+                    ? QString()
+                    : tr("These registers were rejected by the drive: %1")
+                              .arg(it->failures.join(QStringLiteral(", ")));
     m_batches.erase(it);
+    if (notCalibrated)
+        emit driveNotCalibrated(kSerialNodeId);
     emit writeBatchFinished(kSerialNodeId, ok, message);
 }
 
@@ -457,6 +476,7 @@ void SerialService::onWorkerPortOpened(bool success, const QString &message)
 
     m_portOpen = success;
     m_logStreaming = false;
+    m_notCalibrated = false;
     if (!success) {
         emit connectionResult(false, message);
         return;

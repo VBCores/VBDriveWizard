@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=VBDrive Wizard
+Comment=Configuration and tuning tool for Voltbro VBDrive
+Exec=VBDriveWizard
+Icon=VBDriveWizard
+Terminal=false
+Categories=Development;Utility;
+StartupWMClass=VBDriveWizard

@@ -4,6 +4,8 @@
 #include "app_types.h"
 
 #include <QColor>
+#include <QIcon>
+#include <QPixmap>
 #include <QString>
 
 QT_BEGIN_NAMESPACE
@@ -14,7 +16,8 @@ QT_END_NAMESPACE
 class QCustomPlot;
 
 /// Dark/light theming for the whole application, the plot and the Restore icons.
-/// Palette and stylesheet follow RWIP_GUI, which the spec names as the reference.
+/// Both themes are one set of stylesheet blocks filled from a colour table, so they
+/// style the same widgets the same way and differ only in the colours.
 class ThemeManager
 {
 public:
@@ -23,6 +26,10 @@ public:
     static void applyApplicationTheme(QApplication &app, const UiSettings &settings);
     static void applyWidgetTheme(QWidget *widget, const UiSettings &settings);
     static void applyPlotTheme(QCustomPlot *plot, const QString &theme, int fontSize);
+
+    /// A bundled white glyph (`refresh_white`, `pause_white`, ...) tinted with the
+    /// theme's text colour, for the icon-only buttons.
+    static QIcon icon(const QString &name, const QString &theme, int size = 18);
 
     static QColor foregroundColor(const QString &theme);
     static QColor backgroundColor(const QString &theme);
@@ -39,8 +46,9 @@ public:
     static QColor restoreIconColor(const QString &theme);
     static QColor restoreIconHoverColor(const QString &theme);
 
-    /// Logo asset matching the theme (white artwork on dark, dark artwork on light).
-    static QString logoPath(const QString &theme);
+    /// The Voltbro logo scaled to `width` and tinted for the theme. One piece of
+    /// artwork serves both themes, so the mark looks the same in each.
+    static QPixmap logo(const QString &theme, int width);
 };
 
 #endif // VBDW_UI_THEME_MANAGER_H

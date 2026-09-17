@@ -184,6 +184,14 @@ MainWindow::MainWindow(TranslationController *translationController, QWidget *pa
 {
     ui->setupUi(this);
 
+    // The one action each panel is for gets the accent; every other button stays
+    // quiet (see buttonStyle() in ThemeManager). STOP is styled by its object name.
+    for (QPushButton *button : { ui->SerialConnectBtn, ui->CanConnectBtn, ui->WriteRegBtn,
+                                 ui->ServoUserStartBtn, ui->ServoSinStartBtn,
+                                 ui->ServoMeanderStartBtn, ui->ServoTriangleStartBtn,
+                                 ui->MitStartBtn })
+        button->setProperty("variant", "primary");
+
     // Link state on the left, transient messages on the right.
     m_connectionStatusLabel = new QLabel(this);
     statusBar()->addWidget(m_connectionStatusLabel);
@@ -334,6 +342,12 @@ void MainWindow::setupServices()
                 }
                 ui->FlashProgressBar->setValue(100);
                 setStatusMessage(message);
+                // The new image only runs after a power cycle, so nothing is looked
+                // for until the user says the drive is back up. A link that drops
+                // while the dialog is up is handled as any other disconnect; the
+                // reconnect below then starts from a closed link.
+                QMessageBox::information(this, tr("Firmware flashed"),
+                                         tr("Restart the drive and press OK."));
                 if (!m_flashSerialPort.isEmpty()) {
                     // The drive has been reset into the new image: whatever the
                     // link knew about it is stale, so it is reconnected from scratch.
@@ -343,6 +357,12 @@ void MainWindow::setupServices()
                     m_pollTimer.start();
                     m_link->readRegister(activeNodeId(),
                                          QString::fromLatin1(registers::kFirmwareRev));
+                } else {
+                    // Flashed with no link and no port to go back to: the drive may
+                    // have just enumerated, so the list is refreshed for the user.
+                    refreshSerialPorts();
+                    setStatusMessage(tr("%1 Connect to the drive from CONNECTION.")
+                                             .arg(message));
                 }
             });
 }
@@ -415,18 +435,27 @@ void MainWindow::applyUiSettings()
     m_serial->setTelemetryBatchIntervalMs(
             qBound(10, 1000 / qMax(1, m_config.ui.plot_draw_rate_hz), 100));
     updateLogo();
+    // The icon-only buttons are quiet buttons, so their glyphs take the text colour.
+    const auto setIcon = [this](QPushButton *button, const QString &glyph) {
+        button->setIcon(ThemeManager::icon(glyph, m_config.ui.theme, button->iconSize().width()));
+    };
+    setIcon(ui->SerialRefreshBtn, QStringLiteral("refresh_white"));
+    setIcon(ui->CanRefreshBtn, QStringLiteral("refresh_white"));
+    setIcon(ui->RefreshDeviceBtn, QStringLiteral("refresh_white"));
+    setIcon(ui->PreferencesBtn, QStringLiteral("settings_white"));
+    setPlotLive(m_plot->isLiveMode());
     // A new font size changes how wide the captions are.
     lockConnectButtonWidths();
+    updateServoTargetLabel();
 }
 
 void MainWindow::updateLogo()
 {
-    const QPixmap logo(ThemeManager::logoPath(m_config.ui.theme));
-    if (logo.isNull())
-        return;
     // A fixed width: scaling to the label's current width would grow the logo
     // every time the theme is switched, since the label expands to fit the pixmap.
-    ui->LogoLabel->setPixmap(logo.scaledToWidth(kLogoWidth, Qt::SmoothTransformation));
+    const QPixmap logo = ThemeManager::logo(m_config.ui.theme, kLogoWidth);
+    if (!logo.isNull())
+        ui->LogoLabel->setPixmap(logo);
 }
 
 void MainWindow::applyLanguageFromCombo()
@@ -968,6 +997,8 @@ void MainWindow::setLink(DeviceLink *link)
             << connect(m_link, &DeviceLink::deviceDiscovered, this,
                        &MainWindow::onDeviceDiscovered)
             << connect(m_link, &DeviceLink::deviceLost, this, &MainWindow::onDeviceLost)
+            << connect(m_link, &DeviceLink::driveNotCalibrated, this,
+                       &MainWindow::onDriveNotCalibrated)
             << connect(m_link, &DeviceLink::linkError, this, &MainWindow::onLinkError)
             << connect(m_link, &DeviceLink::logLine, this,
                        [this](const QString &line) { m_plot->appendLogLine(line); })
@@ -1041,6 +1072,7 @@ void MainWindow::handleConnected(LinkKind kind)
 {
     if (!m_link || !m_link->isConnected())
         return;  // closed again before the handshake was reported
+    m_driveNotCalibrated = false;
 
     // Every discovered drive is enabled and fully read, which also fills the
     // DeviceParamList snapshot the Restore icons compare against.
@@ -1076,6 +1108,7 @@ void MainWindow::handleDisconnected()
     m_awaitingReconnect.clear();
     m_writesInFlight.clear();
     m_runningLocks.clear();
+    m_driveNotCalibrated = false;
     setLink(nullptr);
     showConnectionBadge(false, tr("Not connected"));
     setStatusMessage(tr("Disconnected."));
@@ -1114,9 +1147,8 @@ void MainWindow::updateUiState()
     const bool serial = connected && m_link->kind() == LinkKind::Serial;
     const bool can = connected && m_link->kind() == LinkKind::Can;
 
-    // Before a connection only the plot controls and the two global combo boxes are
-    // usable; everything else needs a drive.
-    ui->ConfigGroupBox->setEnabled(connected);
+    // Before a connection only the plot controls, the two global combo boxes and
+    // the firmware panel are usable; everything else needs a drive.
     ui->ControlGroupBox->setEnabled(connected);
     ui->StatusGroupBox->setEnabled(connected);
     ui->EmergStopPushButton->setEnabled(connected);
@@ -1143,10 +1175,23 @@ void MainWindow::updateUiState()
     ui->DataBaudComboBox->setEnabled(serial);
     ui->NomBaudComboBox->setEnabled(serial);
 
-    // Calibration and firmware flashing are Serial-only.
+    // CONFIGURATION: the register tabs need a drive, but System stays open because
+    // flashing goes over SWD, not over the link, and has to work on a drive that
+    // cannot answer at all - one with no firmware on it yet, say.
+    for (int i = 0; i < ui->ConfigTabWidget->count(); ++i) {
+        ui->ConfigTabWidget->setTabEnabled(
+                i, connected || ui->ConfigTabWidget->widget(i) == ui->SystemTab);
+    }
+    ui->RegisterParamsGroupBox->setEnabled(connected);
+    updateRegisterActionButtons();
+
+    // Calibration is Serial-only. Flashing is Serial or no link at all; over CAN it
+    // stays off, as the reconnect after a flash is a Serial affair.
     ui->CalibrateBtn->setEnabled(serial);
-    ui->FirmwareGroupBox->setEnabled(serial);
-    ui->OpenHexPushButton->setEnabled(serial && ui->ChooseFirmwareFileRadioButton->isChecked());
+    ui->SensorGroupBox->setEnabled(serial);
+    ui->FirmwareGroupBox->setEnabled(flashingAvailable());
+    ui->OpenHexPushButton->setEnabled(flashingAvailable()
+                                      && ui->ChooseFirmwareFileRadioButton->isChecked());
 
     // Always available, connection or not.
     ui->SavePltCsvBtn->setEnabled(true);
@@ -1660,9 +1705,7 @@ void MainWindow::onRegisterWritten(quint8 nodeId, const QString &name, bool ok,
 void MainWindow::onWriteBatchFinished(quint8 nodeId, bool ok, const QString &error)
 {
     const RegisterMap written = m_writesInFlight.take(nodeId);
-    const bool registerActions = m_controlLock == ControlLock::None;
-    ui->WriteRegBtn->setEnabled(registerActions);
-    ui->SetOriginBtn->setEnabled(registerActions);
+    updateRegisterActionButtons();
     if (ok) {
         // What was acknowledged is now what the drive runs with, so it is no
         // longer pending; on Serial the re-read after the reboot confirms it.
@@ -1675,12 +1718,27 @@ void MainWindow::onWriteBatchFinished(quint8 nodeId, bool ok, const QString &err
         setStatusMessage(tr("Registers written."));
         return;
     }
+    if (error.isEmpty())
+        return;  // already reported by the link (driveNotCalibrated)
     if (m_closePending || !m_link) {
         // Nothing to fix any more; a modal box here would only get in the way.
         setStatusMessage(error);
         return;
     }
     showError(tr("Some registers were not written"), error);
+}
+
+void MainWindow::onDriveNotCalibrated(quint8)
+{
+    const QString text =
+            tr("The drive is not calibrated. Please calibrate the drive to start working.");
+    setStatusMessage(text, 0);
+    // Connecting enables the drive twice (discovery, then the connected handler) and
+    // disconnecting disables it; each is refused the same way, one dialog is enough.
+    if (m_driveNotCalibrated || m_closePending || !m_link)
+        return;
+    m_driveNotCalibrated = true;
+    showError(tr("Drive not calibrated"), text);
 }
 
 void MainWindow::onTelemetry(quint8 nodeId, const TelemetryBatch &samples)
@@ -1836,6 +1894,9 @@ void MainWindow::updateStatusLabels()
         ui->StatusRotorEncoderLbl->setText(dash);
         ui->StatusShaftEncoderLbl->setText(dash);
         ui->FaultLabel->setText(dash);
+        // Now that the panel is readable without a drive, a version left over from
+        // the last one (or the .ui placeholder) must not pass for a current reading.
+        ui->CurFirmwareRevLabel->setText(dash);
         return;
     }
 
@@ -2006,12 +2067,29 @@ void MainWindow::onServoControlTypeChanged()
 
 void MainWindow::updateServoTargetLabel()
 {
+    const QString velocity = tr("Target vel:");
+    const QString torque = tr("Target torq:");
+    const QString position = tr("Target pos:");
+
+    // The label is sized for the widest of the three captions, so switching the
+    // control type does not shift the panel around it. Re-measured every time for
+    // the same reason as lockConnectButtonWidths(): language and font size change.
+    QLabel *label = ui->ServoUserTargetLbl;
+    label->setMinimumWidth(0);
+    label->setMaximumWidth(QWIDGETSIZE_MAX);
+    int widest = 0;
+    for (const QString &caption : {velocity, torque, position}) {
+        label->setText(caption);
+        widest = qMax(widest, label->sizeHint().width());
+    }
+    label->setFixedWidth(widest);
+
     if (ui->ServoVelocityRadioBtn->isChecked())
-        ui->ServoUserTargetLbl->setText(tr("Target vel:"));
+        label->setText(velocity);
     else if (ui->ServoTorqueRadioBtn->isChecked())
-        ui->ServoUserTargetLbl->setText(tr("Target torq:"));
+        label->setText(torque);
     else
-        ui->ServoUserTargetLbl->setText(tr("Target pos:"));
+        label->setText(position);
 }
 
 bool MainWindow::servoUserTabActive() const
@@ -2046,10 +2124,20 @@ void MainWindow::applyControlLock(ControlLock lock)
     ui->ControlTabWidget->setTabEnabled(kServoTabIndex, !mitLocked);
     // Register traffic shares the Serial line with the set-points, and a Write goes
     // through CONFIG -> APPLY, which reboots the drive out from under the motion.
-    const bool registers = lock == ControlLock::None;
+    updateRegisterActionButtons();
+}
+
+void MainWindow::updateRegisterActionButtons()
+{
+    const bool registers = m_link && m_link->isConnected() && m_controlLock == ControlLock::None;
     ui->ReadRegBtn->setEnabled(registers);
     ui->WriteRegBtn->setEnabled(registers);
     ui->SetOriginBtn->setEnabled(registers);
+}
+
+bool MainWindow::flashingAvailable() const
+{
+    return !(m_link && m_link->isConnected() && m_link->kind() == LinkKind::Can);
 }
 
 void MainWindow::updateControlLock()
@@ -2488,8 +2576,10 @@ void MainWindow::setPlotLive(bool live)
 {
     m_plot->setLiveMode(live);
     // The button shows the action it will take: pause a live plot, play a paused one.
-    ui->PausePltBtn->setIcon(QIcon(live ? QStringLiteral(":/icons/pause_white.svg")
-                                        : QStringLiteral(":/icons/play_white.svg")));
+    ui->PausePltBtn->setIcon(ThemeManager::icon(live ? QStringLiteral("pause_white")
+                                                     : QStringLiteral("play_white"),
+                                                m_config.ui.theme,
+                                                ui->PausePltBtn->iconSize().width()));
     ui->PausePltBtn->setToolTip(live ? tr("Pause the plot") : tr("Resume the plot"));
 }
 
@@ -2526,7 +2616,7 @@ void MainWindow::setupFirmwareUi()
     ui->FlashProgressBar->setValue(0);
 
     connect(ui->ChooseFirmwareFileRadioButton, &QRadioButton::toggled, this, [this](bool on) {
-        ui->OpenHexPushButton->setEnabled(on && m_link && m_link->kind() == LinkKind::Serial);
+        ui->OpenHexPushButton->setEnabled(on && flashingAvailable());
     });
     connect(ui->OpenHexPushButton, &QPushButton::clicked, this, &MainWindow::onOpenHexFile);
     connect(ui->FlashPushButton, &QPushButton::clicked, this, &MainWindow::onFlashClicked);
@@ -2573,6 +2663,10 @@ void MainWindow::startFlashing(const QString &hexPath)
                                                  RegisterValue::fromBool(false)}});
         if (m_link->kind() == LinkKind::Serial)
             m_flashSerialPort = ui->SerialCombo->currentData().toString();
+    } else if (ui->SerialRadioBtn->isChecked()) {
+        // No link - a drive with no firmware on it cannot be connected to. The port
+        // picked in CONNECTION, if any, is where the flashed drive is looked for.
+        m_flashSerialPort = ui->SerialCombo->currentData().toString();
     }
     setStatusMessage(tr("Flashing %1...").arg(QFileInfo(hexPath).fileName()), 0);
     m_flasher->flash(hexPath, m_config.ui.openocd_interface, m_config.ui.openocd_target);

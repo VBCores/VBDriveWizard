@@ -147,6 +147,7 @@ private:
     {
         int pending = 0;       ///< commands of this batch not yet finished
         QStringList failures;  ///< registers the drive rejected
+        bool notCalibrated = false;  ///< a runtime write met "RUNNING mode required"
     };
 
     static PendingCommand bareCommand(const QString &line, const QStringList &acks = {});
@@ -157,7 +158,7 @@ private:
     /// into CONFIG mode, rather than the command in flight.
     bool isStrayRunningModeError(const QString &line, const PendingCommand &command) const;
     /// Books one finished command of its batch and reports the batch when done.
-    void finishBatchCommand(const PendingCommand &command, bool success);
+    void finishBatchCommand(const PendingCommand &command, bool success, const QString &error);
     /// Drops the batch's remaining commands and reports it as failed.
     void failBatch(int batchId, const QString &error);
     void abortAll(const QString &reason);
@@ -196,6 +197,9 @@ private:
     bool m_closing = false;
     /// What setLogStreaming() last asked for.
     bool m_logStreaming = false;
+    /// The drive reported NOT_CALIBRATED (see driveNotCalibrated()); log_on is refused
+    /// for the same reason and is not reported a second time.
+    bool m_notCalibrated = false;
     /// connectToPort() was issued and the worker has not reported the open yet; a
     /// portClosed for the previous port arriving meanwhile is not a lost link.
     bool m_openPending = false;

@@ -149,6 +149,7 @@ private:
     void onDeviceReappeared(quint8 nodeId);
     /// Serial: APPLY rebooted the drive to make the written config take effect.
     void onDriveRebooted();
+    void onDriveNotCalibrated(quint8 nodeId);
     /// Yes / No / Cancel prompt before leaving a drive with pending edits.
     /// Returns false when the user cancels the switch.
     bool confirmLeavingDevice(DeviceModel *device);
@@ -217,6 +218,10 @@ private:
     /// user instead of leaving them to press Disconnect and Connect.
     void reconnectAfterFlash();
     void tryFlashReconnect();
+    /// Flashing goes over SWD, so it needs no link; it is only refused over CAN.
+    bool flashingAvailable() const;
+    /// Read / Write / Set Origin: a drive, and no running trajectory locking them.
+    void updateRegisterActionButtons();
 
     // --- plot ---
     void onSignalChanged();
@@ -251,6 +256,9 @@ private:
     QList<QMetaObject::Connection> m_linkConnections;
     /// closeEvent() is waiting for the link to shut down before the window goes.
     bool m_closePending = false;
+    /// The drive said it is not calibrated on this connection; the dialog is shown
+    /// once, later refusals only reach the status bar.
+    bool m_driveNotCalibrated = false;
     /// The emergency stop is closing the link; handleDisconnected() then tells the
     /// user to power-cycle the drive and connect again.
     bool m_emergencyStopPending = false;

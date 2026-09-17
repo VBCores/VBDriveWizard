@@ -53,8 +53,13 @@ signals:
     /// One register finished writing.
     void registerWritten(quint8 nodeId, const QString &name, bool ok, const QString &error);
 
-    /// The whole batch handed to writeRegisters() has finished.
+    /// The whole batch handed to writeRegisters() has finished. An empty `error` with
+    /// `ok == false` means the failure was already reported through a more specific
+    /// signal (driveNotCalibrated) and needs no further message.
     void writeBatchFinished(quint8 nodeId, bool ok, const QString &error);
+    /// The drive refused a runtime write (is_on) because it has no calibration: it
+    /// boots into NOT_CALIBRATED and only CALIBRATE takes it to RUNNING.
+    void driveNotCalibrated(quint8 nodeId);
 
     void telemetryReceived(quint8 nodeId, const TelemetryBatch &samples);
 

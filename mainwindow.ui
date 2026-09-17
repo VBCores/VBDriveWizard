@@ -53,12 +53,6 @@
          <string>CONNECTION</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_12">
-         <property name="horizontalSpacing">
-          <number>8</number>
-         </property>
-         <property name="verticalSpacing">
-          <number>4</number>
-         </property>
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -70,6 +64,12 @@
          </property>
          <property name="bottomMargin">
           <number>0</number>
+         </property>
+         <property name="horizontalSpacing">
+          <number>8</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>4</number>
          </property>
          <item row="0" column="0">
           <widget class="QRadioButton" name="SerialRadioBtn">
@@ -303,7 +303,7 @@
          <item>
           <widget class="QTabWidget" name="ConfigTabWidget">
            <property name="currentIndex">
-            <number>2</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="BasicTab">
             <attribute name="title">
@@ -331,12 +331,6 @@
                 <string>Limits</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_5">
-                <property name="horizontalSpacing">
-                 <number>8</number>
-                </property>
-                <property name="verticalSpacing">
-                 <number>4</number>
-                </property>
                 <property name="leftMargin">
                  <number>0</number>
                 </property>
@@ -349,7 +343,13 @@
                 <property name="bottomMargin">
                  <number>0</number>
                 </property>
-                <item row="7" column="2" colspan="2">
+                <property name="horizontalSpacing">
+                 <number>8</number>
+                </property>
+                <property name="verticalSpacing">
+                 <number>4</number>
+                </property>
+                <item row="7" column="2">
                  <widget class="QDoubleSpinBox" name="CurrentLimitDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
@@ -368,7 +368,7 @@
                 <item row="1" column="3">
                  <widget class="RestoreLabel" name="RestoreAngleLimitLbl"/>
                 </item>
-                <item row="8" column="2" colspan="2">
+                <item row="8" column="2">
                  <widget class="QComboBox" name="DirComboBox">
                   <item>
                    <property name="text">
@@ -382,7 +382,7 @@
                   </item>
                  </widget>
                 </item>
-                <item row="5" column="2" colspan="2">
+                <item row="5" column="2">
                  <widget class="QDoubleSpinBox" name="TorqLimitDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
@@ -419,7 +419,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="2" colspan="2">
+                <item row="4" column="2">
                  <widget class="QDoubleSpinBox" name="VelLimitDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
@@ -435,7 +435,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="6" column="2" colspan="2">
+                <item row="6" column="2">
                  <widget class="QDoubleSpinBox" name="VoltageLimitDoubleSpinBox">
                   <property name="enabled">
                    <bool>true</bool>
@@ -485,7 +485,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="2" colspan="2">
+                <item row="3" column="2">
                  <widget class="QDoubleSpinBox" name="AngleMaxDoubleSpinBox">
                   <property name="decimals">
                    <number>4</number>
@@ -530,57 +530,22 @@
                   </property>
                  </widget>
                 </item>
+                <item row="4" column="3">
+                 <widget class="RestoreLabel" name="RestoreVelLimitLbl"/>
+                </item>
+                <item row="5" column="3">
+                 <widget class="RestoreLabel" name="RestoreTorqLimitLbl"/>
+                </item>
+                <item row="6" column="3">
+                 <widget class="RestoreLabel" name="RestoreVoltageLimitLbl"/>
+                </item>
+                <item row="7" column="3">
+                 <widget class="RestoreLabel" name="RestoreCurrentLimitLbl"/>
+                </item>
+                <item row="8" column="3">
+                 <widget class="RestoreLabel" name="RestoreDirLbl"/>
+                </item>
                </layout>
-               <widget class="RestoreLabel" name="RestoreDirLbl">
-                <property name="geometry">
-                 <rect>
-                  <x>201</x>
-                  <y>198</y>
-                  <width>16</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-               </widget>
-               <widget class="RestoreLabel" name="RestoreCurrentLimitLbl">
-                <property name="geometry">
-                 <rect>
-                  <x>231</x>
-                  <y>165</y>
-                  <width>16</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-               </widget>
-               <widget class="RestoreLabel" name="RestoreVoltageLimitLbl">
-                <property name="geometry">
-                 <rect>
-                  <x>216</x>
-                  <y>132</y>
-                  <width>16</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-               </widget>
-               <widget class="RestoreLabel" name="RestoreTorqLimitLbl">
-                <property name="geometry">
-                 <rect>
-                  <x>231</x>
-                  <y>99</y>
-                  <width>16</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-               </widget>
-               <widget class="RestoreLabel" name="RestoreVelLimitLbl">
-                <property name="geometry">
-                 <rect>
-                  <x>246</x>
-                  <y>66</y>
-                  <width>16</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-               </widget>
               </widget>
              </item>
              <item>
@@ -603,12 +568,6 @@
              <string>CAN</string>
             </attribute>
             <layout class="QGridLayout" name="gridLayout_14">
-             <property name="horizontalSpacing">
-              <number>8</number>
-             </property>
-             <property name="verticalSpacing">
-              <number>4</number>
-             </property>
              <property name="leftMargin">
               <number>4</number>
              </property>
@@ -619,6 +578,12 @@
               <number>4</number>
              </property>
              <property name="bottomMargin">
+              <number>4</number>
+             </property>
+             <property name="horizontalSpacing">
+              <number>8</number>
+             </property>
+             <property name="verticalSpacing">
               <number>4</number>
              </property>
              <item row="1" column="0" colspan="2">
@@ -792,17 +757,11 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>315</width>
-                  <height>512</height>
+                  <width>303</width>
+                  <height>466</height>
                  </rect>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_6">
-                 <property name="horizontalSpacing">
-                  <number>8</number>
-                 </property>
-                 <property name="verticalSpacing">
-                  <number>4</number>
-                 </property>
                  <property name="leftMargin">
                   <number>0</number>
                  </property>
@@ -814,6 +773,12 @@
                  </property>
                  <property name="bottomMargin">
                   <number>0</number>
+                 </property>
+                 <property name="horizontalSpacing">
+                  <number>8</number>
+                 </property>
+                 <property name="verticalSpacing">
+                  <number>4</number>
                  </property>
                  <item row="0" column="0">
                   <widget class="QLabel" name="GearRatioLbl">
@@ -1159,12 +1124,6 @@
                 <string>Sensor</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_16">
-                <property name="horizontalSpacing">
-                 <number>8</number>
-                </property>
-                <property name="verticalSpacing">
-                 <number>4</number>
-                </property>
                 <property name="leftMargin">
                  <number>0</number>
                 </property>
@@ -1176,6 +1135,12 @@
                 </property>
                 <property name="bottomMargin">
                  <number>0</number>
+                </property>
+                <property name="horizontalSpacing">
+                 <number>8</number>
+                </property>
+                <property name="verticalSpacing">
+                 <number>4</number>
                 </property>
                 <item row="0" column="0">
                  <widget class="QPushButton" name="CalibrateBtn">
@@ -1203,12 +1168,6 @@
                 <string>Register Parameters</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_13">
-                <property name="horizontalSpacing">
-                 <number>8</number>
-                </property>
-                <property name="verticalSpacing">
-                 <number>4</number>
-                </property>
                 <property name="leftMargin">
                  <number>0</number>
                 </property>
@@ -1220,6 +1179,12 @@
                 </property>
                 <property name="bottomMargin">
                  <number>0</number>
+                </property>
+                <property name="horizontalSpacing">
+                 <number>8</number>
+                </property>
+                <property name="verticalSpacing">
+                 <number>4</number>
                 </property>
                 <item row="0" column="0">
                  <widget class="QPushButton" name="SaveRegBtn">
@@ -1473,11 +1438,11 @@
        </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_26" stretch="0,0,0,0,0,0,0,0">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetDefaultConstraint</enum>
-         </property>
          <property name="spacing">
           <number>8</number>
+         </property>
+         <property name="sizeConstraint">
+          <enum>QLayout::SetDefaultConstraint</enum>
          </property>
          <property name="leftMargin">
           <number>0</number>
@@ -1732,12 +1697,6 @@
          <string>CONTROL</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_11">
-         <property name="horizontalSpacing">
-          <number>8</number>
-         </property>
-         <property name="verticalSpacing">
-          <number>4</number>
-         </property>
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -1749,6 +1708,12 @@
          </property>
          <property name="bottomMargin">
           <number>0</number>
+         </property>
+         <property name="horizontalSpacing">
+          <number>8</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>4</number>
          </property>
          <item row="0" column="0">
           <widget class="QTabWidget" name="ControlTabWidget">
@@ -1972,6 +1937,19 @@
                     </item>
                    </layout>
                   </item>
+                  <item>
+                   <spacer name="verticalSpacer_3">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
                  </layout>
                 </widget>
                </item>
@@ -2000,12 +1978,6 @@
                 </property>
                 <item>
                  <layout class="QGridLayout" name="gridLayout_7">
-                  <property name="horizontalSpacing">
-                   <number>8</number>
-                  </property>
-                  <property name="verticalSpacing">
-                   <number>4</number>
-                  </property>
                   <property name="leftMargin">
                    <number>0</number>
                   </property>
@@ -2018,6 +1990,12 @@
                   <property name="bottomMargin">
                    <number>0</number>
                   </property>
+                  <property name="horizontalSpacing">
+                   <number>8</number>
+                  </property>
+                  <property name="verticalSpacing">
+                   <number>4</number>
+                  </property>
                   <item row="0" column="0">
                    <widget class="QLabel" name="ServoKpLbl">
                     <property name="text">
@@ -2025,7 +2003,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="2">
+                  <item row="0" column="1">
                    <widget class="QDoubleSpinBox" name="ServoKpDoubleSpinBox">
                     <property name="decimals">
                      <number>4</number>
@@ -2041,7 +2019,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="3">
+                  <item row="0" column="2">
                    <widget class="QSlider" name="ServoKpSlider">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -2055,7 +2033,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="1" column="1" colspan="2">
+                  <item row="1" column="1">
                    <widget class="QDoubleSpinBox" name="ServoKiDoubleSpinBox">
                     <property name="decimals">
                      <number>4</number>
@@ -2071,21 +2049,21 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="1" column="3">
+                  <item row="1" column="2">
                    <widget class="QSlider" name="ServoKiSlider">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
                    </widget>
                   </item>
-                  <item row="2" column="0" colspan="2">
+                  <item row="2" column="0">
                    <widget class="QLabel" name="ServoKdLbl">
                     <property name="text">
                      <string>Kd:</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="2" column="2">
+                  <item row="2" column="1">
                    <widget class="QDoubleSpinBox" name="ServoKdDoubleSpinBox">
                     <property name="decimals">
                      <number>4</number>
@@ -2101,7 +2079,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="2" column="3">
+                  <item row="2" column="2">
                    <widget class="QSlider" name="ServoKdSlider">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -2302,12 +2280,6 @@
                  </property>
                  <item>
                   <layout class="QGridLayout" name="gridLayout_8">
-                   <property name="horizontalSpacing">
-                    <number>8</number>
-                   </property>
-                   <property name="verticalSpacing">
-                    <number>4</number>
-                   </property>
                    <property name="leftMargin">
                     <number>0</number>
                    </property>
@@ -2319,6 +2291,12 @@
                    </property>
                    <property name="bottomMargin">
                     <number>0</number>
+                   </property>
+                   <property name="horizontalSpacing">
+                    <number>8</number>
+                   </property>
+                   <property name="verticalSpacing">
+                    <number>4</number>
                    </property>
                    <item row="0" column="0">
                     <widget class="QLabel" name="ServoSinAmpLbl">
@@ -2458,12 +2436,6 @@
                  </property>
                  <item>
                   <layout class="QGridLayout" name="gridLayout_9">
-                   <property name="horizontalSpacing">
-                    <number>8</number>
-                   </property>
-                   <property name="verticalSpacing">
-                    <number>4</number>
-                   </property>
                    <property name="leftMargin">
                     <number>0</number>
                    </property>
@@ -2475,6 +2447,12 @@
                    </property>
                    <property name="bottomMargin">
                     <number>0</number>
+                   </property>
+                   <property name="horizontalSpacing">
+                    <number>8</number>
+                   </property>
+                   <property name="verticalSpacing">
+                    <number>4</number>
                    </property>
                    <item row="0" column="0">
                     <widget class="QLabel" name="ServoMeanderAmpLbl">
@@ -2614,12 +2592,6 @@
                  </property>
                  <item>
                   <layout class="QGridLayout" name="gridLayout_10">
-                   <property name="horizontalSpacing">
-                    <number>8</number>
-                   </property>
-                   <property name="verticalSpacing">
-                    <number>4</number>
-                   </property>
                    <property name="leftMargin">
                     <number>0</number>
                    </property>
@@ -2631,6 +2603,12 @@
                    </property>
                    <property name="bottomMargin">
                     <number>0</number>
+                   </property>
+                   <property name="horizontalSpacing">
+                    <number>8</number>
+                   </property>
+                   <property name="verticalSpacing">
+                    <number>4</number>
                    </property>
                    <item row="0" column="0">
                     <widget class="QLabel" name="ServoTriangleAmpLbl">
@@ -2855,11 +2833,8 @@
                     <string>Step Targets</string>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_3">
-                    <property name="horizontalSpacing">
-                     <number>8</number>
-                    </property>
-                    <property name="verticalSpacing">
-                     <number>4</number>
+                    <property name="sizeConstraint">
+                     <enum>QLayout::SetMinimumSize</enum>
                     </property>
                     <property name="leftMargin">
                      <number>0</number>
@@ -2872,6 +2847,12 @@
                     </property>
                     <property name="bottomMargin">
                      <number>0</number>
+                    </property>
+                    <property name="horizontalSpacing">
+                     <number>8</number>
+                    </property>
+                    <property name="verticalSpacing">
+                     <number>4</number>
                     </property>
                     <item row="0" column="0">
                      <widget class="QLabel" name="MitStepPosLbl">
@@ -3051,12 +3032,6 @@
                     <string>Trajectory Targets</string>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_4">
-                    <property name="horizontalSpacing">
-                     <number>8</number>
-                    </property>
-                    <property name="verticalSpacing">
-                     <number>4</number>
-                    </property>
                     <property name="leftMargin">
                      <number>0</number>
                     </property>
@@ -3068,6 +3043,12 @@
                     </property>
                     <property name="bottomMargin">
                      <number>0</number>
+                    </property>
+                    <property name="horizontalSpacing">
+                     <number>8</number>
+                    </property>
+                    <property name="verticalSpacing">
+                     <number>4</number>
                     </property>
                     <item row="0" column="0">
                      <widget class="QLabel" name="MitTrajAmpLbl">
@@ -3292,12 +3273,6 @@
          <string>STATUS</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <property name="horizontalSpacing">
-          <number>8</number>
-         </property>
-         <property name="verticalSpacing">
-          <number>4</number>
-         </property>
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -3309,6 +3284,12 @@
          </property>
          <property name="bottomMargin">
           <number>0</number>
+         </property>
+         <property name="horizontalSpacing">
+          <number>8</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>4</number>
          </property>
          <item row="0" column="0">
           <widget class="QLabel" name="StatusModelCaptionLbl">
@@ -3487,12 +3468,6 @@
          <string/>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <property name="horizontalSpacing">
-          <number>8</number>
-         </property>
-         <property name="verticalSpacing">
-          <number>4</number>
-         </property>
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -3504,6 +3479,12 @@
          </property>
          <property name="bottomMargin">
           <number>0</number>
+         </property>
+         <property name="horizontalSpacing">
+          <number>8</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>4</number>
          </property>
          <item row="0" column="0">
           <widget class="QPushButton" name="EmergStopPushButton">

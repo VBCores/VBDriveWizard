@@ -96,6 +96,11 @@ set(PROJECT_SOURCES
     icons.qrc
 )
 
+# The executable icon on Windows; the in-app window icon is set from icons.qrc.
+if(WIN32)
+    list(APPEND PROJECT_SOURCES icons/app_icon.rc)
+endif()
+
 qt_add_executable(VBDriveWizard MANUAL_FINALIZATION ${PROJECT_SOURCES})
 
 target_include_directories(VBDriveWizard PRIVATE
@@ -151,5 +156,12 @@ set_target_properties(VBDriveWizard PROPERTIES WIN32_EXECUTABLE TRUE)
 include(GNUInstallDirs)
 install(TARGETS VBDriveWizard RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY registers/ DESTINATION ${CMAKE_INSTALL_DATADIR}/VBDriveWizard/registers)
+# GNOME/KDE take the dock and launcher icon from the .desktop entry matched by the
+# window's app id (see setDesktopFileName in main.cpp), not from setWindowIcon.
+if(UNIX AND NOT APPLE)
+    install(FILES VBDriveWizard.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+    install(FILES icons/icon.png DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/1024x1024/apps
+            RENAME VBDriveWizard.png)
+endif()
 
 qt_finalize_executable(VBDriveWizard)

@@ -5,7 +5,9 @@
 #include <QAbstractButton>
 #include <QDialogButtonBox>
 #include <QEvent>
+#include <QIcon>
 #include <QPushButton>
+#include <QStyle>
 
 PreferencesDialog::PreferencesDialog(QWidget *parent)
     : QDialog(parent)
@@ -24,6 +26,16 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     ui->LocalNodeIdSpinBox->setToolTip(
             tr("Node ID this application announces on the CAN bus.\n"
                "It must not collide with any drive."));
+
+    // The platform style decorates standard buttons with icons; keep them text-only.
+    for (QAbstractButton *button : ui->ButtonBox->buttons())
+        button->setIcon(QIcon());
+    // A dynamic property set after the button was polished only reaches the
+    // stylesheet on a repolish.
+    QPushButton *ok = ui->ButtonBox->button(QDialogButtonBox::Ok);
+    ok->setProperty("variant", "primary");
+    ok->style()->unpolish(ok);
+    ok->style()->polish(ok);
 
     connect(ui->ButtonBox, &QDialogButtonBox::accepted, this, [this] {
         applyChanges();

@@ -15,7 +15,10 @@ int main(int argc, char *argv[])
     app.setApplicationName(QStringLiteral("VBDriveWizard"));
     app.setOrganizationName(QStringLiteral("Voltbro"));
     app.setApplicationVersion(QStringLiteral("1.0"));
-    app.setWindowIcon(QIcon(QStringLiteral(":/icons/voltbro_logo_dark.png")));
+    // Matches VBDriveWizard.desktop: on Wayland (and GNOME's dock on X11) the taskbar
+    // icon comes from that entry, so the app id has to be set for it to be found.
+    app.setDesktopFileName(QStringLiteral("VBDriveWizard"));
+    app.setWindowIcon(QIcon(QStringLiteral(":/icons/icon.png")));
 
     // These cross thread boundaries through queued connections.
     qRegisterMetaType<TelemetrySample>("TelemetrySample");
