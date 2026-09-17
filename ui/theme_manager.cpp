@@ -227,7 +227,8 @@ QString fill(QString qss, const Tokens &t)
 /// Buttons in three weights. The default is the quiet secondary button; the one
 /// action a panel is for (Connect, Write, Start, OK) is tagged `variant=primary`
 /// by the window that owns it, and STOP is the only danger button. The disabled
-/// rules come last so a disabled button of any weight falls back to the same
+/// rules come last (and name the STOP button by id, since an id selector outranks
+/// a bare `:disabled` one) so a disabled button of any weight falls back to the same
 /// outline-only look: with most of the window disabled until a drive is
 /// connected, a filled disabled button is too easy to mistake for a live one.
 QString buttonStyle()
@@ -247,7 +248,8 @@ QString buttonStyle()
             " border-color: @dangerHover; color: @onDanger; font-weight: 700; }"
             "QPushButton#EmergStopPushButton:hover { background-color: @dangerHover; }"
             "QPushButton#EmergStopPushButton:pressed { background-color: @dangerPressed; }"
-            "QPushButton:disabled, QPushButton[variant=\"primary\"]:disabled {"
+            "QPushButton:disabled, QPushButton[variant=\"primary\"]:disabled,"
+            " QPushButton#EmergStopPushButton:disabled {"
             " background-color: @buttonDisabled; border-color: @buttonDisabledBorder;"
             " color: @buttonDisabledText; }");
 }

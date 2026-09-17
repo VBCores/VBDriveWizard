@@ -1,0 +1,26 @@
+{
+    "sources": [
+        "definitions.h",
+        "interfaces.h",
+        "allocators/allocator.h",
+        "allocators/o1/o1_allocator.h",
+        "allocators/sys/sys_allocator.h",
+        "providers/FDCAN_generic.h",
+        "providers/provider.h",
+        "providers/G4CAN.h",
+        "types.hpp",
+        "cyphal.h",
+        "subscriptions/callbacks.h",
+        "cyphal.tpp",
+        "subscriptions/subscription.h",
+        "node/node_info_handler.h",
+        "node/registers_handler.hpp",
+        "node/registers_utils.hpp",
+        "node/registers_access.hpp",
+        "platforms/embedded_cyphal.hpp"
+    ],
+    "libs": [
+        "libcanard",
+        "o1heap"
+    ]
+}

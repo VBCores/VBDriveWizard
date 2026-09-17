@@ -160,7 +160,9 @@ install(DIRECTORY registers/ DESTINATION ${CMAKE_INSTALL_DATADIR}/VBDriveWizard/
 # window's app id (see setDesktopFileName in main.cpp), not from setWindowIcon.
 if(UNIX AND NOT APPLE)
     install(FILES VBDriveWizard.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
-    install(FILES icons/icon.png DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/1024x1024/apps
+    # hicolor only looks in the size directories its index.theme lists, so the icon
+    # has to go into one of them (512x512 is the largest); icon.png is 1254x1254.
+    install(FILES icons/icon_512.png DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/512x512/apps
             RENAME VBDriveWizard.png)
 endif()
 

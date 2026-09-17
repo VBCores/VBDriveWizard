@@ -1,0 +1,35 @@
+project(libcxxcanard)
+cmake_minimum_required(VERSION 3.15)
+
+set (CMAKE_CXX_STANDARD 17)
+option(LIBCXXCANARD_POSITION_INDEPENDENT_CODE "Build libcxxcanard and bundled C libraries as PIC" OFF)
+
+include_directories(.)
+file(GLOB_RECURSE SOURCES "cyphal/*.c" "cyphal/*.cpp")
+
+if(DEFINED ENV{<COMMON_LIBS_DIR>})
+    set(COMMON_LIBS_DIR $ENV{COMMON_LIBS_DIR})
+else()
+    get_filename_component(COMMON_LIBS_DIR
+            "./libs"
+            ABSOLUTE)
+endif()
+set(COMMON_LIBS_DIR ${COMMON_LIBS_DIR} PARENT_SCOPE)
+message(STATUS "${CMAKE_CURRENT_LIST_DIR} | Using <${COMMON_LIBS_DIR}> as directory of common libs")
+
+include_directories(${COMMON_LIBS_DIR})
+add_subdirectory(${COMMON_LIBS_DIR}/libcanard ${PROJECT_BINARY_DIR}/build/libcanard)
+add_subdirectory(${COMMON_LIBS_DIR}/o1heap ${PROJECT_BINARY_DIR}/build/o1heap)
+
+add_library(libcxxcanard ${SOURCES} $<TARGET_OBJECTS:libcanard> $<TARGET_OBJECTS:o1heap>)
+set_target_properties(libcxxcanard libcanard o1heap PROPERTIES
+        POSITION_INDEPENDENT_CODE ${LIBCXXCANARD_POSITION_INDEPENDENT_CODE})
+set(LIBCXXCANARD_CXX_TRAITS_TEMPLATES_DIR
+        "${CMAKE_CURRENT_LIST_DIR}/nunavut_templates/cxxcanard_traits")
+if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(LIBCXXCANARD_CXX_TRAITS_TEMPLATES_DIR
+            "${LIBCXXCANARD_CXX_TRAITS_TEMPLATES_DIR}"
+            PARENT_SCOPE)
+endif()
+set_target_properties(libcxxcanard PROPERTIES
+        CYPHAL_TRAITS_TEMPLATES_DIR "${LIBCXXCANARD_CXX_TRAITS_TEMPLATES_DIR}")
