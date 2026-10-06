@@ -7,7 +7,7 @@
 /// Maps between the LanguageComboBox indices, the codes stored in config.yaml and
 /// the Qt locales / translation catalogues.
 ///
-/// Combo order comes from mainwindow.ui: 0 English, 1 Русский, 2 中文.
+/// Combo order comes from preferences_dialog.ui: 0 English, 1 Русский, 2 中文.
 class LanguageManager
 {
 public:

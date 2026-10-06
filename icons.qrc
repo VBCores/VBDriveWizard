@@ -8,6 +8,8 @@
         <file alias="play_white.svg">icons/play_white.svg</file>
         <file alias="pause_white.svg">icons/pause_white.svg</file>
         <file alias="settings_white.svg">icons/settings_white.svg</file>
+        <file alias="crosshair_white.svg">icons/crosshair_white.svg</file>
+        <file alias="save_white.svg">icons/save_white.svg</file>
         <file alias="restore.svg">icons/restore.svg</file>
         <file alias="check_white.svg">icons/check_white.svg</file>
         <file alias="radio_dot_light.svg">icons/radio_dot_light.svg</file>
@@ -22,7 +24,7 @@
         <file alias="spin_down_light.svg">icons/spin_down_light.svg</file>
         <file alias="spin_up_light_disabled.svg">icons/spin_up_light_disabled.svg</file>
         <file alias="spin_down_light_disabled.svg">icons/spin_down_light_disabled.svg</file>
-        <file alias="voltbro_logo.png">icons/voltbro_logo.png</file>
+        <file alias="vbcore.png">icons/vbcore.png</file>
         <file alias="icon.png">icons/icon.png</file>
     </qresource>
 </RCC>

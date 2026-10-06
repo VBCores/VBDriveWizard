@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+# The single definition of the application version: configure_file() turns it into
+# version.h, which is what verLabel shows. Never hard-code it in the sources.
 project(VBDriveWizard VERSION 0.0.1 LANGUAGES C CXX)
 
 set(CMAKE_AUTOUIC ON)
@@ -13,9 +15,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Qt 5 packages on Ubuntu 24.04, and qt_add_translations() for runtime language
 # switching. Falling back to Qt 5 would silently drop both.
 find_package(Qt6 6.4 REQUIRED COMPONENTS Widgets SerialPort Network PrintSupport LinguistTools)
+# SVG export of plots only; without the module the save dialog reports that SVG is
+# unavailable instead of the build failing (Ubuntu package: qt6-svg-dev).
+find_package(Qt6 6.4 QUIET OPTIONAL_COMPONENTS Svg)
 
 find_package(yaml-cpp REQUIRED)
 find_package(Threads REQUIRED)
+
+configure_file(version.h.in version.h @ONLY)
 
 # ---------------------------------------------------------------------------
 # Vendored dependencies
@@ -78,12 +85,21 @@ set(PROJECT_SOURCES
     ui/translation_controller.h
     ui/plot_controller.cpp
     ui/plot_controller.h
+    ui/plot_crosshair.cpp
+    ui/plot_crosshair.h
+    ui/plot_measurement.cpp
+    ui/plot_measurement.h
+    ui/plot_export.cpp
+    ui/plot_export.h
     ui/preferences_dialog.cpp
     ui/preferences_dialog.h
     ui/preferences_dialog.ui
     ui/restore_model_dialog.cpp
     ui/restore_model_dialog.h
     ui/restore_model_dialog.ui
+    ui/save_file_dialog.cpp
+    ui/save_file_dialog.h
+    ui/save_file_dialog.ui
 
     firmware/firmware_downloader.cpp
     firmware/firmware_downloader.h
@@ -105,6 +121,7 @@ qt_add_executable(VBDriveWizard MANUAL_FINALIZATION ${PROJECT_SOURCES})
 
 target_include_directories(VBDriveWizard PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}          # version.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/qcustomplot
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libcxxcanard
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libcxxcanard/libs
@@ -138,6 +155,10 @@ target_link_libraries(VBDriveWizard PRIVATE
     yaml-cpp
     Threads::Threads
 )
+if(TARGET Qt6::Svg)
+    target_link_libraries(VBDriveWizard PRIVATE Qt6::Svg)
+    target_compile_definitions(VBDriveWizard PRIVATE VBDW_HAVE_SVG)
+endif()
 
 # ---------------------------------------------------------------------------
 # Translations

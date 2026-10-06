@@ -12,13 +12,14 @@
 #include "transport/cyphal_service.h"
 #include "transport/serial_service.h"
 #include "ui/config_manager.h"
-#include "ui/language_manager.h"
 #include "ui/plot_controller.h"
 #include "ui/preferences_dialog.h"
 #include "ui/restore_label.h"
 #include "ui/restore_model_dialog.h"
+#include "ui/save_file_dialog.h"
 #include "ui/theme_manager.h"
 #include "ui/translation_controller.h"
+#include "version.h"
 
 #include <QAbstractItemView>
 #include <QStyle>
@@ -67,9 +68,6 @@ constexpr int kRegisterPollHz = 5;
 /// Longest the window waits for the link to shut down on close before giving up;
 /// the Serial drain itself is bounded at 2 s by the service.
 constexpr int kCloseFallbackMs = 3000;
-/// Width the logo is scaled to; the label itself is 100 px wide before the first
-/// layout pass, so this is what the logo has always been shown at on start-up.
-constexpr int kLogoWidth = 120;
 /// After flashing the drive is reset by OpenOCD and, like after APPLY, ignores its
 /// input for a second or so; the reconnect is retried at this pace until the window
 /// has passed, which also covers a USB re-enumeration of the port.
@@ -107,7 +105,7 @@ bool configGroupComplete(const DeviceModel *device)
 /// Width of the port and interface combo boxes, in characters. A port entry carries a
 /// long description ("ttyACM0 (STM32 STLink)") which would otherwise set the width of
 /// the whole CONNECTION panel, and with it of the left column.
-constexpr int kPortComboChars = 10;
+constexpr int kPortComboChars = 8;
 
 /// The full text of a combo entry, shown in the popup and the tool tip while the
 /// closed box keeps the short form.
@@ -183,6 +181,7 @@ MainWindow::MainWindow(TranslationController *translationController, QWidget *pa
     , m_translation(translationController)
 {
     ui->setupUi(this);
+    ui->verLabel->setText(QStringLiteral("v") + QStringLiteral(VBDRIVEWIZARD_VERSION));
 
     // The one action each panel is for gets the accent; every other button stays
     // quiet (see buttonStyle() in ThemeManager). STOP is styled by its object name.
@@ -192,15 +191,14 @@ MainWindow::MainWindow(TranslationController *translationController, QWidget *pa
                                  ui->MitStartBtn })
         button->setProperty("variant", "primary");
 
-    // Link state on the left, transient messages on the right.
-    m_connectionStatusLabel = new QLabel(this);
-    statusBar()->addWidget(m_connectionStatusLabel);
-    showConnectionBadge(false, tr("Not connected"));
-
+    // Transient messages on the left, link state on the right.
     m_statusMessageLabel = new QLabel(this);
     m_statusMessageLabel->setProperty("role", "caption");
-    m_statusMessageLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    statusBar()->addPermanentWidget(m_statusMessageLabel, 1);
+    statusBar()->addWidget(m_statusMessageLabel, 1);
+
+    m_connectionStatusLabel = new QLabel(this);
+    statusBar()->addPermanentWidget(m_connectionStatusLabel);
+    showConnectionBadge(false, tr("Not connected"));
     m_statusMessageTimer.setSingleShot(true);
     connect(&m_statusMessageTimer, &QTimer::timeout, this,
             [this] { m_statusMessageLabel->clear(); });
@@ -299,8 +297,8 @@ void MainWindow::setupServices()
     connect(m_devices, &DeviceManager::listChanged, this, &MainWindow::rebuildDeviceList);
     connect(m_devices, &DeviceManager::selectionChanged, this, &MainWindow::onDeviceSelected);
 
-    connect(m_control, &ControlManager::setpointProduced, this,
-            &MainWindow::onSetpointProduced);
+    connect(m_control, &ControlManager::setpointsProduced, this,
+            &MainWindow::onSetpointsProduced);
     connect(m_control, &ControlManager::runningChanged, this,
             &MainWindow::onTrajectoryRunningChanged);
 
@@ -374,13 +372,8 @@ void MainWindow::loadSettings()
     m_configPath = ConfigManager::resolveConfigFilePath();
     m_config = ConfigManager::loadConfig(m_configPath);
 
-    {
-        const QSignalBlocker blocker(ui->LanguageComboBox);
-        ui->LanguageComboBox->setCurrentIndex(LanguageManager::comboIndexForLanguage(
-                LanguageManager::effectiveLanguage(m_config.ui.language)));
-    }
-
     applyUiSettings();
+    restoreControlState();
 
     // Restore the window geometry only if it still lands on an attached screen.
     const QRect stored(m_config.window.x, m_config.window.y, m_config.window.width,
@@ -410,12 +403,67 @@ void MainWindow::saveSettings()
         m_config.window.height = rect.height();
     }
     m_config.window.maximized = isMaximized();
-    m_config.ui.language = LanguageManager::languageForComboIndex(
-            ui->LanguageComboBox->currentIndex());
+    storeControlState();
 
     QString error;
     if (!ConfigManager::saveConfig(m_configPath, m_config, &error))
         setStatusMessage(error);
+}
+
+void MainWindow::storeControlState()
+{
+    // Everything inside the CONTROL panel is stored by object name, so a widget added
+    // to the panel later is remembered without touching this code.
+    m_config.ui.angle_unit = QLatin1String(m_angleUnit == AngleUnit::Degrees ? "deg" : "rad");
+
+    QMap<QString, QString> &state = m_config.control;
+    state.clear();
+    const QString checked = QStringLiteral("true");
+    for (const QTabWidget *tabs : ui->ControlGroupBox->findChildren<QTabWidget *>())
+        state.insert(tabs->objectName(), QString::number(tabs->currentIndex()));
+    // Only the checked button of each group: checking it on restore unchecks the rest.
+    for (const QRadioButton *button : ui->ControlGroupBox->findChildren<QRadioButton *>()) {
+        if (button->isChecked())
+            state.insert(button->objectName(), checked);
+    }
+    for (const QCheckBox *box : ui->ControlGroupBox->findChildren<QCheckBox *>())
+        state.insert(box->objectName(), box->isChecked() ? checked : QStringLiteral("false"));
+    for (const QDoubleSpinBox *spin : ui->ControlGroupBox->findChildren<QDoubleSpinBox *>())
+        state.insert(spin->objectName(), QString::number(spin->value()));
+}
+
+void MainWindow::restoreControlState()
+{
+    // The order matters. The unit comes first: the stored values are in the unit the
+    // user saw them in. The radio buttons come next, since their handlers re-range
+    // the sliders. The spin boxes come last and re-seat their sliders themselves.
+    ui->UnitsComboBox->setCurrentIndex(m_config.ui.angle_unit == QLatin1String("deg") ? 1 : 0);
+
+    const QMap<QString, QString> &state = m_config.control;
+    const auto stored = [&state](const QWidget *widget) {
+        return state.value(widget->objectName());
+    };
+    for (QRadioButton *button : ui->ControlGroupBox->findChildren<QRadioButton *>()) {
+        if (stored(button) == QLatin1String("true"))
+            button->setChecked(true);
+    }
+    for (QCheckBox *box : ui->ControlGroupBox->findChildren<QCheckBox *>()) {
+        const QString value = stored(box);
+        if (!value.isEmpty())
+            box->setChecked(value == QLatin1String("true"));
+    }
+    for (QTabWidget *tabs : ui->ControlGroupBox->findChildren<QTabWidget *>()) {
+        bool ok = false;
+        const int index = stored(tabs).toInt(&ok);
+        if (ok && index >= 0 && index < tabs->count())
+            tabs->setCurrentIndex(index);
+    }
+    for (QDoubleSpinBox *spin : ui->ControlGroupBox->findChildren<QDoubleSpinBox *>()) {
+        bool ok = false;
+        const double value = stored(spin).toDouble(&ok);
+        if (ok && std::isfinite(value))
+            spin->setValue(value);
+    }
 }
 
 void MainWindow::applyUiSettings()
@@ -443,6 +491,8 @@ void MainWindow::applyUiSettings()
     setIcon(ui->CanRefreshBtn, QStringLiteral("refresh_white"));
     setIcon(ui->RefreshDeviceBtn, QStringLiteral("refresh_white"));
     setIcon(ui->PreferencesBtn, QStringLiteral("settings_white"));
+    setIcon(ui->crosshairPushButton, QStringLiteral("crosshair_white"));
+    setIcon(ui->SavePltBtn, QStringLiteral("save_white"));
     setPlotLive(m_plot->isLiveMode());
     // A new font size changes how wide the captions are.
     lockConnectButtonWidths();
@@ -451,23 +501,25 @@ void MainWindow::applyUiSettings()
 
 void MainWindow::updateLogo()
 {
-    // A fixed width: scaling to the label's current width would grow the logo
-    // every time the theme is switched, since the label expands to fit the pixmap.
-    const QPixmap logo = ThemeManager::logo(m_config.ui.theme, kLogoWidth);
+    // As wide as the ink of the application name below it, so both edges line up;
+    // it follows the font size and the language. The label's own width is no use:
+    // it expands to fit the pixmap, so the logo would grow on every theme switch.
+    // The stylesheet sets the name's font, so the label is polished before measuring.
+    ui->appNameLabel->ensurePolished();
+    const QRect ink = ui->appNameLabel->fontMetrics().tightBoundingRect(
+            ui->appNameLabel->text());
+    const QPixmap logo = ThemeManager::logo(m_config.ui.theme, ink.right() + 1,
+                                            ui->LogoLabel->devicePixelRatioF());
     if (!logo.isNull())
         ui->LogoLabel->setPixmap(logo);
 }
 
-void MainWindow::applyLanguageFromCombo()
+void MainWindow::applyLanguage()
 {
-    const QString language =
-            LanguageManager::languageForComboIndex(ui->LanguageComboBox->currentIndex());
-    m_config.ui.language = language;
     if (m_translation)
-        m_translation->applyConfiguredLanguage(language);
+        m_translation->applyConfiguredLanguage(m_config.ui.language);
     // Widgets get QEvent::LanguageChange; everything else is retranslated by hand.
     retranslateDynamicTexts();
-    saveSettings();
 }
 
 void MainWindow::changeEvent(QEvent *event)
@@ -493,6 +545,8 @@ void MainWindow::retranslateDynamicTexts()
         ui->CanConnectBtn->setText(tr("Disconnect"));
 
     setPlotLive(m_plot->isLiveMode());  // refreshes the tool tip
+    // retranslateUi() also put back the placeholder texts of the measurement labels.
+    onMeasurementChanged(m_plot->measurement());
     updateServoTargetLabel();
 
     if (!connected)
@@ -676,6 +730,10 @@ void MainWindow::setupRegisterBindings()
     m_voltageLimitBaseline = {ui->VoltageLimitCheckBox->isChecked(),
                               ui->VoltageLimitDoubleSpinBox->value()};
     ui->RestoreVoltageLimitLbl->setVisible(false);
+    // As with the bound limits, an unchecked box means "no limit" and locks its editor.
+    ui->VoltageLimitDoubleSpinBox->setEnabled(ui->VoltageLimitCheckBox->isChecked());
+    connect(ui->VoltageLimitCheckBox, &QCheckBox::toggled, ui->VoltageLimitDoubleSpinBox,
+            &QWidget::setEnabled);
     connect(ui->VoltageLimitCheckBox, &QCheckBox::toggled, this,
             &MainWindow::updateVoltageRestoreIcon);
     connect(ui->VoltageLimitDoubleSpinBox, &QDoubleSpinBox::valueChanged, this,
@@ -1154,11 +1212,13 @@ void MainWindow::updateUiState()
     ui->EmergStopPushButton->setEnabled(connected);
     ui->DevicesGroupBox->setEnabled(can);
 
-    // Only the row of the chosen transport is usable, and while a link is up the
+    // Only the row of the chosen transport is on screen, and while a link is up the
     // rest of CONNECTION is locked to its own control.
     const bool serialChosen = ui->SerialRadioBtn->isChecked();
     const bool serialRow = !connected && serialChosen;
     const bool canRow = !connected && !serialChosen;
+    ui->ConnectionStack->setCurrentWidget(serialChosen ? ui->SerialConnectionPage
+                                                       : ui->CanConnectionPage);
     ui->SerialRadioBtn->setEnabled(!connected);
     ui->CanRadioBtn->setEnabled(!connected);
     ui->SerialCombo->setEnabled(serialRow);
@@ -1194,14 +1254,13 @@ void MainWindow::updateUiState()
                                       && ui->ChooseFirmwareFileRadioButton->isChecked());
 
     // Always available, connection or not.
-    ui->SavePltCsvBtn->setEnabled(true);
-    ui->SavePltPngBtn->setEnabled(true);
+    updateSavePlotButton();
+    ui->crosshairPushButton->setEnabled(true);
     // Disconnecting pauses the plot and nothing can resume it until a drive is
     // back, so the button only makes sense while connected.
     ui->PausePltBtn->setEnabled(connected);
     ui->SignalComboBox->setEnabled(true);
     ui->UnitsComboBox->setEnabled(true);
-    ui->LanguageComboBox->setEnabled(true);
     ui->PreferencesBtn->setEnabled(true);
 
     onServoControlTypeChanged();
@@ -1386,6 +1445,10 @@ bool MainWindow::confirmLeavingDevice(DeviceModel *device)
 
 void MainWindow::onDeviceSelected(DeviceModel *device)
 {
+    // The set-points on the plot belonged to the previous drive; a running new one
+    // reopens the stream with its next batch.
+    m_plot->endSetpoints();
+
     if (!device) {
         for (const RegisterBinding &binding : m_bindings) {
             if (binding.restore)
@@ -2466,14 +2529,27 @@ void MainWindow::onEmergencyStop()
     m_link->closeLink();
 }
 
-void MainWindow::onSetpointProduced(quint8 nodeId, const TrajectoryOutput &output)
+void MainWindow::onSetpointsProduced(quint8 nodeId, const TrajectoryBatch &outputs)
 {
     DeviceModel *device = m_devices->selected();
     if (!device || device->nodeId() != nodeId)
         return;
+    // A batch still queued when Stop was pressed would reopen the set-point stream
+    // that onTrajectoryRunningChanged() has just closed.
+    if (!m_control->isRunning(nodeId))
+        return;
     // Native units: the plot scales the set-point together with the sample it is
-    // drawn against.
-    m_plot->appendSetpoint(output.primary, output.primaryType, output.t_us);
+    // drawn against. Every channel that is commanded is reported; the plot keeps only
+    // the one on screen.
+    for (const TrajectoryOutput &output : outputs) {
+        if (output.protocol == ControlProtocol::Mit) {
+            m_plot->appendSetpoint(output.position, ServoControlType::Position, output.t_us);
+            m_plot->appendSetpoint(output.velocity, ServoControlType::Velocity, output.t_us);
+            m_plot->appendSetpoint(output.torque, ServoControlType::Torque, output.t_us);
+        } else {
+            m_plot->appendSetpoint(output.primary, output.primaryType, output.t_us);
+        }
+    }
 }
 
 void MainWindow::onTrajectoryRunningChanged(quint8 nodeId, bool running)
@@ -2486,6 +2562,11 @@ void MainWindow::onTrajectoryRunningChanged(quint8 nodeId, bool running)
     DeviceModel *device = m_devices->selected();
     if (!device || device->nodeId() != nodeId)
         return;
+
+    // A protocol change rebuilds the worker, and the old one reports its stop while
+    // the new one already runs.
+    if (!running && !m_control->isRunning(nodeId))
+        m_plot->endSetpoints();
 
     // ServoUserStartBtn stays "Start": it applies a target rather than toggling.
     const QString label = running ? tr("Stop") : tr("Start");
@@ -2505,19 +2586,24 @@ void MainWindow::setupPlotUi()
             &MainWindow::onSignalChanged);
     connect(ui->UnitsComboBox, &QComboBox::currentIndexChanged, this,
             &MainWindow::onUnitsChanged);
-    connect(ui->LanguageComboBox, &QComboBox::currentIndexChanged, this,
-            &MainWindow::applyLanguageFromCombo);
     connect(ui->PausePltBtn, &QPushButton::clicked, this, &MainWindow::onPausePlot);
-    connect(ui->SavePltCsvBtn, &QPushButton::clicked, this, &MainWindow::onSavePlotCsv);
-    connect(ui->SavePltPngBtn, &QPushButton::clicked, this, &MainWindow::onSavePlotPng);
+    connect(ui->crosshairPushButton, &QPushButton::toggled, m_plot,
+            &PlotController::setCrosshairEnabled);
+    connect(ui->SavePltBtn, &QPushButton::clicked, this, &MainWindow::onSavePlot);
+    connect(m_plot, &PlotController::measurementChanged, this,
+            &MainWindow::onMeasurementChanged);
+    onMeasurementChanged(PlotMeasurement{});
 
     connect(ui->PreferencesBtn, &QPushButton::clicked, this, [this] {
         PreferencesDialog dialog(this);
         dialog.setConfig(m_config);
         connect(&dialog, &PreferencesDialog::configApplied, this,
                 [this](const AppConfig &config) {
+                    const bool languageChanged = config.ui.language != m_config.ui.language;
                     m_config = config;
                     applyUiSettings();
+                    if (languageChanged)
+                        applyLanguage();
                     saveSettings();
                 });
         dialog.exec();
@@ -2527,6 +2613,7 @@ void MainWindow::setupPlotUi()
 void MainWindow::onSignalChanged()
 {
     m_plot->setSignal(static_cast<PlotSignal>(ui->SignalComboBox->currentIndex()));
+    updateSavePlotButton();
 }
 
 void MainWindow::onUnitsChanged()
@@ -2581,32 +2668,74 @@ void MainWindow::setPlotLive(bool live)
                                                 m_config.ui.theme,
                                                 ui->PausePltBtn->iconSize().width()));
     ui->PausePltBtn->setToolTip(live ? tr("Pause the plot") : tr("Resume the plot"));
+    setMeasurementReadoutVisible(!live);
 }
 
-void MainWindow::onSavePlotCsv()
+void MainWindow::onMeasurementChanged(const PlotMeasurement &measurement)
 {
-    const QString path = QFileDialog::getSaveFileName(this, tr("Save plot data"), QString(),
-                                                      tr("CSV files (*.csv)"));
-    if (path.isEmpty())
-        return;
-    QString error;
-    if (!m_plot->saveCsv(path, &error))
-        showError(tr("Could not save the CSV"), error);
-    else
-        setStatusMessage(tr("Plot data saved."));
+    PlotMeasurementTool::showInLabels(measurement, ui->PlotXPosLabel, ui->PlotYPosLabel,
+                                      ui->PlotDistLabel, ui->PlotDistLabel_2,
+                                      QLatin1Char(' ') + tr("s"));
 }
 
-void MainWindow::onSavePlotPng()
+void MainWindow::setMeasurementReadoutVisible(bool visible)
 {
-    const QString path = QFileDialog::getSaveFileName(this, tr("Save plot image"), QString(),
-                                                      tr("PNG images (*.png)"));
-    if (path.isEmpty())
+    const QList<QWidget *> readout = {ui->line_2,  ui->label,         ui->PlotXPosLabel,
+                                      ui->label_3, ui->PlotYPosLabel, ui->line_3,
+                                      ui->label_5, ui->PlotDistLabel, ui->label_6,
+                                      ui->PlotDistLabel_2};
+    for (QWidget *widget : readout)
+        widget->setVisible(visible);
+}
+
+void MainWindow::onSavePlot()
+{
+    SaveFileDialog dialog(this);
+    dialog.setTheme(m_config.ui.theme);
+    dialog.setSuggestedName(QStringLiteral("plot"));
+    if (dialog.exec() != QDialog::Accepted)
         return;
+    const SaveFileDialog::Options options = dialog.options();
+    if (options.path.isEmpty()) {
+        setStatusMessage(tr("No file was selected."));
+        return;
+    }
+    if (QFileInfo::exists(options.path)
+        && QMessageBox::question(this, tr("Save plot"),
+                                 tr("%1 already exists. Overwrite it?")
+                                         .arg(QDir::toNativeSeparators(options.path)))
+                != QMessageBox::Yes) {
+        return;
+    }
+
     QString error;
-    if (!m_plot->savePng(path, &error))
-        showError(tr("Could not save the image"), error);
+    bool ok = false;
+    switch (options.format) {
+    case SaveFileDialog::Format::Csv:
+        ok = m_plot->saveCsv(options.path, &error);
+        break;
+    case SaveFileDialog::Format::Png:
+        ok = m_plot->saveImage(options.path, plot_export::ImageFormat::Png, options.theme,
+                               options.dpi, &error);
+        break;
+    case SaveFileDialog::Format::Jpg:
+        ok = m_plot->saveImage(options.path, plot_export::ImageFormat::Jpg, options.theme,
+                               options.dpi, &error);
+        break;
+    case SaveFileDialog::Format::Svg:
+        ok = m_plot->saveImage(options.path, plot_export::ImageFormat::Svg, options.theme,
+                               options.dpi, &error);
+        break;
+    }
+    if (ok)
+        setStatusMessage(tr("Saved to %1.").arg(QDir::toNativeSeparators(options.path)));
     else
-        setStatusMessage(tr("Plot image saved."));
+        showError(tr("Could not save the plot"), error);
+}
+
+void MainWindow::updateSavePlotButton()
+{
+    ui->SavePltBtn->setEnabled(m_plot->currentSignal() != PlotSignal::Log);
 }
 
 // --- firmware --------------------------------------------------------------------------------

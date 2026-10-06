@@ -2,6 +2,8 @@
 
 #include "ui_preferences_dialog.h"
 
+#include "ui/language_manager.h"
+
 #include <QAbstractButton>
 #include <QDialogButtonBox>
 #include <QEvent>
@@ -58,6 +60,9 @@ void PreferencesDialog::setConfig(const AppConfig &config)
     m_config = config;
     const UiSettings &settings = config.ui;
 
+    ui->LanguageComboBox->setCurrentIndex(LanguageManager::comboIndexForLanguage(
+            LanguageManager::effectiveLanguage(settings.language)));
+
     const int themeIndex = ui->ThemeComboBox->findData(settings.theme.toLower());
     ui->ThemeComboBox->setCurrentIndex(themeIndex >= 0 ? themeIndex : 0);
 
@@ -75,8 +80,13 @@ void PreferencesDialog::setConfig(const AppConfig &config)
 void PreferencesDialog::applyChanges()
 {
     // Every editor is range-constrained by the widget itself, so there is nothing to
-    // reject here; the language setting is intentionally left untouched.
+    // reject here.
     UiSettings &settings = m_config.ui;
+    // "system" stays in the config until the user actually picks another language.
+    const QString language =
+            LanguageManager::languageForComboIndex(ui->LanguageComboBox->currentIndex());
+    if (language != LanguageManager::effectiveLanguage(settings.language))
+        settings.language = language;
     settings.theme = ui->ThemeComboBox->currentData().toString();
     settings.font_size = ui->FontSizeSpinBox->value();
     settings.plot_font_size = ui->PlotFontSizeSpinBox->value();

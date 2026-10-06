@@ -88,6 +88,7 @@ TrajectoryOutput Trajectory::evaluate(const TrajectoryParams &params,
                                       const TrajectoryState &state)
 {
     TrajectoryOutput out;
+    out.protocol = params.protocol;
 
     if (params.protocol == ControlProtocol::Servo) {
         out.primaryType = params.servoType;

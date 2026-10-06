@@ -66,8 +66,8 @@ void ControlManager::start(quint8 nodeId, const TrajectoryParams &params)
     }
 
     auto *worker = new TrajectoryWorker(nodeId, m_link, effectiveRateHz(params.protocol));
-    connect(worker, &TrajectoryWorker::setpointProduced, this,
-            &ControlManager::setpointProduced, Qt::QueuedConnection);
+    connect(worker, &TrajectoryWorker::setpointsProduced, this,
+            &ControlManager::setpointsProduced, Qt::QueuedConnection);
     connect(worker, &TrajectoryWorker::runningChanged, this, &ControlManager::runningChanged,
             Qt::QueuedConnection);
 

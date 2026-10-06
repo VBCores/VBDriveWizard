@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SaveFileDialog</class>
+ <widget class="QDialog" name="SaveFileDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>477</width>
+    <height>180</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Save Plot</string>
+  </property>
+  <layout class="QVBoxLayout" name="RootLayout">
+   <item>
+    <layout class="QGridLayout" name="FieldsLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="PathLabel">
+       <property name="text">
+        <string>Address</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="PathLineEdit"/>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="BrowseBtn">
+       <property name="text">
+        <string>Browse</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="FormatLabel">
+       <property name="text">
+        <string>Save as</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="FormatComboBox">
+       <item>
+        <property name="text">
+         <string notr="true">PNG</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string notr="true">JPG</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string notr="true">SVG</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string notr="true">CSV</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="ThemeLabel">
+       <property name="text">
+        <string>Theme</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="ThemeComboBox">
+       <item>
+        <property name="text">
+         <string>Light</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Dark</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="DpiLabel">
+       <property name="text">
+        <string>DPI</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QComboBox" name="DpiComboBox">
+       <property name="currentIndex">
+        <number>2</number>
+       </property>
+       <item>
+        <property name="text">
+         <string notr="true">72</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string notr="true">96</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string notr="true">150</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string notr="true">300</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string notr="true">600</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="VerticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="ButtonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

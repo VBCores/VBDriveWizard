@@ -2,6 +2,8 @@
 #define VBDW_UI_PLOT_CONTROLLER_H
 
 #include "app_types.h"
+#include "ui/plot_export.h"
+#include "ui/plot_measurement.h"
 
 #include <QElapsedTimer>
 #include <QObject>
@@ -16,6 +18,7 @@ QT_END_NAMESPACE
 
 class QCPGraph;
 class QCustomPlot;
+class PlotCrosshairTool;
 
 /// The realtime chart in the REALTIME DATA panel.
 ///
@@ -49,6 +52,14 @@ public:
     void setLiveMode(bool enabled);
     bool isLiveMode() const { return m_liveMode; }
 
+    /// Points picked on the paused plot; see PlotMeasurementTool.
+    PlotMeasurement measurement() const;
+
+    /// The line under the cursor with the time and value of each trace; see
+    /// PlotCrosshairTool. Off by default.
+    void setCrosshairEnabled(bool enabled);
+    bool isCrosshairEnabled() const;
+
     void clear();
 
     // --- ingest; each is a no-op unless it feeds the selected signal ---
@@ -57,16 +68,32 @@ public:
     /// `value` is in drive-native units, like the telemetry samples; `t_us` is its
     /// production time on the host clock.
     void appendSetpoint(double value, ServoControlType type, qint64 t_us);
+    /// Says no more set-points are coming, once the trajectory stops or the selected
+    /// drive changes. Telemetry is then no longer held back for them, and the last
+    /// reported set-point is held flat under it.
+    void endSetpoints();
     void appendLogLine(const QString &line);
 
-    bool savePng(const QString &filePath, QString *error);
+    /// Writes the plot in `exportTheme` at `dpi`; the screen keeps its own theme.
+    bool saveImage(const QString &filePath, plot_export::ImageFormat format,
+                   const QString &exportTheme, int dpi, QString *error);
     bool saveCsv(const QString &filePath, QString *error);
+
+signals:
+    void measurementChanged(const PlotMeasurement &measurement);
 
 private slots:
     void onDrawTimer();
 
 private:
     struct SetpointSample
+    {
+        double key = 0.0;    ///< plot-clock seconds
+        double value = 0.0;  ///< drive-native units
+    };
+
+    /// A telemetry sample whose set-point has not been reported yet.
+    struct Unpaired
     {
         double key = 0.0;    ///< plot-clock seconds
         double value = 0.0;  ///< drive-native units
@@ -81,6 +108,7 @@ private:
     };
 
     void configureForSignal();
+    void applyPens(const QString &theme);
     /// Seconds on the plot clock, the key for anything sampled right now.
     double nowKey() const;
     /// Maps a sample clock (microseconds) onto the plot clock, keeping `offset` as
@@ -89,6 +117,9 @@ private:
     /// Set-point at `key`, linearly interpolated between the two reports around it,
     /// held flat outside the reported range. False when nothing has been reported.
     bool setpointAt(double key, double *value) const;
+    /// Moves telemetry samples whose set-point is known on to the trace. `flush`
+    /// releases the rest too, against the last reported set-point.
+    void releaseTelemetry(bool flush);
     void push(double key, double primary, bool hasSecondary, double secondary);
     /// Multiplies every buffered and plotted value, and the value axis, by `factor`.
     void rescaleValues(double factor);
@@ -103,6 +134,8 @@ private:
     QStackedLayout *m_stack = nullptr;
     QCPGraph *m_primary = nullptr;
     QCPGraph *m_secondary = nullptr;
+    PlotMeasurementTool *m_measure = nullptr;
+    PlotCrosshairTool *m_crosshair = nullptr;
 
     UiSettings m_settings;
     QString m_theme = QStringLiteral("dark");
@@ -130,6 +163,13 @@ private:
     /// interpolated at its own instant rather than with whatever report happened to
     /// arrive last - that alone was a staircase at the telemetry batch rate.
     QVector<SetpointSample> m_setpoints;
+    /// Telemetry newer than the newest set-point report. It is held back until the
+    /// report for its instant arrives: pairing it at once would hold the last report
+    /// flat over the tail of every telemetry batch, and the reference would come out
+    /// as a staircase with its peaks cut off.
+    QVector<Unpaired> m_unpaired;
+    /// Set-points for the signal on screen are still being reported; see endSetpoints().
+    bool m_setpointStreamOpen = false;
     double m_setpointOffset = 0.0;
     bool m_haveSetpointOffset = false;
 };

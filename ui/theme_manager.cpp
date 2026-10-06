@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <QPalette>
 #include <QPixmap>
+#include <QStringList>
 #include <QStyle>
 #include <QWidget>
 
@@ -66,8 +67,13 @@ struct Tokens
     QString onDanger;
 
     QString sliderKnob;
-    QString icons;              // spin/combo arrow set that matches the text colour
-    QString logo;               // tint of the single-colour Voltbro mark
+    // Scroll-bar handle on its @border track: a step darker than the track on light,
+    // a step lighter on dark, so it stands out the same amount in both themes.
+    QString scrollHandle;
+    QString scrollHandleHover;
+    QString scrollHandlePressed;
+    QString icons;             // spin/combo arrow set that matches the text colour
+    QString logo;               // flat tint of the VBCORES mark; empty keeps its gradient
 
     // Plot chrome and series.
     QString plotGrid;
@@ -114,6 +120,9 @@ const Tokens &darkTokens()
         /* onDanger */ QStringLiteral("#FFF1F1"),
 
         /* sliderKnob */ QStringLiteral("#E6E6E6"),
+        /* scrollHandle */ QStringLiteral("#5A606A"),
+        /* scrollHandleHover */ QStringLiteral("#6F7680"),
+        /* scrollHandlePressed */ QStringLiteral("#8A929C"),
         /* icons */ QStringLiteral("dark"),
         /* logo */ QStringLiteral("#E6E6E6"),
 
@@ -163,8 +172,11 @@ const Tokens &lightTokens()
         /* onDanger */ QStringLiteral("#FFFFFF"),
 
         /* sliderKnob */ QStringLiteral("#FFFFFF"),
+        /* scrollHandle */ QStringLiteral("#A5B1C0"),
+        /* scrollHandleHover */ QStringLiteral("#94A3B8"),
+        /* scrollHandlePressed */ QStringLiteral("#64748B"),
         /* icons */ QStringLiteral("light"),
-        /* logo */ QStringLiteral("#2B2A29"),   // the artwork's own colour
+        /* logo */ QString(),                  // the artwork's own gradient
 
         /* plotGrid */ QStringLiteral("#E2E8F0"),
         /* measured */ QStringLiteral("#286FC4"),
@@ -214,6 +226,9 @@ QString fill(QString qss, const Tokens &t)
         { QStringLiteral("danger"), &t.danger },
         { QStringLiteral("onDanger"), &t.onDanger },
         { QStringLiteral("sliderKnob"), &t.sliderKnob },
+        { QStringLiteral("scrollHandlePressed"), &t.scrollHandlePressed },
+        { QStringLiteral("scrollHandleHover"), &t.scrollHandleHover },
+        { QStringLiteral("scrollHandle"), &t.scrollHandle },
         { QStringLiteral("icons"), &t.icons },
     };
     std::stable_sort(names.begin(), names.end(), [](const auto &a, const auto &b) {
@@ -226,18 +241,26 @@ QString fill(QString qss, const Tokens &t)
 
 /// Buttons in three weights. The default is the quiet secondary button; the one
 /// action a panel is for (Connect, Write, Start, OK) is tagged `variant=primary`
-/// by the window that owns it, and STOP is the only danger button. The disabled
+/// by the window that owns it, and STOP is the only danger button. A toggle that is
+/// on (the plot crosshair) stays pressed-in with an accent outline. The disabled
 /// rules come last (and name the STOP button by id, since an id selector outranks
 /// a bare `:disabled` one) so a disabled button of any weight falls back to the same
 /// outline-only look: with most of the window disabled until a drive is
 /// connected, a filled disabled button is too easy to mistake for a live one.
+/// A button tagged `iconOnly` (the refresh buttons) drops the side padding a caption
+/// needs, so its 16 px icon makes it square rather than half as wide again. The side
+/// padding is 2 px short of the vertical one: QPushButton reserves 4 px beside an
+/// icon for a caption even when there is none.
 QString buttonStyle()
 {
     return QStringLiteral(
             "QPushButton { border: 1px solid @buttonBorder; border-radius: 6px;"
             " padding: 5px 12px; background-color: @button; color: @text; }"
+            "QPushButton[iconOnly=\"true\"] { padding: 5px 3px; }"
             "QPushButton:hover { background-color: @buttonHover; }"
             "QPushButton:pressed { background-color: @buttonPressed; }"
+            "QPushButton:checked { background-color: @buttonPressed;"
+            " border-color: @accentMark; }"
             "QPushButton[variant=\"primary\"] { background-color: @accent;"
             " border-color: @accent; color: @onAccent; }"
             "QPushButton[variant=\"primary\"]:hover { background-color: @accentHover;"
@@ -317,6 +340,45 @@ QString radioStyle()
             " image: url(:/icons/radio_dot_@icons_disabled.svg); }");
 }
 
+/// Radio buttons tagged `segment` (first, middle or last) draw as one row of joined
+/// buttons, the checked one filled in the accent: a short set of choices then takes
+/// one line instead of a column. They stay radio buttons, so their exclusivity and
+/// signals are untouched; only the indicator is dropped. Qt matches a property only
+/// by value, so every rule names the three positions.
+QString segmentStyle()
+{
+    const auto each = [](const char *suffix) {
+        QStringList selectors;
+        for (const char *position : {"first", "middle", "last"}) {
+            selectors << QStringLiteral("QRadioButton[segment=\"%1\"]%2")
+                                 .arg(QLatin1String(position), QLatin1String(suffix));
+        }
+        return selectors.join(QStringLiteral(", "));
+    };
+    return each("") + QStringLiteral(" { border: 1px solid @inputBorder; border-left: none;"
+                                     " background-color: @base; color: @text;"
+                                     " padding: 4px 12px; spacing: 0px; min-height: 20px; }")
+            + QStringLiteral("QRadioButton[segment=\"first\"] { border-left: 1px solid @inputBorder;"
+                             " border-top-left-radius: 6px; border-bottom-left-radius: 6px; }"
+                             "QRadioButton[segment=\"last\"] { border-top-right-radius: 6px;"
+                             " border-bottom-right-radius: 6px; }")
+            + each(":hover") + QStringLiteral(" { background-color: @hover; }")
+            + each(":checked")
+            + QStringLiteral(" { background-color: @accent; color: @onAccent; }")
+            + each(":disabled")
+            + QStringLiteral(" { background-color: @baseDisabled; color: @textDisabled; }")
+            + each(":checked:disabled")
+            + QStringLiteral(" { background-color: @inputBorder; color: @card; }")
+            // Every indicator rule of radioStyle() is matched here, each state
+            // included, since a rule with more pseudo-states would win otherwise.
+            + QStringList{each("::indicator"), each("::indicator:hover"),
+                          each("::indicator:checked"), each("::indicator:checked:hover"),
+                          each("::indicator:disabled"), each("::indicator:checked:disabled")}
+                      .join(QStringLiteral(", "))
+            + QStringLiteral(" { width: 0px; height: 0px; border: none; image: none;"
+                             " background-color: transparent; }");
+}
+
 /// Sliders: the travelled part of the groove carries the accent, the handle is a
 /// knob ringed in it. The negative handle margin is what centres the knob on a
 /// 4 px groove, and the knob is only as large as the row can hold: the rows of the
@@ -359,6 +421,8 @@ QString cardStyle()
             " font-weight: 600; }"
             "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left;"
             " left: 10px; padding: 0 4px; color: @textSecondary; }"
+            // The STOP card has no title, so it needs no band above its frame for one.
+            "QGroupBox#StopGroupBox { margin-top: 0px; }"
             "QGroupBox QGroupBox { border: none; background-color: transparent;"
             " margin-top: 22px; padding: 0; }"
             // Qt does not merge two rules for the same subcontrol the way CSS
@@ -460,6 +524,33 @@ QString scrollAreaStyle()
             " background-color: transparent; }");
 }
 
+/// Scroll bars as a thin rounded track with a pill handle, no arrow buttons. The
+/// track is the slider groove's colour, so it is visible on a white card where
+/// Fusion's own handle, painted in the button colour, all but disappears. The bar
+/// itself is the track and the pages are cleared. No margin: the scroll area sizes
+/// the bar by its width alone, so a margin is taken out of the track, not added.
+QString scrollBarStyle()
+{
+    return QStringLiteral(
+            "QScrollBar:vertical { width: 8px; border: none; border-radius: 4px;"
+            " background-color: @border; }"
+            "QScrollBar:horizontal { height: 8px; border: none; border-radius: 4px;"
+            " background-color: @border; }"
+            "QScrollBar::handle:vertical { min-height: 24px; border-radius: 4px;"
+            " background-color: @scrollHandle; }"
+            "QScrollBar::handle:horizontal { min-width: 24px; border-radius: 4px;"
+            " background-color: @scrollHandle; }"
+            "QScrollBar::handle:hover { background-color: @scrollHandleHover; }"
+            "QScrollBar::handle:pressed { background-color: @scrollHandlePressed; }"
+            // Disabled as the slider is: a paler track, the handle in the field border.
+            "QScrollBar:disabled { background-color: @baseDisabled; }"
+            "QScrollBar::handle:disabled { background-color: @inputBorder; }"
+            "QScrollBar::add-line, QScrollBar::sub-line { width: 0px; height: 0px;"
+            " border: none; background: none; }"
+            "QScrollBar::add-page, QScrollBar::sub-page { background: none; }"
+            "QAbstractScrollArea::corner { background: transparent; }");
+}
+
 /// The status bar and the three label roles of the STATUS panel, which MainWindow
 /// tags with a `role` property. The reading is the point of the panel, so it is the
 /// value that carries the weight and the caption that recedes.
@@ -481,8 +572,8 @@ QColor color(const QString &hex)
     return QColor(hex);
 }
 
-/// The palette behind the stylesheet: what Fusion still draws itself (scroll bars,
-/// menus, message boxes, the frame of an unstyled widget) takes its colours from
+/// The palette behind the stylesheet: what Fusion still draws itself (menus,
+/// message boxes, the frame of an unstyled widget) takes its colours from
 /// here, so it is built from the same tokens.
 QPalette paletteFor(const Tokens &t)
 {
@@ -539,12 +630,16 @@ void ThemeManager::applyApplicationTheme(QApplication &app, const UiSettings &se
     const Tokens &t = tokens(settings.theme);
     const QString styleSheet =
             QStringLiteral("QWidget { font-size: %1pt; }"
-                           "QPushButton#EmergStopPushButton { font-size: %2pt; }")
+                           "QPushButton#EmergStopPushButton { font-size: %2pt; }"
+                           // The application name beside the logo.
+                           "QLabel[role=\"header\"] { font-size: %3pt; font-weight: 600;"
+                           " color: @text; }")
                     .arg(settings.font_size)
                     .arg(settings.font_size + 6)
+                    .arg(settings.font_size + 3)
             + buttonStyle() + cardStyle() + inputStyle() + spinBoxStyle() + checkBoxStyle()
-            + radioStyle() + sliderStyle() + tabStyle() + itemViewStyle() + scrollAreaStyle()
-            + statusStyle();
+            + radioStyle() + segmentStyle() + sliderStyle() + tabStyle() + itemViewStyle() + scrollAreaStyle()
+            + scrollBarStyle() + statusStyle();
 
     app.setPalette(paletteFor(t));
     app.setStyleSheet(fill(styleSheet, t));
@@ -624,18 +719,24 @@ QColor ThemeManager::restoreIconHoverColor(const QString &theme)
     return color(tokens(theme).accentMark);
 }
 
-QPixmap ThemeManager::logo(const QString &theme, int width)
+QPixmap ThemeManager::logo(const QString &theme, int width, qreal devicePixelRatio)
 {
-    // The artwork is a single-colour mark (the wordmark is cut out of its box and
-    // shows the surface behind), so it is scaled first and then flood-tinted:
-    // scaling a tinted copy would blur the tint into the transparent letters.
-    QPixmap out = QPixmap(QStringLiteral(":/icons/voltbro_logo.png"))
-                          .scaledToWidth(width, Qt::SmoothTransformation);
+    // Scaled from the large artwork to the device pixels it is drawn on, so it stays
+    // sharp on a HiDPI screen. The dark gradient end is lost on the dark surfaces, so
+    // there the mark is flood-tinted after scaling: scaling a tinted copy would blur
+    // the tint into the transparent edges.
+    QPixmap out = QPixmap(QStringLiteral(":/icons/vbcore.png"))
+                          .scaledToWidth(qRound(width * devicePixelRatio),
+                                         Qt::SmoothTransformation);
     if (out.isNull())
         return out;
-    QPainter painter(&out);
-    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    painter.fillRect(out.rect(), color(tokens(theme).logo));
+    out.setDevicePixelRatio(devicePixelRatio);
+    const QString tint = tokens(theme).logo;
+    if (!tint.isEmpty()) {
+        QPainter painter(&out);
+        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        painter.fillRect(out.rect(), color(tint));
+    }
     return out;
 }
 

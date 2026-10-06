@@ -37,6 +37,7 @@ class PlotController;
 class RestoreLabel;
 class SerialService;
 class TranslationController;
+struct PlotMeasurement;
 
 /// Wiring for the whole application: it owns the services and translates between the
 /// widgets in mainwindow.ui and the register model.
@@ -90,7 +91,9 @@ private:
     void loadSettings();
     void saveSettings();
     void applyUiSettings();
-    void applyLanguageFromCombo();
+    void storeControlState();
+    void restoreControlState();
+    void applyLanguage();
     void retranslateDynamicTexts();
     void updateLogo();
 
@@ -206,7 +209,7 @@ private:
     void onTransientFormSet();
     void onMitTrajectoryChanged();
     void onEmergencyStop();
-    void onSetpointProduced(quint8 nodeId, const TrajectoryOutput &output);
+    void onSetpointsProduced(quint8 nodeId, const TrajectoryBatch &outputs);
     void onTrajectoryRunningChanged(quint8 nodeId, bool running);
     quint8 activeNodeId() const;
 
@@ -232,8 +235,13 @@ private:
     /// Live: the plot follows the drive. Paused: it keeps its picture for the user.
     /// Disconnecting pauses it; a new connection sets it live again.
     void setPlotLive(bool live);
-    void onSavePlotCsv();
-    void onSavePlotPng();
+    void onSavePlot();
+    /// The log view is text, not a plot, so there is nothing to save as a picture.
+    void updateSavePlotButton();
+    /// The picked-point coordinates and distances under the plot.
+    void onMeasurementChanged(const PlotMeasurement &measurement);
+    /// Points can only be picked on a paused plot, so a live one has nothing to show.
+    void setMeasurementReadoutVisible(bool visible);
 
     void showError(const QString &title, const QString &text);
     void setStatusMessage(const QString &message, int timeoutMs = 5000);
@@ -292,7 +300,7 @@ private:
     QPair<bool, double> m_voltageLimitBaseline{false, 0.0};
     QLabel *m_connectionStatusLabel = nullptr;
     /// Transient messages. They are a widget rather than QStatusBar::showMessage(),
-    /// because a shown message hides every left-hand widget - including the badge.
+    /// because a shown message hides every left-hand widget - including this one.
     QLabel *m_statusMessageLabel = nullptr;
     QTimer m_statusMessageTimer;  ///< clears the message when its timeout expires
     /// Node whose heartbeat was lost and which the user asked to wait for.

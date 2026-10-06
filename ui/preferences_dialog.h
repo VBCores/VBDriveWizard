@@ -11,9 +11,8 @@ class PreferencesDialog;
 
 /// Application settings that are not tied to a particular drive.
 ///
-/// The interface language is deliberately absent: it lives in LanguageComboBox on the
-/// main window. The dialog never writes the settings file; MainWindow does that when
-/// it receives configApplied().
+/// The dialog never writes the settings file; MainWindow does that when it receives
+/// configApplied().
 class PreferencesDialog : public QDialog
 {
     Q_OBJECT

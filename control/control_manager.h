@@ -53,7 +53,7 @@ public:
     int effectiveRateHz(ControlProtocol protocol) const;
 
 signals:
-    void setpointProduced(quint8 nodeId, const TrajectoryOutput &output);
+    void setpointsProduced(quint8 nodeId, const TrajectoryBatch &outputs);
     void runningChanged(quint8 nodeId, bool running);
 
 private:

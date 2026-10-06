@@ -8,9 +8,9 @@
 #include <thread>
 
 namespace {
-/// Set-points are published to the plot at about this rate, not at the command rate.
-/// Matched to the telemetry rate: anything slower shows up as visible steps on a
-/// triangle, because the plot draws one set-point point per telemetry sample.
+/// Set-points are handed to the plot in batches at about this rate, so the GUI thread
+/// gets one event per batch instead of one per command. Every command is in a batch:
+/// at the 1 kHz MIT rate a decimated stream cuts the peaks and edges of the reference.
 constexpr int kSetpointReportHz = 100;
 } // namespace
 
@@ -84,7 +84,8 @@ void TrajectoryWorker::run()
 
     auto nextDeadline = clock::now();
     auto lastStep = nextDeadline;
-    qint64 tick = 0;
+    TrajectoryBatch batch;
+    batch.reserve(reportEvery);
 
     while (!m_stopRequested.load(std::memory_order_relaxed)) {
         nextDeadline += period;
@@ -115,11 +116,12 @@ void TrajectoryWorker::run()
                 }
             }
 
-            if (tick % reportEvery == 0)
-                emit setpointProduced(m_nodeId, output);
+            batch.push_back(output);
+            if (batch.size() >= reportEvery) {
+                emit setpointsProduced(m_nodeId, batch);
+                batch.clear();
+            }
         }
-
-        ++tick;
 
         // If a cycle overran, drop the missed slots instead of trying to catch up in
         // a burst, which would flood the link.

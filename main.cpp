@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<DeviceStatus>("DeviceStatus");
     qRegisterMetaType<RegisterValue>("RegisterValue");
     qRegisterMetaType<TrajectoryOutput>("TrajectoryOutput");
+    qRegisterMetaType<TrajectoryBatch>("TrajectoryBatch");
     qRegisterMetaType<TrajectoryParams>("TrajectoryParams");
 
     // The language is applied before MainWindow is built so setupUi() already

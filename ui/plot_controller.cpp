@@ -2,6 +2,7 @@
 
 #include "core/units.h"
 #include "third_party/qcustomplot/qcustomplot.h"
+#include "ui/plot_crosshair.h"
 #include "ui/theme_manager.h"
 
 #include <QPlainTextEdit>
@@ -15,7 +16,6 @@
 
 namespace {
 constexpr double kYAxisMargin = 1.2;
-constexpr int kExportDpi = 96;
 constexpr int kMaxLogLines = 2000;
 /// A telemetry sample delivered this much later than the offset predicts is not late:
 /// its clock has restarted, and the offset is re-estimated.
@@ -24,6 +24,10 @@ constexpr double kTelemetryResyncS = 1.0;
 /// oldest unresolved telemetry sample and now is really needed - one batch interval -
 /// so a second is generous and keeps the buffer small.
 constexpr double kSetpointHistoryS = 1.0;
+/// How long a telemetry sample waits for the set-point report of its instant. Reports
+/// come every 10 ms, so only a set-point stream that has stopped runs into this; the
+/// sample is then drawn against the last report instead of being held back.
+constexpr double kSetpointWaitS = 0.2;
 } // namespace
 
 PlotController::PlotController(QObject *parent)
@@ -53,6 +57,15 @@ void PlotController::setupPlot(QWidget *hostWidget)
     m_primary->setAdaptiveSampling(true);
     m_secondary = m_plot->addGraph();
     m_secondary->setAdaptiveSampling(true);
+
+    m_measure = new PlotMeasurementTool(m_plot, this);
+    connect(m_measure, &PlotMeasurementTool::measurementChanged, this,
+            &PlotController::measurementChanged);
+    m_measure->setEnabled(!m_liveMode);
+
+    m_crosshair = new PlotCrosshairTool(m_plot, this);
+    m_crosshair->addGraph(m_primary);
+    m_crosshair->addGraph(m_secondary);
 
     m_logView = new QPlainTextEdit(hostWidget);
     m_logView->setReadOnly(true);
@@ -116,6 +129,14 @@ void PlotController::applyTheme(const QString &theme)
     if (!m_initialized)
         return;
     ThemeManager::applyPlotTheme(m_plot, theme, m_settings.plot_font_size);
+    applyPens(theme);
+    m_measure->applyTheme(theme);
+    m_crosshair->applyTheme(theme);
+    m_plot->replot(QCustomPlot::rpQueuedReplot);
+}
+
+void PlotController::applyPens(const QString &theme)
+{
     m_primary->setPen(QPen(ThemeManager::measuredColor(theme), m_settings.plot_line_width));
     QPen companion(signalUsesSetpoint() ? ThemeManager::setpointColor(theme)
                                         : ThemeManager::secondaryColor(theme),
@@ -123,7 +144,6 @@ void PlotController::applyTheme(const QString &theme)
     if (signalUsesSetpoint())
         companion.setStyle(Qt::DashLine);
     m_secondary->setPen(companion);
-    m_plot->replot(QCustomPlot::rpQueuedReplot);
 }
 
 void PlotController::retranslate()
@@ -272,6 +292,7 @@ void PlotController::rescaleValues(double factor)
     }
     const QCPRange range = m_plot->yAxis->range();
     m_plot->yAxis->setRange(range.lower * factor, range.upper * factor);
+    m_measure->scaleY(factor);
     m_plot->replot(QCustomPlot::rpQueuedReplot);
 }
 
@@ -286,11 +307,32 @@ void PlotController::setLiveMode(bool enabled)
     m_plot->setSelectionRectMode(enabled ? QCP::srmNone : QCP::srmZoom);
     if (enabled)
         m_ticksSinceRescale = m_rescaleIntervalTicks;
+    // Points picked on a frozen picture mean nothing once it scrolls again, which
+    // disabling the tool takes care of.
+    m_measure->setEnabled(!enabled);
+}
+
+PlotMeasurement PlotController::measurement() const
+{
+    return m_initialized ? m_measure->measurement() : PlotMeasurement{};
+}
+
+void PlotController::setCrosshairEnabled(bool enabled)
+{
+    if (m_initialized)
+        m_crosshair->setEnabled(enabled);
+}
+
+bool PlotController::isCrosshairEnabled() const
+{
+    return m_initialized && m_crosshair->isEnabled();
 }
 
 void PlotController::clear()
 {
     m_pending.clear();
+    m_unpaired.clear();
+    m_setpointStreamOpen = false;
     m_haveLastKey = false;
     m_haveTelemetryOffset = false;
     m_lastKey = 0.0;
@@ -301,6 +343,7 @@ void PlotController::clear()
         return;
     m_primary->data()->clear();
     m_secondary->data()->clear();
+    m_measure->clear();
     m_plot->replot(QCustomPlot::rpQueuedReplot);
 }
 
@@ -375,7 +418,6 @@ void PlotController::appendTelemetry(const TelemetryBatch &samples)
         return;  // this signal is not fed by telemetry
     }
 
-    const double scale = displayScale();
     // A batch carries several samples produced over the whole batch interval, so each
     // is keyed by its own timestamp rather than by the moment the batch landed. The
     // offset is estimated from the newest sample, which has the smallest delay.
@@ -396,11 +438,33 @@ void PlotController::appendTelemetry(const TelemetryBatch &samples)
         default:
             break;
         }
-        const double key = static_cast<double>(sample.t_us) * 1e-6 + m_telemetryOffset;
-        double setpoint = 0.0;
-        const bool haveSetpoint = setpointAt(key, &setpoint);
-        push(key, value * scale, haveSetpoint, setpoint * scale);
+        Unpaired unpaired;
+        unpaired.key = static_cast<double>(sample.t_us) * 1e-6 + m_telemetryOffset;
+        unpaired.value = value;
+        m_unpaired.push_back(unpaired);
     }
+    releaseTelemetry(false);
+}
+
+void PlotController::releaseTelemetry(bool flush)
+{
+    if (m_unpaired.isEmpty())
+        return;
+    const double scale = displayScale();
+    const double now = nowKey();
+    int released = 0;
+    for (; released < m_unpaired.size(); ++released) {
+        const Unpaired &sample = m_unpaired.at(released);
+        // Its report is still on the way; everything after it is newer.
+        if (!flush && m_setpointStreamOpen && !m_setpoints.isEmpty()
+            && sample.key > m_setpoints.last().key && now - sample.key < kSetpointWaitS) {
+            break;
+        }
+        double setpoint = 0.0;
+        const bool haveSetpoint = setpointAt(sample.key, &setpoint);
+        push(sample.key, sample.value * scale, haveSetpoint, setpoint * scale);
+    }
+    m_unpaired.remove(0, released);
 }
 
 void PlotController::appendStatus(const DeviceStatus &status)
@@ -438,6 +502,7 @@ void PlotController::appendSetpoint(double value, ServoControlType type, qint64 
                 && (type == ServoControlType::Torque || type == ServoControlType::Voltage));
     if (!matches)
         return;
+    m_setpointStreamOpen = true;
 
     SetpointSample sample;
     sample.key = mapToPlotClock(t_us, &m_setpointOffset, &m_haveSetpointOffset);
@@ -459,6 +524,14 @@ void PlotController::appendSetpoint(double value, ServoControlType type, qint64 
         ++drop;
     if (drop > 0)
         m_setpoints.remove(0, drop);
+
+    releaseTelemetry(false);
+}
+
+void PlotController::endSetpoints()
+{
+    releaseTelemetry(true);
+    m_setpointStreamOpen = false;
 }
 
 void PlotController::appendLogLine(const QString &line)
@@ -472,6 +545,9 @@ void PlotController::appendLogLine(const QString &line)
 
 void PlotController::onDrawTimer()
 {
+    // Samples whose set-point stopped coming are let through here, since no new
+    // report will ever release them.
+    releaseTelemetry(false);
     if (!m_dirty || !m_initialized || m_pending.isEmpty())
         return;
 
@@ -545,7 +621,8 @@ void PlotController::onDrawTimer()
 
 // --- export ---------------------------------------------------------------------------
 
-bool PlotController::savePng(const QString &filePath, QString *error)
+bool PlotController::saveImage(const QString &filePath, plot_export::ImageFormat format,
+                               const QString &exportTheme, int dpi, QString *error)
 {
     if (!m_initialized) {
         if (error)
@@ -558,28 +635,16 @@ bool PlotController::savePng(const QString &filePath, QString *error)
         return false;
     }
 
-    // Export on white so the image is usable in documents regardless of the UI theme.
-    ThemeManager::applyPlotTheme(m_plot, QStringLiteral("light"), m_settings.plot_font_size);
-    m_plot->replot(QCustomPlot::rpImmediateRefresh);
-
-    QImage image = m_plot->toPixmap().toImage();
-    ThemeManager::applyPlotTheme(m_plot, m_theme, m_settings.plot_font_size);
+    // Exported without the cursor line, which is not part of the data. The series
+    // pens follow the theme too, and plot_export only restyles the chrome.
+    const bool crosshair = m_crosshair->isEnabled();
+    m_crosshair->setEnabled(false);
+    const bool ok = plot_export::saveImage(m_plot, filePath, format, exportTheme, m_theme,
+                                           m_settings.plot_font_size, dpi, error,
+                                           [this](const QString &theme) { applyPens(theme); });
+    m_crosshair->setEnabled(crosshair);
     m_plot->replot(QCustomPlot::rpQueuedReplot);
-
-    if (image.isNull()) {
-        if (error)
-            *error = tr("The plot could not be rendered.");
-        return false;
-    }
-    const int dotsPerMeter = qRound(kExportDpi / 0.0254);
-    image.setDotsPerMeterX(dotsPerMeter);
-    image.setDotsPerMeterY(dotsPerMeter);
-    if (!image.save(filePath, "PNG", -1)) {
-        if (error)
-            *error = tr("Could not write %1.").arg(filePath);
-        return false;
-    }
-    return true;
+    return ok;
 }
 
 bool PlotController::saveCsv(const QString &filePath, QString *error)

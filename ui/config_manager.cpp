@@ -124,6 +124,9 @@ void ConfigManager::sanitize(AppConfig *config)
         ui.openocd_interface = defaults.ui.openocd_interface;
     if (ui.openocd_target.trimmed().isEmpty())
         ui.openocd_target = defaults.ui.openocd_target;
+    ui.angle_unit = ui.angle_unit.toLower();
+    if (ui.angle_unit != QLatin1String("rad") && ui.angle_unit != QLatin1String("deg"))
+        ui.angle_unit = defaults.ui.angle_unit;
 
     WindowSettings &window = config->window;
     if (window.width < 640 || window.width > 16384)
@@ -159,6 +162,7 @@ AppConfig ConfigManager::loadConfig(const QString &path, QString *message, LoadS
                 ui.openocd_interface =
                         readString(root, "openocd_interface", ui.openocd_interface);
                 ui.openocd_target = readString(root, "openocd_target", ui.openocd_target);
+                ui.angle_unit = readString(root, "angle_unit", ui.angle_unit);
 
                 WindowSettings &window = config.window;
                 window.x = readInt(root, "window_x", window.x);
@@ -166,6 +170,19 @@ AppConfig ConfigManager::loadConfig(const QString &path, QString *message, LoadS
                 window.width = readInt(root, "window_width", window.width);
                 window.height = readInt(root, "window_height", window.height);
                 window.maximized = readBool(root, "window_maximized", window.maximized);
+
+                const YAML::Node control = root["control"];
+                if (control && control.IsMap()) {
+                    for (const auto &entry : control) {
+                        try {
+                            config.control.insert(
+                                    QString::fromStdString(entry.first.as<std::string>()),
+                                    QString::fromStdString(entry.second.as<std::string>()));
+                        } catch (const YAML::Exception &) {
+                            // A malformed entry only loses itself.
+                        }
+                    }
+                }
             }
         } catch (const YAML::Exception &) {
             config = defaultConfig();
@@ -219,7 +236,15 @@ bool ConfigManager::saveConfig(const QString &path, const AppConfig &config, QSt
         << "window_y: " << window.y << '\n'
         << "window_width: " << window.width << '\n'
         << "window_height: " << window.height << '\n'
-        << "window_maximized: " << (window.maximized ? "true" : "false") << '\n';
+        << "window_maximized: " << (window.maximized ? "true" : "false") << '\n'
+        << "\nangle_unit: " << ui.angle_unit << '\n';
+
+    if (!config.control.isEmpty()) {
+        out << "\n# Last input of the CONTROL panel, keyed by widget name.\n"
+            << "control:\n";
+        for (auto it = config.control.cbegin(); it != config.control.cend(); ++it)
+            out << "  " << it.key() << ": " << it.value() << '\n';
+    }
 
     if (!file.commit()) {
         if (error)

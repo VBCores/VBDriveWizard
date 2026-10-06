@@ -4,6 +4,7 @@
 #include "app_types.h"
 
 #include <QMetaType>
+#include <QVector>
 
 /// Everything a trajectory worker needs to produce one command.
 ///
@@ -52,14 +53,21 @@ struct TrajectoryOutput
     /// set-point trace.
     double primary = 0.0;
     ServoControlType primaryType = ServoControlType::Position;
+    /// Which fields are really commanded: MIT sends position, velocity and torque in
+    /// every mit_cmd, Servo only the primary one.
+    ControlProtocol protocol = ControlProtocol::Servo;
     /// Host wall clock (hostTimeUs()) at the moment the command was produced, in the
     /// same clock as TelemetrySample::t_us. The plot needs it to place the set-point
     /// on the same time base as the measurement instead of at delivery time.
     qint64 t_us = 0;
 };
 
+/// Consecutive commands, oldest first, handed to the plot in one event.
+using TrajectoryBatch = QVector<TrajectoryOutput>;
+
 Q_DECLARE_METATYPE(TrajectoryParams)
 Q_DECLARE_METATYPE(TrajectoryOutput)
+Q_DECLARE_METATYPE(TrajectoryBatch)
 
 /// The part of the waveform the generator carries between commands.
 ///

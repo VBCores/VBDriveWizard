@@ -1,0 +1,8 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+/// Generated from CMakeLists.txt by configure_file(). The version is defined once,
+/// in project(VBDriveWizard VERSION ...), and never hard-coded in the sources.
+#define VBDRIVEWIZARD_VERSION "@PROJECT_VERSION@"
+
+#endif // VERSION_H

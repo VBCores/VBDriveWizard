@@ -1,6 +1,7 @@
 #ifndef APP_TYPES_H
 #define APP_TYPES_H
 
+#include <QMap>
 #include <QMetaType>
 #include <QString>
 #include <QVector>
@@ -124,6 +125,7 @@ struct UiSettings
     int serial_baud = 115200;     ///< VBDrive UART speed
     QString openocd_interface = QStringLiteral("interface/stlink.cfg");
     QString openocd_target = QStringLiteral("target/stm32g4x.cfg");
+    QString angle_unit = QStringLiteral("rad");  ///< "rad" or "deg"
 };
 
 struct WindowSettings
@@ -139,6 +141,8 @@ struct AppConfig
 {
     UiSettings ui;
     WindowSettings window;
+    /// Last input of the CONTROL panel: widget object name -> value as text.
+    QMap<QString, QString> control;
 };
 
 Q_DECLARE_METATYPE(TelemetrySample)

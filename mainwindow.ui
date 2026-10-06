@@ -48,11 +48,56 @@
        <number>0</number>
       </property>
       <item>
+       <widget class="QGroupBox" name="logoGroupBox">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_15">
+         <item row="1" column="0">
+          <widget class="QLabel" name="appNameLabel">
+           <property name="text">
+            <string>VBDrive Wizard</string>
+           </property>
+           <property name="role" stdset="0">
+            <string notr="true">header</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="LogoLabel">
+           <property name="text">
+            <string notr="true"/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="verLabel">
+           <property name="text">
+            <string notr="true">v0.0.1</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="role" stdset="0">
+            <string notr="true">caption</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
        <widget class="QGroupBox" name="ConnectionGroupBox">
         <property name="title">
          <string>CONNECTION</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout_12">
+        <layout class="QVBoxLayout" name="ConnectionLayout">
+         <property name="spacing">
+          <number>4</number>
+         </property>
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -65,119 +110,202 @@
          <property name="bottomMargin">
           <number>0</number>
          </property>
-         <property name="horizontalSpacing">
-          <number>8</number>
-         </property>
-         <property name="verticalSpacing">
-          <number>4</number>
-         </property>
-         <item row="0" column="0">
-          <widget class="QRadioButton" name="SerialRadioBtn">
-           <property name="text">
-            <string>Serial</string>
+         <item>
+          <layout class="QHBoxLayout" name="ConnectionTransportLayout">
+           <property name="spacing">
+            <number>0</number>
            </property>
-           <property name="checked">
-            <bool>true</bool>
+           <property name="leftMargin">
+            <number>0</number>
            </property>
-          </widget>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QRadioButton" name="SerialRadioBtn">
+             <property name="text">
+              <string>Serial</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+             <property name="segment" stdset="0">
+              <string notr="true">first</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="CanRadioBtn">
+             <property name="text">
+              <string>CAN</string>
+             </property>
+             <property name="segment" stdset="0">
+              <string notr="true">last</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="ConnectionTransportSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="SerialCombo">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+         <item>
+          <widget class="QStackedWidget" name="ConnectionStack">
+           <property name="currentIndex">
+            <number>0</number>
            </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QPushButton" name="SerialConnectBtn">
-           <property name="text">
-            <string>Connect</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3">
-          <widget class="QPushButton" name="SerialRefreshBtn">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Refresh</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="icons.qrc">
-             <normaloff>:/icons/refresh_white.svg</normaloff>:/icons/refresh_white.svg</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>16</width>
-             <height>16</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QRadioButton" name="CanRadioBtn">
-           <property name="text">
-            <string>CAN</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QComboBox" name="CanCombo">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QPushButton" name="CanConnectBtn">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Connect</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="3">
-          <widget class="QPushButton" name="CanRefreshBtn">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Refresh</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="icons.qrc">
-             <normaloff>:/icons/refresh_white.svg</normaloff>:/icons/refresh_white.svg</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>16</width>
-             <height>16</height>
-            </size>
-           </property>
+           <widget class="QWidget" name="SerialConnectionPage">
+            <layout class="QHBoxLayout" name="SerialConnectionLayout">
+             <property name="spacing">
+              <number>8</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QComboBox" name="SerialCombo">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="SerialConnectBtn">
+               <property name="text">
+                <string>Connect</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="SerialRefreshBtn">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Refresh</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="icons.qrc">
+                 <normaloff>:/icons/refresh_white.svg</normaloff>:/icons/refresh_white.svg</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>16</width>
+                 <height>16</height>
+                </size>
+               </property>
+               <property name="iconOnly" stdset="0">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="CanConnectionPage">
+            <layout class="QHBoxLayout" name="CanConnectionLayout">
+             <property name="spacing">
+              <number>8</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QComboBox" name="CanCombo">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="CanConnectBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Connect</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="CanRefreshBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Refresh</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="icons.qrc">
+                 <normaloff>:/icons/refresh_white.svg</normaloff>:/icons/refresh_white.svg</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>16</width>
+                 <height>16</height>
+                </size>
+               </property>
+               <property name="iconOnly" stdset="0">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
          </item>
         </layout>
@@ -229,6 +357,9 @@
              <property name="icon">
               <iconset resource="icons.qrc">
                <normaloff>:/icons/refresh_white.svg</normaloff>:/icons/refresh_white.svg</iconset>
+             </property>
+             <property name="iconOnly" stdset="0">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -303,7 +434,7 @@
          <item>
           <widget class="QTabWidget" name="ConfigTabWidget">
            <property name="currentIndex">
-            <number>3</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="BasicTab">
             <attribute name="title">
@@ -352,7 +483,7 @@
                 <item row="7" column="2">
                  <widget class="QDoubleSpinBox" name="CurrentLimitDoubleSpinBox">
                   <property name="decimals">
-                   <number>4</number>
+                   <number>2</number>
                   </property>
                   <property name="minimum">
                    <double>0.000000000000000</double>
@@ -385,13 +516,13 @@
                 <item row="5" column="2">
                  <widget class="QDoubleSpinBox" name="TorqLimitDoubleSpinBox">
                   <property name="decimals">
-                   <number>4</number>
+                   <number>2</number>
                   </property>
                   <property name="minimum">
                    <double>0.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>10000.000000000000000</double>
+                   <double>1000.000000000000000</double>
                   </property>
                   <property name="singleStep">
                    <double>0.100000000000000</double>
@@ -422,13 +553,13 @@
                 <item row="4" column="2">
                  <widget class="QDoubleSpinBox" name="VelLimitDoubleSpinBox">
                   <property name="decimals">
-                   <number>4</number>
+                   <number>2</number>
                   </property>
                   <property name="minimum">
                    <double>0.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>100000.000000000000000</double>
+                   <double>1000.000000000000000</double>
                   </property>
                   <property name="singleStep">
                    <double>0.100000000000000</double>
@@ -488,13 +619,13 @@
                 <item row="3" column="2">
                  <widget class="QDoubleSpinBox" name="AngleMaxDoubleSpinBox">
                   <property name="decimals">
-                   <number>4</number>
+                   <number>2</number>
                   </property>
                   <property name="minimum">
-                   <double>-100000.000000000000000</double>
+                   <double>-10.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>100000.000000000000000</double>
+                   <double>10.000000000000000</double>
                   </property>
                   <property name="singleStep">
                    <double>0.100000000000000</double>
@@ -517,13 +648,13 @@
                 <item row="1" column="2">
                  <widget class="QDoubleSpinBox" name="AngleMinDoubleSpinBox">
                   <property name="decimals">
-                   <number>4</number>
+                   <number>2</number>
                   </property>
                   <property name="minimum">
-                   <double>-100000.000000000000000</double>
+                   <double>-10.000000000000000</double>
                   </property>
                   <property name="maximum">
-                   <double>100000.000000000000000</double>
+                   <double>10.000000000000000</double>
                   </property>
                   <property name="singleStep">
                    <double>0.100000000000000</double>
@@ -842,16 +973,16 @@
                  <item row="2" column="1">
                   <widget class="QDoubleSpinBox" name="TorqueConstDoubleSpinBox">
                    <property name="decimals">
-                    <number>6</number>
+                    <number>2</number>
                    </property>
                    <property name="minimum">
                     <double>0.000000000000000</double>
                    </property>
                    <property name="maximum">
-                    <double>1000.000000000000000</double>
+                    <double>5.000000000000000</double>
                    </property>
                    <property name="singleStep">
-                    <double>0.100000000000000</double>
+                    <double>0.010000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -868,16 +999,16 @@
                  <item row="3" column="1">
                   <widget class="QDoubleSpinBox" name="CurrentKpDoubleSpinBox">
                    <property name="decimals">
-                    <number>6</number>
+                    <number>1</number>
                    </property>
                    <property name="minimum">
                     <double>0.000000000000000</double>
                    </property>
                    <property name="maximum">
-                    <double>100000.000000000000000</double>
+                    <double>100.000000000000000</double>
                    </property>
                    <property name="singleStep">
-                    <double>0.100000000000000</double>
+                    <double>1.000000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -894,16 +1025,16 @@
                  <item row="4" column="1">
                   <widget class="QDoubleSpinBox" name="CurrentKiDoubleSpinBox">
                    <property name="decimals">
-                    <number>6</number>
+                    <number>1</number>
                    </property>
                    <property name="minimum">
                     <double>0.000000000000000</double>
                    </property>
                    <property name="maximum">
-                    <double>100000.000000000000000</double>
+                    <double>10000.000000000000000</double>
                    </property>
                    <property name="singleStep">
-                    <double>0.100000000000000</double>
+                    <double>1.000000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -920,13 +1051,13 @@
                  <item row="5" column="1">
                   <widget class="QDoubleSpinBox" name="CurrentKdDoubleSpinBox">
                    <property name="decimals">
-                    <number>6</number>
+                    <number>1</number>
                    </property>
                    <property name="minimum">
                     <double>0.000000000000000</double>
                    </property>
                    <property name="maximum">
-                    <double>100000.000000000000000</double>
+                    <double>1000.000000000000000</double>
                    </property>
                    <property name="singleStep">
                     <double>0.100000000000000</double>
@@ -943,13 +1074,13 @@
                  <item row="6" column="1">
                   <widget class="QDoubleSpinBox" name="PosOffsetDoubleSpinBox">
                    <property name="decimals">
-                    <number>4</number>
+                    <number>3</number>
                    </property>
                    <property name="minimum">
-                    <double>-100000.000000000000000</double>
+                    <double>-6.300000000000000</double>
                    </property>
                    <property name="maximum">
-                    <double>100000.000000000000000</double>
+                    <double>6.300000000000000</double>
                    </property>
                    <property name="singleStep">
                     <double>0.100000000000000</double>
@@ -969,13 +1100,13 @@
                  <item row="7" column="1">
                   <widget class="QDoubleSpinBox" name="FilterADoubleSpinBox">
                    <property name="decimals">
-                    <number>6</number>
+                    <number>2</number>
                    </property>
                    <property name="minimum">
                     <double>0.000000000000000</double>
                    </property>
                    <property name="maximum">
-                    <double>100000.000000000000000</double>
+                    <double>1000.000000000000000</double>
                    </property>
                    <property name="singleStep">
                     <double>0.100000000000000</double>
@@ -995,7 +1126,7 @@
                  <item row="8" column="1">
                   <widget class="QDoubleSpinBox" name="FilterG1DoubleSpinBox">
                    <property name="decimals">
-                    <number>6</number>
+                    <number>4</number>
                    </property>
                    <property name="minimum">
                     <double>0.000000000000000</double>
@@ -1021,7 +1152,7 @@
                  <item row="9" column="1">
                   <widget class="QDoubleSpinBox" name="FilterG2DoubleSpinBox">
                    <property name="decimals">
-                    <number>6</number>
+                    <number>4</number>
                    </property>
                    <property name="minimum">
                     <double>0.000000000000000</double>
@@ -1047,7 +1178,7 @@
                  <item row="10" column="1">
                   <widget class="QDoubleSpinBox" name="FilterG3DoubleSpinBox">
                    <property name="decimals">
-                    <number>6</number>
+                    <number>4</number>
                    </property>
                    <property name="minimum">
                     <double>0.000000000000000</double>
@@ -1073,7 +1204,7 @@
                  <item row="11" column="1">
                   <widget class="QDoubleSpinBox" name="CurrentLpfDoubleSpinBox">
                    <property name="decimals">
-                    <number>6</number>
+                    <number>4</number>
                    </property>
                    <property name="minimum">
                     <double>0.000000000000000</double>
@@ -1282,14 +1413,46 @@
                    <number>0</number>
                   </property>
                   <item>
-                   <widget class="QRadioButton" name="ChooseFirmwareFileRadioButton">
-                    <property name="text">
-                     <string>Choose file</string>
+                   <layout class="QHBoxLayout" name="FirmwareSourceLayout">
+                    <property name="spacing">
+                     <number>0</number>
                     </property>
-                    <property name="checked">
-                     <bool>true</bool>
+                    <property name="leftMargin">
+                     <number>0</number>
                     </property>
-                   </widget>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QRadioButton" name="ChooseFirmwareFileRadioButton">
+                      <property name="text">
+                       <string>Local file</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                      <property name="segment" stdset="0">
+                       <string notr="true">first</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="DownloadFirmwareRadioButton">
+                      <property name="text">
+                       <string>Remote repo</string>
+                      </property>
+                      <property name="segment" stdset="0">
+                       <string notr="true">last</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </item>
                   <item>
                    <widget class="QPushButton" name="OpenHexPushButton">
@@ -1298,14 +1461,20 @@
                     </property>
                    </widget>
                   </item>
+                  <item>
+                   <spacer name="FirmwareSourceSpacer">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>0</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
                  </layout>
-                </item>
-                <item>
-                 <widget class="QRadioButton" name="DownloadFirmwareRadioButton">
-                  <property name="text">
-                   <string>Download from remote repo</string>
-                  </property>
-                 </widget>
                 </item>
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_12">
@@ -1403,16 +1572,6 @@
         </layout>
        </widget>
       </item>
-      <item>
-       <widget class="QLabel" name="LogoLabel">
-        <property name="text">
-         <string notr="true"/>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
@@ -1437,7 +1596,7 @@
         <number>0</number>
        </property>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_26" stretch="0,0,0,0,0,0,0,0">
+        <layout class="QHBoxLayout" name="horizontalLayout_26" stretch="0,0,0,0,0,0">
          <property name="spacing">
           <number>8</number>
          </property>
@@ -1556,50 +1715,6 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QLabel" name="LanguageLbl">
-           <property name="text">
-            <string>Language:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="LanguageComboBox">
-           <property name="sizeAdjustPolicy">
-            <enum>QComboBox::AdjustToContents</enum>
-           </property>
-           <property name="minimumContentsLength">
-            <number>10</number>
-           </property>
-           <item>
-            <property name="text">
-             <string>English</string>
-            </property>
-            <property name="icon">
-             <iconset resource="icons.qrc">
-              <normaloff>:/icons/flag_uk.png</normaloff>:/icons/flag_uk.png</iconset>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Русский</string>
-            </property>
-            <property name="icon">
-             <iconset resource="icons.qrc">
-              <normaloff>:/icons/flag_russia.png</normaloff>:/icons/flag_russia.png</iconset>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>中文</string>
-            </property>
-            <property name="icon">
-             <iconset resource="icons.qrc">
-              <normaloff>:/icons/flag_china.png</normaloff>:/icons/flag_china.png</iconset>
-            </property>
-           </item>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>
@@ -1643,16 +1758,45 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="SavePltCsvBtn">
+          <widget class="QPushButton" name="SavePltBtn">
+           <property name="toolTip">
+            <string>Save as...</string>
+           </property>
            <property name="text">
-            <string>Save as CSV...</string>
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="icons.qrc">
+             <normaloff>:/icons/save_white.svg</normaloff>:/icons/save_white.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="SavePltPngBtn">
+          <widget class="QPushButton" name="crosshairPushButton">
+           <property name="toolTip">
+            <string>Crosshair</string>
+           </property>
            <property name="text">
-            <string>Save as PNG...</string>
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="icons.qrc">
+             <normaloff>:/icons/crosshair_white.svg</normaloff>:/icons/crosshair_white.svg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -1668,6 +1812,76 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="Line" name="line_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>X:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="PlotXPosLabel">
+           <property name="text">
+            <string notr="true">00.00</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Y:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="PlotYPosLabel">
+           <property name="text">
+            <string notr="true">00.00</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Dist X:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="PlotDistLabel">
+           <property name="text">
+            <string notr="true">00.00</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Dist Y:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="PlotDistLabel_2">
+           <property name="text">
+            <string notr="true">00.00</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -1883,7 +2097,7 @@
                     <item>
                      <widget class="QDoubleSpinBox" name="TransientVelDoubleSpinBox">
                       <property name="decimals">
-                       <number>4</number>
+                       <number>2</number>
                       </property>
                       <property name="minimum">
                        <double>0.000000000000000</double>
@@ -2006,7 +2220,7 @@
                   <item row="0" column="1">
                    <widget class="QDoubleSpinBox" name="ServoKpDoubleSpinBox">
                     <property name="decimals">
-                     <number>4</number>
+                     <number>2</number>
                     </property>
                     <property name="minimum">
                      <double>0.000000000000000</double>
@@ -2036,7 +2250,7 @@
                   <item row="1" column="1">
                    <widget class="QDoubleSpinBox" name="ServoKiDoubleSpinBox">
                     <property name="decimals">
-                     <number>4</number>
+                     <number>2</number>
                     </property>
                     <property name="minimum">
                      <double>0.000000000000000</double>
@@ -2066,7 +2280,7 @@
                   <item row="2" column="1">
                    <widget class="QDoubleSpinBox" name="ServoKdDoubleSpinBox">
                     <property name="decimals">
-                     <number>4</number>
+                     <number>2</number>
                     </property>
                     <property name="minimum">
                      <double>0.000000000000000</double>
@@ -2182,7 +2396,7 @@
                    <item>
                     <widget class="QDoubleSpinBox" name="ServoUserTargetDoubleSpinBox">
                      <property name="decimals">
-                      <number>4</number>
+                      <number>2</number>
                      </property>
                      <property name="minimum">
                       <double>-100000.000000000000000</double>
@@ -2308,7 +2522,7 @@
                    <item row="0" column="1">
                     <widget class="QDoubleSpinBox" name="ServoSinAmpDoubleSpinBox">
                      <property name="decimals">
-                      <number>4</number>
+                      <number>2</number>
                      </property>
                      <property name="minimum">
                       <double>0.000000000000000</double>
@@ -2338,10 +2552,10 @@
                    <item row="1" column="1">
                     <widget class="QDoubleSpinBox" name="ServoSinFreqDoubleSpinBox">
                      <property name="decimals">
-                      <number>3</number>
+                      <number>2</number>
                      </property>
                      <property name="minimum">
-                      <double>0.001000000000000</double>
+                      <double>0.000000000000000</double>
                      </property>
                      <property name="maximum">
                       <double>1000.000000000000000</double>
@@ -2464,7 +2678,7 @@
                    <item row="0" column="1">
                     <widget class="QDoubleSpinBox" name="ServoMeanderAmpDoubleSpinBox">
                      <property name="decimals">
-                      <number>4</number>
+                      <number>2</number>
                      </property>
                      <property name="minimum">
                       <double>0.000000000000000</double>
@@ -2494,10 +2708,10 @@
                    <item row="1" column="1">
                     <widget class="QDoubleSpinBox" name="ServoMeanderFreqDoubleSpinBox">
                      <property name="decimals">
-                      <number>3</number>
+                      <number>2</number>
                      </property>
                      <property name="minimum">
-                      <double>0.001000000000000</double>
+                      <double>0.000000000000000</double>
                      </property>
                      <property name="maximum">
                       <double>1000.000000000000000</double>
@@ -2620,7 +2834,7 @@
                    <item row="0" column="1">
                     <widget class="QDoubleSpinBox" name="ServoTriangleAmpDoubleSpinBox">
                      <property name="decimals">
-                      <number>4</number>
+                      <number>2</number>
                      </property>
                      <property name="minimum">
                       <double>0.000000000000000</double>
@@ -2650,10 +2864,10 @@
                    <item row="1" column="1">
                     <widget class="QDoubleSpinBox" name="ServoTriangleFreqDoubleSpinBox">
                      <property name="decimals">
-                      <number>3</number>
+                      <number>2</number>
                      </property>
                      <property name="minimum">
-                      <double>0.001000000000000</double>
+                      <double>0.000000000000000</double>
                      </property>
                      <property name="maximum">
                       <double>1000.000000000000000</double>
@@ -2755,9 +2969,9 @@
                <property name="title">
                 <string>Trajectory</string>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_7">
+               <layout class="QHBoxLayout" name="MitTrajectoryFormLayout">
                 <property name="spacing">
-                 <number>4</number>
+                 <number>0</number>
                 </property>
                 <property name="leftMargin">
                  <number>0</number>
@@ -2779,12 +2993,18 @@
                   <property name="checked">
                    <bool>true</bool>
                   </property>
+                  <property name="segment" stdset="0">
+                   <string notr="true">first</string>
+                  </property>
                  </widget>
                 </item>
                 <item>
                  <widget class="QRadioButton" name="MitSinRadioBtn">
                   <property name="text">
                    <string>Sin</string>
+                  </property>
+                  <property name="segment" stdset="0">
+                   <string notr="true">middle</string>
                   </property>
                  </widget>
                 </item>
@@ -2793,6 +3013,9 @@
                   <property name="text">
                    <string>Meander</string>
                   </property>
+                  <property name="segment" stdset="0">
+                   <string notr="true">middle</string>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -2800,7 +3023,23 @@
                   <property name="text">
                    <string>Triangle</string>
                   </property>
+                  <property name="segment" stdset="0">
+                   <string notr="true">last</string>
+                  </property>
                  </widget>
+                </item>
+                <item>
+                 <spacer name="MitTrajectoryFormSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>0</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                 </spacer>
                 </item>
                </layout>
               </widget>
@@ -2808,7 +3047,7 @@
              <item>
               <widget class="QStackedWidget" name="MitTargetsStack">
                <property name="currentIndex">
-                <number>0</number>
+                <number>1</number>
                </property>
                <widget class="QWidget" name="MitStepPage">
                 <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -2864,7 +3103,7 @@
                     <item row="0" column="1">
                      <widget class="QDoubleSpinBox" name="MitStepPosDoubleSpinBox">
                       <property name="decimals">
-                       <number>4</number>
+                       <number>2</number>
                       </property>
                       <property name="minimum">
                        <double>-100000.000000000000000</double>
@@ -2894,7 +3133,7 @@
                     <item row="1" column="1">
                      <widget class="QDoubleSpinBox" name="MitStepVelDoubleSpinBox">
                       <property name="decimals">
-                       <number>4</number>
+                       <number>2</number>
                       </property>
                       <property name="minimum">
                        <double>-100000.000000000000000</double>
@@ -2924,7 +3163,7 @@
                     <item row="2" column="1">
                      <widget class="QDoubleSpinBox" name="MitStepTorqDoubleSpinBox">
                       <property name="decimals">
-                       <number>4</number>
+                       <number>2</number>
                       </property>
                       <property name="minimum">
                        <double>-10000.000000000000000</double>
@@ -2954,7 +3193,7 @@
                     <item row="3" column="1">
                      <widget class="QDoubleSpinBox" name="MitStepKpDoubleSpinBox">
                       <property name="decimals">
-                       <number>4</number>
+                       <number>2</number>
                       </property>
                       <property name="minimum">
                        <double>0.000000000000000</double>
@@ -2984,7 +3223,7 @@
                     <item row="4" column="1">
                      <widget class="QDoubleSpinBox" name="MitStepKdDoubleSpinBox">
                       <property name="decimals">
-                       <number>4</number>
+                       <number>2</number>
                       </property>
                       <property name="minimum">
                        <double>0.000000000000000</double>
@@ -3050,17 +3289,89 @@
                     <property name="verticalSpacing">
                      <number>4</number>
                     </property>
-                    <item row="0" column="0">
+                    <item row="0" column="0" colspan="3">
+                     <layout class="QHBoxLayout" name="MitTrajChannelLayout">
+                      <property name="spacing">
+                       <number>0</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="QRadioButton" name="MitTrajPositionRadioBtn">
+                        <property name="text">
+                         <string>Position</string>
+                        </property>
+                        <property name="checked">
+                         <bool>true</bool>
+                        </property>
+                        <property name="segment" stdset="0">
+                         <string notr="true">first</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QRadioButton" name="MitTrajVelocityRadioBtn">
+                        <property name="text">
+                         <string>Velocity</string>
+                        </property>
+                        <property name="segment" stdset="0">
+                         <string notr="true">middle</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QRadioButton" name="MitTrajTorqueRadioBtn">
+                        <property name="text">
+                         <string>Torque</string>
+                        </property>
+                        <property name="segment" stdset="0">
+                         <string notr="true">last</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="MitTrajChannelSpacer">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>0</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                     </layout>
+                    </item>
+                    <item row="1" column="0" colspan="3">
+                     <widget class="QCheckBox" name="MitDerivativeCheckBox">
+                      <property name="text">
+                       <string>+derivative</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
                      <widget class="QLabel" name="MitTrajAmpLbl">
                       <property name="text">
                        <string>Amplitude</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="0" column="1">
+                    <item row="2" column="1">
                      <widget class="QDoubleSpinBox" name="MitTrajAmpDoubleSpinBox">
                       <property name="decimals">
-                       <number>4</number>
+                       <number>2</number>
                       </property>
                       <property name="minimum">
                        <double>0.000000000000000</double>
@@ -3073,27 +3384,27 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="0" column="2">
+                    <item row="2" column="2">
                      <widget class="QSlider" name="MitTrajAmpSlider">
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="0">
+                    <item row="3" column="0">
                      <widget class="QLabel" name="MitTrajFreqLbl">
                       <property name="text">
                        <string>Frequency</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="1">
+                    <item row="3" column="1">
                      <widget class="QDoubleSpinBox" name="MitTrajFreqDoubleSpinBox">
                       <property name="decimals">
-                       <number>3</number>
+                       <number>2</number>
                       </property>
                       <property name="minimum">
-                       <double>0.001000000000000</double>
+                       <double>0.000000000000000</double>
                       </property>
                       <property name="maximum">
                        <double>1000.000000000000000</double>
@@ -3103,24 +3414,54 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="2">
+                    <item row="3" column="2">
                      <widget class="QSlider" name="MitTrajFreqSlider">
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
                       </property>
                      </widget>
                     </item>
-                    <item row="5" column="0">
+                    <item row="4" column="0">
                      <widget class="QLabel" name="MitTrajKpLbl">
                       <property name="text">
                        <string>Kp</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="5" column="1">
+                    <item row="4" column="1">
                      <widget class="QDoubleSpinBox" name="MitTrajKpDoubleSpinBox">
                       <property name="decimals">
-                       <number>4</number>
+                       <number>2</number>
+                      </property>
+                      <property name="minimum">
+                       <double>0.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>10000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.100000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="2">
+                     <widget class="QSlider" name="MitTrajKpSlider">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="5" column="0">
+                     <widget class="QLabel" name="MitTrajKdLbl">
+                      <property name="text">
+                       <string>Kd</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="5" column="1">
+                     <widget class="QDoubleSpinBox" name="MitTrajKdDoubleSpinBox">
+                      <property name="decimals">
+                       <number>2</number>
                       </property>
                       <property name="minimum">
                        <double>0.000000000000000</double>
@@ -3134,70 +3475,9 @@
                      </widget>
                     </item>
                     <item row="5" column="2">
-                     <widget class="QSlider" name="MitTrajKpSlider">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="6" column="0">
-                     <widget class="QLabel" name="MitTrajKdLbl">
-                      <property name="text">
-                       <string>Kd</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="6" column="1">
-                     <widget class="QDoubleSpinBox" name="MitTrajKdDoubleSpinBox">
-                      <property name="decimals">
-                       <number>4</number>
-                      </property>
-                      <property name="minimum">
-                       <double>0.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>10000.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>0.100000000000000</double>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="6" column="2">
                      <widget class="QSlider" name="MitTrajKdSlider">
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="4" column="0">
-                     <widget class="QRadioButton" name="MitTrajTorqueRadioBtn">
-                      <property name="text">
-                       <string>Torque</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="0">
-                     <widget class="QRadioButton" name="MitTrajVelocityRadioBtn">
-                      <property name="text">
-                       <string>Velocity</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="0">
-                     <widget class="QRadioButton" name="MitTrajPositionRadioBtn">
-                      <property name="text">
-                       <string>Position</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="2">
-                     <widget class="QCheckBox" name="MitDerivativeCheckBox">
-                      <property name="text">
-                       <string>+derivative</string>
                       </property>
                      </widget>
                     </item>

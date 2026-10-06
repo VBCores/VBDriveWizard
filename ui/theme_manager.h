@@ -46,9 +46,10 @@ public:
     static QColor restoreIconColor(const QString &theme);
     static QColor restoreIconHoverColor(const QString &theme);
 
-    /// The Voltbro logo scaled to `width` and tinted for the theme. One piece of
-    /// artwork serves both themes, so the mark looks the same in each.
-    static QPixmap logo(const QString &theme, int width);
+    /// The VBCORES logo, `width` logical pixels wide, for a screen of the given
+    /// device pixel ratio. The light theme shows the brand gradient; the dark one a
+    /// light single-colour mark, since the gradient's dark end vanishes there.
+    static QPixmap logo(const QString &theme, int width, qreal devicePixelRatio);
 };
 
 #endif // VBDW_UI_THEME_MANAGER_H
