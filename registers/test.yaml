@@ -28,5 +28,3 @@ servo_pos_i_gain: 0
 servo_pos_d_gain: 0.45
 servo_vel_p_gain: 21.33
 servo_vel_i_gain: 0.05
-servo_tr_form: 1
-servo_tr_vel: 0

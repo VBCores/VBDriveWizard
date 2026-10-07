@@ -50,6 +50,9 @@ servo_pos_i_gain: 200.0
 servo_pos_d_gain: 10.0
 servo_vel_p_gain: 30.0
 servo_vel_i_gain: 60.0
-# servo_tr_form: 1 = LINE_TRAJ, 2 = POLYNOM_TRAJ
-servo_tr_form: 1
-servo_tr_vel: 0.0
+# Servo input generators; 0 leaves them unconfigured (firmware default).
+servo_control_input_bandwith: 0.0
+servo_control_vel_limit: 0.0
+servo_control_accel_limit: 0.0
+servo_control_decel_limit: 0.0
+servo_control_vel_ramp_rate: 0.0

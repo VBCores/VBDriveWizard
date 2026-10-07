@@ -28,6 +28,11 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     ui->LocalNodeIdSpinBox->setToolTip(
             tr("Node ID this application announces on the CAN bus.\n"
                "It must not collide with any actuator."));
+    ui->MaxStatorTempSpinBox->setToolTip(
+            tr("An actuator whose motor gets hotter than this is stopped and disabled."));
+    ui->MaxMcuTempSpinBox->setToolTip(
+            tr("An actuator whose microcontroller gets hotter than this is stopped and "
+               "disabled."));
 
     // The platform style decorates standard buttons with icons; keep them text-only.
     for (QAbstractButton *button : ui->ButtonBox->buttons())
@@ -75,6 +80,8 @@ void PreferencesDialog::setConfig(const AppConfig &config)
     ui->SerialBaudSpinBox->setValue(settings.serial_baud);
     ui->OpenocdInterfaceLineEdit->setText(settings.openocd_interface);
     ui->OpenocdTargetLineEdit->setText(settings.openocd_target);
+    ui->MaxStatorTempSpinBox->setValue(config.safety.max_stator_temp_c);
+    ui->MaxMcuTempSpinBox->setValue(config.safety.max_mcu_temp_c);
 }
 
 void PreferencesDialog::applyChanges()
@@ -97,6 +104,8 @@ void PreferencesDialog::applyChanges()
     settings.serial_baud = ui->SerialBaudSpinBox->value();
     settings.openocd_interface = ui->OpenocdInterfaceLineEdit->text().trimmed();
     settings.openocd_target = ui->OpenocdTargetLineEdit->text().trimmed();
+    m_config.safety.max_stator_temp_c = ui->MaxStatorTempSpinBox->value();
+    m_config.safety.max_mcu_temp_c = ui->MaxMcuTempSpinBox->value();
 
     emit configApplied(m_config);
 }

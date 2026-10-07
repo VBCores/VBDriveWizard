@@ -17,9 +17,16 @@
 namespace {
 constexpr double kYAxisMargin = 1.2;
 constexpr int kMaxLogLines = 2000;
-/// A telemetry sample delivered this much later than the offset predicts is not late:
-/// its clock has restarted, and the offset is re-estimated.
-constexpr double kTelemetryResyncS = 1.0;
+/// A delivery delay this far from the last block's is not a late sample: the drive's
+/// clock has restarted or wrapped, and the delay envelope starts afresh.
+constexpr qint64 kTelemetryResyncUs = 1'000'000;
+/// The drive's clock is mapped onto the host's one stretch of this length at a time.
+/// A block holds several delivery bursts, so its least delayed sample is close to the
+/// true transport delay, and the drift within one stays well under a millisecond.
+constexpr qint64 kAnchorBlockUs = 100'000;
+/// Blocks of the delay envelope kept: the one being filled and the finished ones that
+/// samples still waiting in m_unpaired can fall between.
+constexpr int kMaxAnchors = 4;
 /// How much set-point history is kept for interpolation. Only the span between the
 /// oldest unresolved telemetry sample and now is really needed - one batch interval -
 /// so a second is generous and keeps the buffer small.
@@ -76,7 +83,7 @@ void PlotController::setupPlot(QWidget *hostWidget)
     m_stack->addWidget(m_logView);
     m_stack->setCurrentWidget(m_plot);
 
-    m_clock.start();
+    m_clockStartUs = hostTimeUs();
     m_initialized = true;
 
     configureForSignal();
@@ -334,11 +341,9 @@ void PlotController::clear()
     m_unpaired.clear();
     m_setpointStreamOpen = false;
     m_haveLastKey = false;
-    m_haveTelemetryOffset = false;
     m_lastKey = 0.0;
+    m_anchors.clear();
     m_setpoints.clear();
-    m_haveSetpointOffset = false;
-    m_setpointOffset = 0.0;
     if (!m_initialized)
         return;
     m_primary->data()->clear();
@@ -351,24 +356,60 @@ void PlotController::clear()
 
 double PlotController::nowKey() const
 {
-    return static_cast<double>(m_clock.nsecsElapsed()) * 1e-9;
+    return hostKey(hostTimeUs());
 }
 
-double PlotController::mapToPlotClock(qint64 t_us, double *offset, bool *haveOffset) const
+double PlotController::hostKey(qint64 hostUs) const
 {
-    // The sample clock (the drive's on CAN, the host's on Serial and for set-points)
-    // is mapped onto the plot clock by the smallest delivery delay seen: delivery
-    // never runs ahead of sampling, so the minimum is the best estimate of the offset
-    // between the two, and with it a steady sample rate comes out as evenly spaced
-    // points. A delay that jumps far beyond that estimate means the sample clock
-    // restarted, and the offset is taken afresh so the trace continues from "now".
-    const double seconds = static_cast<double>(t_us) * 1e-6;
-    const double delay = nowKey() - seconds;
-    if (!*haveOffset || delay < *offset || delay - *offset > kTelemetryResyncS) {
-        *offset = delay;
-        *haveOffset = true;
+    return static_cast<double>(hostUs - m_clockStartUs) * 1e-6;
+}
+
+void PlotController::addDelaySample(qint64 driveUs, qint64 hostUs)
+{
+    const qint64 delayUs = hostUs - driveUs;
+    if (!m_anchors.isEmpty()
+        && (driveUs < m_lastDriveUs
+            || std::abs(delayUs - m_anchors.last().delayUs) > kTelemetryResyncUs)) {
+        m_anchors.clear();
     }
-    return seconds + *offset;
+    if (m_anchors.isEmpty())
+        m_anchorOriginUs = driveUs;
+    m_lastDriveUs = driveUs;
+
+    const qint64 block = (driveUs - m_anchorOriginUs) / kAnchorBlockUs;
+    if (m_anchors.isEmpty() || block != m_anchors.last().block) {
+        m_anchors.push_back({block, driveUs, delayUs});
+        if (m_anchors.size() > kMaxAnchors)
+            m_anchors.removeFirst();
+    } else if (delayUs < m_anchors.last().delayUs) {
+        m_anchors.last().driveUs = driveUs;
+        m_anchors.last().delayUs = delayUs;
+    }
+}
+
+qint64 PlotController::delayAt(qint64 driveUs) const
+{
+    if (m_anchors.isEmpty())
+        return 0;
+    // Only finished blocks count: the one being filled has not seen its least delayed
+    // sample yet, and would key the samples at its start too late. Until one block is
+    // finished, its running minimum is all there is.
+    const int finished = m_anchors.size() - 1;
+    if (finished == 0)
+        return m_anchors.last().delayUs;
+
+    if (driveUs <= m_anchors.first().driveUs)
+        return m_anchors.first().delayUs;
+    for (int i = 1; i < finished; ++i) {
+        const DelayAnchor &lo = m_anchors.at(i - 1);
+        const DelayAnchor &hi = m_anchors.at(i);
+        if (driveUs < hi.driveUs) {
+            return lo.delayUs
+                    + (hi.delayUs - lo.delayUs) * (driveUs - lo.driveUs)
+                    / (hi.driveUs - lo.driveUs);
+        }
+    }
+    return m_anchors.at(finished - 1).delayUs;
 }
 
 bool PlotController::setpointAt(double key, double *value) const
@@ -418,10 +459,17 @@ void PlotController::appendTelemetry(const TelemetryBatch &samples)
         return;  // this signal is not fed by telemetry
     }
 
-    // A batch carries several samples produced over the whole batch interval, so each
-    // is keyed by its own timestamp rather than by the moment the batch landed. The
-    // offset is estimated from the newest sample, which has the smallest delay.
-    mapToPlotClock(samples.last().t_us, &m_telemetryOffset, &m_haveTelemetryOffset);
+    // Samples reach the host in bursts, so they are spaced by the drive's own clock
+    // (t_us) rather than by when they arrived. That clock drifts against the host's,
+    // by more than a percent and in steps while the drive follows commands, so it is
+    // mapped onto the host's by the smallest delivery delay (host_us - t_us) of each
+    // block of drive time: delivery never comes before sampling, and the least delayed
+    // sample is the one stamped closest to its instant. Between blocks the delay is
+    // interpolated, which takes the drift out in either direction; a single offset
+    // for the whole run let the trace run ahead of its set-point once the drive's
+    // clock fell behind. host_us is on the set-points' clock, so both share keys.
+    for (const TelemetrySample &sample : samples)
+        addDelaySample(sample.t_us, sample.host_us);
 
     for (const TelemetrySample &sample : samples) {
         double value = 0.0;
@@ -439,7 +487,7 @@ void PlotController::appendTelemetry(const TelemetryBatch &samples)
             break;
         }
         Unpaired unpaired;
-        unpaired.key = static_cast<double>(sample.t_us) * 1e-6 + m_telemetryOffset;
+        unpaired.key = hostKey(sample.t_us + delayAt(sample.t_us));
         unpaired.value = value;
         m_unpaired.push_back(unpaired);
     }
@@ -504,13 +552,14 @@ void PlotController::appendSetpoint(double value, ServoControlType type, qint64 
         return;
     m_setpointStreamOpen = true;
 
+    // Stamped on the host's steady clock, which the plot clock is, so no estimate is
+    // involved.
     SetpointSample sample;
-    sample.key = mapToPlotClock(t_us, &m_setpointOffset, &m_haveSetpointOffset);
+    sample.key = hostKey(t_us);
     sample.value = value;
 
-    // Shrinking the offset estimate can pull a key back behind the previous one; the
-    // history has to stay sorted for setpointAt(), so such a report replaces the last
-    // one instead of being appended out of order.
+    // The history has to stay sorted for setpointAt(), so a report stamped no later
+    // than the previous one replaces it instead of being appended out of order.
     if (!m_setpoints.isEmpty() && sample.key <= m_setpoints.last().key)
         m_setpoints.last().value = sample.value;
     else

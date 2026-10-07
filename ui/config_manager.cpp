@@ -128,6 +128,13 @@ void ConfigManager::sanitize(AppConfig *config)
     if (ui.angle_unit != QLatin1String("rad") && ui.angle_unit != QLatin1String("deg"))
         ui.angle_unit = defaults.ui.angle_unit;
 
+    SafetySettings &safety = config->safety;
+    const auto validTemp = [](double c) { return std::isfinite(c) && c >= 0.0 && c <= 250.0; };
+    if (!validTemp(safety.max_stator_temp_c))
+        safety.max_stator_temp_c = defaults.safety.max_stator_temp_c;
+    if (!validTemp(safety.max_mcu_temp_c))
+        safety.max_mcu_temp_c = defaults.safety.max_mcu_temp_c;
+
     WindowSettings &window = config->window;
     if (window.width < 640 || window.width > 16384)
         window.width = defaults.window.width;
@@ -163,6 +170,11 @@ AppConfig ConfigManager::loadConfig(const QString &path, QString *message, LoadS
                         readString(root, "openocd_interface", ui.openocd_interface);
                 ui.openocd_target = readString(root, "openocd_target", ui.openocd_target);
                 ui.angle_unit = readString(root, "angle_unit", ui.angle_unit);
+
+                SafetySettings &safety = config.safety;
+                safety.max_stator_temp_c =
+                        readDouble(root, "max_stator_temp_c", safety.max_stator_temp_c);
+                safety.max_mcu_temp_c = readDouble(root, "max_mcu_temp_c", safety.max_mcu_temp_c);
 
                 WindowSettings &window = config.window;
                 window.x = readInt(root, "window_x", window.x);
@@ -216,6 +228,7 @@ bool ConfigManager::saveConfig(const QString &path, const AppConfig &config, QSt
     out.setRealNumberPrecision(6);
 
     const UiSettings &ui = config.ui;
+    const SafetySettings &safety = config.safety;
     const WindowSettings &window = config.window;
 
     out << "# VBDriveWizard application settings.\n"
@@ -232,6 +245,9 @@ bool ConfigManager::saveConfig(const QString &path, const AppConfig &config, QSt
         << "\n# OpenOCD configuration used for firmware flashing (ST-Link / STM32G4).\n"
         << "openocd_interface: " << ui.openocd_interface << '\n'
         << "openocd_target: " << ui.openocd_target << '\n'
+        << "\n# Protective stop: a drive hotter than this, deg C, is stopped and disabled.\n"
+        << "max_stator_temp_c: " << safety.max_stator_temp_c << '\n'
+        << "max_mcu_temp_c: " << safety.max_mcu_temp_c << '\n'
         << "\nwindow_x: " << window.x << '\n'
         << "window_y: " << window.y << '\n'
         << "window_width: " << window.width << '\n'

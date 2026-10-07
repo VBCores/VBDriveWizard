@@ -66,6 +66,10 @@ struct Tokens
     QString dangerPressed;
     QString onDanger;
 
+    // Status text on a card: a firmware that is up to date, or one that is not.
+    QString success;
+    QString dangerText;
+
     QString sliderKnob;
     // Scroll-bar handle on its @border track: a step darker than the track on light,
     // a step lighter on dark, so it stands out the same amount in both themes.
@@ -119,6 +123,9 @@ const Tokens &darkTokens()
         /* dangerPressed */ QStringLiteral("#8A1B21"),
         /* onDanger */ QStringLiteral("#FFF1F1"),
 
+        /* success */ QStringLiteral("#4CC38A"),
+        /* dangerText */ QStringLiteral("#F0686B"),
+
         /* sliderKnob */ QStringLiteral("#E6E6E6"),
         /* scrollHandle */ QStringLiteral("#5A606A"),
         /* scrollHandleHover */ QStringLiteral("#6F7680"),
@@ -170,6 +177,9 @@ const Tokens &lightTokens()
         /* dangerHover */ QStringLiteral("#A93226"),
         /* dangerPressed */ QStringLiteral("#96271C"),
         /* onDanger */ QStringLiteral("#FFFFFF"),
+
+        /* success */ QStringLiteral("#1E8E3E"),
+        /* dangerText */ QStringLiteral("#C0392B"),
 
         /* sliderKnob */ QStringLiteral("#FFFFFF"),
         /* scrollHandle */ QStringLiteral("#A5B1C0"),
@@ -225,6 +235,8 @@ QString fill(QString qss, const Tokens &t)
         { QStringLiteral("dangerPressed"), &t.dangerPressed },
         { QStringLiteral("danger"), &t.danger },
         { QStringLiteral("onDanger"), &t.onDanger },
+        { QStringLiteral("dangerText"), &t.dangerText },
+        { QStringLiteral("success"), &t.success },
         { QStringLiteral("sliderKnob"), &t.sliderKnob },
         { QStringLiteral("scrollHandlePressed"), &t.scrollHandlePressed },
         { QStringLiteral("scrollHandleHover"), &t.scrollHandleHover },
@@ -340,7 +352,7 @@ QString radioStyle()
             " image: url(:/icons/radio_dot_@icons_disabled.svg); }");
 }
 
-/// Radio buttons tagged `segment` (first, middle or last) draw as one row of joined
+/// Radio buttons tagged `segment` (first, middle, last, or only) draw as one row of joined
 /// buttons, the checked one filled in the accent: a short set of choices then takes
 /// one line instead of a column. They stay radio buttons, so their exclusivity and
 /// signals are untouched; only the indicator is dropped. Qt matches a property only
@@ -349,7 +361,7 @@ QString segmentStyle()
 {
     const auto each = [](const char *suffix) {
         QStringList selectors;
-        for (const char *position : {"first", "middle", "last"}) {
+        for (const char *position : {"first", "middle", "last", "only"}) {
             selectors << QStringLiteral("QRadioButton[segment=\"%1\"]%2")
                                  .arg(QLatin1String(position), QLatin1String(suffix));
         }
@@ -358,10 +370,11 @@ QString segmentStyle()
     return each("") + QStringLiteral(" { border: 1px solid @inputBorder; border-left: none;"
                                      " background-color: @base; color: @text;"
                                      " padding: 4px 12px; spacing: 0px; min-height: 20px; }")
-            + QStringLiteral("QRadioButton[segment=\"first\"] { border-left: 1px solid @inputBorder;"
+            + QStringLiteral("QRadioButton[segment=\"first\"], QRadioButton[segment=\"only\"]"
+                             " { border-left: 1px solid @inputBorder;"
                              " border-top-left-radius: 6px; border-bottom-left-radius: 6px; }"
-                             "QRadioButton[segment=\"last\"] { border-top-right-radius: 6px;"
-                             " border-bottom-right-radius: 6px; }")
+                             "QRadioButton[segment=\"last\"], QRadioButton[segment=\"only\"]"
+                             " { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }")
             + each(":hover") + QStringLiteral(" { background-color: @hover; }")
             + each(":checked")
             + QStringLiteral(" { background-color: @accent; color: @onAccent; }")
@@ -564,7 +577,15 @@ QString statusStyle()
             " padding: 3px; }"
             "QLabel[role=\"caption\"] { color: @textSecondary; }"
             "QLabel[role=\"value\"] { color: @text; font-weight: 600; }"
-            "QLabel[role=\"unit\"] { color: @textMuted; }");
+            "QLabel[role=\"unit\"] { color: @textMuted; }"
+            // The installed firmware against the latest release; no property while
+            // that is unknown, so the label keeps the colour of every other one.
+            "QLabel[firmwareStatus=\"latest\"] { color: @success; }"
+            "QLabel[firmwareStatus=\"outdated\"] { color: @dangerText; }"
+            // The fault LED: grey while the drive reports none, red on a fault; no
+            // property while is_fault is unknown, so the dash keeps the usual colour.
+            "QLabel[fault=\"off\"] { color: @textMuted; }"
+            "QLabel[fault=\"on\"] { color: @dangerText; }");
 }
 
 QColor color(const QString &hex)
@@ -717,6 +738,11 @@ QColor ThemeManager::restoreIconColor(const QString &theme)
 QColor ThemeManager::restoreIconHoverColor(const QString &theme)
 {
     return color(tokens(theme).accentMark);
+}
+
+QColor ThemeManager::mutedTextColor(const QString &theme)
+{
+    return color(tokens(theme).textMuted);
 }
 
 QPixmap ThemeManager::logo(const QString &theme, int width, qreal devicePixelRatio)

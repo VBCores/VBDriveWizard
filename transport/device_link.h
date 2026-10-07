@@ -34,12 +34,14 @@ public:
     virtual void readRegister(quint8 nodeId, const QString &name) = 0;
     virtual void readRegisters(quint8 nodeId, const QStringList &names) = 0;
 
-    /// Writes a batch. On Serial this wraps the batch in CONFIG ... SAVE when any of
-    /// the registers is config-only; on CAN the writes go straight through.
+    /// Writes a batch. On Serial this wraps the batch in CONFIG ... APPLY (or SAVE,
+    /// for servo settings only) when any of the registers is config-only; on CAN the
+    /// writes go straight through.
     virtual void writeRegisters(quint8 nodeId, const RegisterWrites &writes) = 0;
 
-    /// Servo set-point: voltbro.foc.Servo.1.0 on CAN, `servo_cmd:` on Serial.
-    virtual void sendServoSetpoint(quint8 nodeId, ServoControlType type, float value) = 0;
+    /// Servo set-point: voltbro.foc.Servo.1.0 on CAN, `servo_cmd:` on Serial. No
+    /// command_idx is sent, so the drive deduplicates consecutive identical commands.
+    virtual void sendServoSetpoint(quint8 nodeId, ServoCommandType type, float value) = 0;
 
     /// MIT command: voltbro.foc.MIT.1.0 on CAN, `mit_cmd:` on Serial.
     virtual void sendMitCommand(quint8 nodeId, float position, float velocity, float torque,

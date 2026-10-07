@@ -178,7 +178,9 @@ bool SerialWorker::parseTelemetry(const QString &line, TelemetrySample *out) con
     if (!ok || !std::isfinite(torque))
         return false;
 
-    out->t_us = hostTimeUs();
+    // The line carries no timestamp, so both clocks are the moment it was parsed.
+    out->host_us = hostTimeUs();
+    out->t_us = out->host_us;
     out->position = position;
     out->velocity = velocity;
     out->torque = torque;

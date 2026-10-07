@@ -8,23 +8,10 @@ DeviceModel::DeviceModel(quint8 nodeId, QObject *parent)
 {
 }
 
-QString DeviceModel::modelName() const
-{
-    const RegisterValue model = m_deviceValues.value(QString::fromLatin1(registers::kModel));
-    return model.isEmpty() ? QString() : model.toString();
-}
-
 QString DeviceModel::displayName() const
 {
-    const QString model = modelName();
-    if (model.isEmpty())
-        return tr("Unknown actuator");
-
-    // vbdrive_model is just "M4310"; the R-suffix the user recognises is the gear ratio.
-    const RegisterValue gear = m_deviceValues.value(QString::fromLatin1(registers::kGear));
-    if (gear.isEmpty())
-        return model;
-    return QStringLiteral("%1R%2").arg(model).arg(gear.toUInt32());
+    const RegisterValue name = m_deviceValues.value(QString::fromLatin1(registers::kName));
+    return name.isEmpty() ? tr("Unknown actuator") : name.toString();
 }
 
 int DeviceModel::canId() const
@@ -41,8 +28,7 @@ void DeviceModel::setDeviceValue(const QString &name, const RegisterValue &value
         return;
     m_deviceValues.insert(name, value);
     emit deviceValueChanged(name);
-    if (name == QLatin1String(registers::kModel) || name == QLatin1String(registers::kGear)
-        || name == QLatin1String(registers::kNodeId))
+    if (name == QLatin1String(registers::kName) || name == QLatin1String(registers::kNodeId))
         emit identityChanged();
 }
 

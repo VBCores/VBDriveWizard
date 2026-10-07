@@ -22,8 +22,8 @@ DeviceModel *DeviceManager::ensureDevice(quint8 nodeId)
         return existing;
 
     auto *created = new DeviceModel(nodeId, this);
-    // The label depends on registers that arrive after discovery, so a late model or
-    // gear read has to be able to re-sort and re-label the list.
+    // The label depends on registers that arrive after discovery, so a late name or
+    // node id read has to be able to re-sort and re-label the list.
     connect(created, &DeviceModel::identityChanged, this, [this] {
         resort();
         emit listChanged();
@@ -100,7 +100,7 @@ void DeviceManager::resort()
     std::sort(m_devices.begin(), m_devices.end(),
               [this](const DeviceModel *a, const DeviceModel *b) {
                   int cmp = 0;
-                  if (m_sortKey == SortKey::Model) {
+                  if (m_sortKey == SortKey::Name) {
                       cmp = a->displayName().compare(b->displayName(), Qt::CaseInsensitive);
                   } else {
                       // The column shows what the drive reports, so that is what it
@@ -108,7 +108,7 @@ void DeviceManager::resort()
                       // at the ascending end until its first read lands.
                       cmp = a->canId() - b->canId();
                   }
-                  // Two drives can share a model and, for a moment after a node id
+                  // Two drives can share a name and, for a moment after a node id
                   // write, an id; the transport address they were discovered at is
                   // unique and keeps the order from flickering between rebuilds.
                   if (cmp == 0)

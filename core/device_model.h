@@ -30,9 +30,8 @@ public:
 
     quint8 nodeId() const { return m_nodeId; }
 
-    /// Raw `vbdrive_model` register, e.g. "M4310".
-    QString modelName() const;
-    /// Model with the gear ratio appended, e.g. "M4310R36" - what DeviceList shows.
+    /// The drive's own `name` register - what DeviceList and STATUS show - or a
+    /// placeholder while it has not been read yet.
     QString displayName() const;
 
     /// The CAN node id the drive reports in its `node_id` register - what the ID

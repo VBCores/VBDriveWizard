@@ -110,6 +110,9 @@ public:
     virtual bool read_frame(CanardFrame*, void* data) = 0;
     virtual int write_frame(const CanardTxQueueItem* ti) = 0;
     void process_canard_rx(CanardFrame*);
+    // VBDriveWizard patch: a provider that knows when the frame actually arrived
+    // passes that instant instead of the time it got around to processing it.
+    void process_canard_rx(CanardFrame*, uint64_t timestamp_usec);
     void process_canard_tx();
     void clear_queue();
 

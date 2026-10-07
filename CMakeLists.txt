@@ -72,6 +72,8 @@ set(PROJECT_SOURCES
     control/trajectory_worker.h
     control/control_manager.cpp
     control/control_manager.h
+    control/safety_monitor.cpp
+    control/safety_monitor.h
 
     ui/restore_label.cpp
     ui/restore_label.h
@@ -105,6 +107,9 @@ set(PROJECT_SOURCES
     firmware/firmware_downloader.h
     firmware/firmware_flasher.cpp
     firmware/firmware_flasher.h
+    firmware/firmware_version.h
+    firmware/vbboot_flasher.cpp
+    firmware/vbboot_flasher.h
 
     third_party/qcustomplot/qcustomplot.cpp
     third_party/qcustomplot/qcustomplot.h

@@ -37,14 +37,27 @@ enum class PlotSignal
     Log
 };
 
-/// Servo set-point kind. The values are the wire encoding of
-/// voltbro.foc.Servo.1.0::set_point_type and of the Serial `servo_cmd` first argument.
+/// The quantity a set-point drives: what the plot draws it against, and which field
+/// of an MIT command a waveform fills.
 enum class ServoControlType
 {
-    Velocity = 0,
-    Torque = 1,
-    Position = 2,
-    Voltage = 3
+    Velocity,
+    Torque,
+    Position,
+    Voltage
+};
+
+/// Servo command type. The values are the wire encoding of
+/// voltbro.foc.Servo.1.0::control_type and of the Serial `servo_cmd` first argument.
+enum class ServoCommandType : quint8
+{
+    VelocityDirect = 0,
+    VelocityRamp = 1,
+    TorqueDirect = 2,
+    PositionDirect = 3,
+    PositionFilter = 4,
+    PositionPoly = 5,
+    VoltageDirect = 6
 };
 
 /// Reference trajectory shape. `Step` is MIT-only, the rest are shared.
@@ -64,32 +77,31 @@ enum class ControlProtocol
     Mit
 };
 
-/// `servo_tr_form` register encoding.
-enum class TransientForm
-{
-    Linear = 1,
-    Polynomial = 2
-};
-
 /// One telemetry sample: what voltbro.foc.State.1.0 carries, and what the Serial
 /// `state:` log line carries. All values are in drive-native units (rad, rad/s, N*m).
 struct TelemetrySample
 {
-    /// Microseconds: the drive's own clock on CAN, the host wall clock otherwise.
-    /// Only differences between samples of one batch are relied upon.
+    /// Microseconds: the drive's own clock on CAN, the same as host_us on Serial. It
+    /// spaces the samples truly, but drifts against the host's clock, so the plot maps
+    /// it onto host_us (PlotController::appendTelemetry()).
     qint64 t_us = 0;
+    /// hostTimeUs() at which the sample reached the host: the kernel's reception stamp
+    /// on CAN, the moment the line was parsed on Serial. Samples arrive in bursts, so
+    /// this is the delivery instant, not the sampling one.
+    qint64 host_us = 0;
     double position = 0.0;
     double velocity = 0.0;
     double torque = 0.0;
 };
 
-/// Host wall clock in microseconds, for samples the drive does not timestamp itself.
-/// Millisecond resolution is not enough: two lines parsed in the same millisecond
-/// would collapse onto one point of the plot.
+/// Host steady clock in microseconds: the one time base telemetry, set-points and the
+/// plot share. Monotonic rather than wall time, which NTP may slew or step. Millisecond
+/// resolution is not enough: two lines parsed in the same millisecond would collapse
+/// onto one point of the plot.
 inline qint64 hostTimeUs()
 {
     return std::chrono::duration_cast<std::chrono::microseconds>(
-                   std::chrono::system_clock::now().time_since_epoch())
+                   std::chrono::steady_clock::now().time_since_epoch())
             .count();
 }
 
@@ -128,6 +140,14 @@ struct UiSettings
     QString angle_unit = QStringLiteral("rad");  ///< "rad" or "deg"
 };
 
+/// Limits of the protective stop. A drive past either temperature, or reporting
+/// is_fault, is stopped and switched off.
+struct SafetySettings
+{
+    double max_stator_temp_c = 90.0;
+    double max_mcu_temp_c = 85.0;
+};
+
 struct WindowSettings
 {
     int x = 0;
@@ -140,6 +160,7 @@ struct WindowSettings
 struct AppConfig
 {
     UiSettings ui;
+    SafetySettings safety;
     WindowSettings window;
     /// Last input of the CONTROL panel: widget object name -> value as text.
     QMap<QString, QString> control;

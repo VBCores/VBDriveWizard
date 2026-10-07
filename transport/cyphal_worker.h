@@ -50,7 +50,7 @@ public:
 
     // --- callable from any thread ---
 
-    void sendServo(quint8 nodeId, quint8 setPointType, float value);
+    void sendServo(quint8 nodeId, quint8 controlType, float value);
     void sendMit(quint8 nodeId, float position, float velocity, float torque,
                  float positionGain, float velocityGain);
 

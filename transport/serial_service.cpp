@@ -4,6 +4,7 @@
 #include "transport/serial_worker.h"
 
 #include <QMetaObject>
+#include <QRegularExpression>
 #include <QSignalBlocker>
 
 #include <utility>
@@ -13,11 +14,6 @@ constexpr int kDefaultTimeoutMs = 1000;
 constexpr int kHandshakeTimeoutMs = 2000;
 /// How long closeLink() lets the queue drain before the port is closed anyway.
 constexpr int kCloseTimeoutMs = 2000;
-constexpr auto kErrorPrefix = "ERROR:";
-constexpr auto kOkPrefix = "OK: ";
-/// Printed by SAVE: "NOTE: config changes not applied! To apply, run APPLY or reset
-/// controller". Worth showing, since only the servo gains take effect immediately.
-constexpr auto kNotePrefix = "NOTE:";
 /// Last line of the boot banner, printed whether or not the drive is configured; it
 /// is the only reliable sign that the reboot APPLY triggers is over. On the bench
 /// the whole reboot takes about 100 ms, the timeout also covers the flash write.
@@ -31,10 +27,21 @@ constexpr int kBootSettleMs = 1500;
 constexpr int kReopenIntervalMs = 250;
 constexpr int kReopenWindowMs = 10000;
 
-/// What the drive answers to servo_cmd / mit_cmd / log_on / is_on:1 in CONFIG mode.
-constexpr auto kRunningModeRequired = "ERROR: RUNNING mode required";
-/// The same, as completeCurrent() reports it: without the prefix.
+/// CALIBRATE answers its acceptance at once; a refusal comes just as fast.
+constexpr int kCalibrationAckTimeoutMs = 3000;
+/// Longest the drive may stay silent between two calibration stage reports before
+/// it counts as hung. A stage is one slow electrical revolution of the rotor.
+constexpr int kCalibrationStageTimeoutMs = 30000;
+
+/// Why the drive refuses servo_cmd / mit_cmd / log_on / is_on:1 outside RUNNING.
 constexpr auto kRunningModeRequiredReason = "RUNNING mode required";
+
+/// The streaming commands bypass the queue; their replies concern nobody.
+const QStringList &streamingCommands()
+{
+    static const QStringList names = {QStringLiteral("servo_cmd"), QStringLiteral("mit_cmd")};
+    return names;
+}
 
 bool startsWithAny(const QString &line, const QStringList &prefixes)
 {
@@ -43,6 +50,18 @@ bool startsWithAny(const QString &line, const QStringList &prefixes)
             return true;
     }
     return false;
+}
+
+/// `<token> ERROR: <reason>`: the token names the command or register refused.
+bool parseError(const QString &line, QString *token, QString *reason)
+{
+    static const QRegularExpression pattern(QStringLiteral("^(\\S+) ERROR: (.*)$"));
+    const QRegularExpressionMatch match = pattern.match(line.trimmed());
+    if (!match.hasMatch())
+        return false;
+    *token = match.captured(1);
+    *reason = match.captured(2).trimmed();
+    return true;
 }
 } // namespace
 
@@ -77,6 +96,9 @@ SerialService::SerialService(QObject *parent)
     connect(&m_reopenTimer, &QTimer::timeout, this, &SerialService::onReopenTimeout);
     m_bootSettleTimer.setSingleShot(true);
     connect(&m_bootSettleTimer, &QTimer::timeout, this, &SerialService::onBootSettled);
+    m_calibrationTimer.setSingleShot(true);
+    m_calibrationTimer.setInterval(kCalibrationStageTimeoutMs);
+    connect(&m_calibrationTimer, &QTimer::timeout, this, &SerialService::onCalibrationTimeout);
 }
 
 SerialService::~SerialService()
@@ -101,6 +123,8 @@ void SerialService::shutdown()
     m_closeTimer.stop();
     m_reopenTimer.stop();
     m_bootSettleTimer.stop();
+    m_calibrationTimer.stop();
+    m_calibrating = false;
     m_closing = false;
     m_reopening = false;
     m_rebootPending = false;
@@ -121,6 +145,8 @@ void SerialService::connectToPort(const QString &portName, int baudRate)
     m_closeTimer.stop();
     m_reopenTimer.stop();
     m_bootSettleTimer.stop();
+    m_calibrationTimer.stop();
+    m_calibrating = false;
     m_closing = false;
     m_reopening = false;
     m_rebootPending = false;
@@ -234,6 +260,8 @@ void SerialService::pumpQueue()
     }
     if (m_bootSettleTimer.isActive())
         return;  // resumed by onBootSettled()
+    if (m_calibrating)
+        return;  // the drive discards input until FINISH; resumed by finishCalibration()
 
     m_current = m_queue.dequeue();
     QMetaObject::invokeMethod(m_worker, "writeLine", Qt::QueuedConnection,
@@ -242,10 +270,10 @@ void SerialService::pumpQueue()
 
 void SerialService::sendImmediate(const QString &line)
 {
-    if (!m_portOpen || m_closing)
+    if (!m_portOpen || m_closing || m_calibrating)
         return;
     // Bypasses the queue: trajectory commands run far faster than the ack round trip,
-    // and their `OK: mit_cmd` / `OK: servo_cmd` replies are dropped by the matcher.
+    // and their `mit_cmd OK` / `servo_cmd OK` replies are dropped by the matcher.
     QMetaObject::invokeMethod(m_worker, "writeLine", Qt::QueuedConnection, Q_ARG(int, -1),
                               Q_ARG(QString, line));
 }
@@ -283,8 +311,17 @@ void SerialService::completeCurrent(bool success, const QString &error)
         emit registerWritten(kSerialNodeId, command.token, success, error);
         break;
     case CommandKind::Bare:
-        if (!success && command.expectAck && !command.internal
-            && !(m_notCalibrated && error == QLatin1String(kRunningModeRequiredReason))) {
+        if (command.calibrates) {
+            if (success) {
+                // From here on the drive answers nothing but stage reports.
+                m_calibrating = true;
+                m_calibrationTimer.start();
+            } else {
+                emit calibrationFinished(false, false, error);
+            }
+        } else if (!success && command.expectAck && !command.internal
+                   && !(m_notCalibrated
+                        && error == QLatin1String(kRunningModeRequiredReason))) {
             emit linkError(tr("Command '%1' failed: %2").arg(command.token, error));
         }
         break;
@@ -323,7 +360,7 @@ void SerialService::completeCurrent(bool success, const QString &error)
         }
         emit connectionResult(success,
                               success ? tr("Actuator detected on %1.").arg(m_portName)
-                                      : tr("No actuator answered on %1: %2")
+                                      : tr("No VBDrive found on %1: %2")
                                                 .arg(m_portName, error));
     }
 
@@ -355,6 +392,54 @@ void SerialService::completeCurrent(bool success, const QString &error)
 void SerialService::onBootSettled()
 {
     pumpQueue();
+}
+
+bool SerialService::handleCalibrationLine(const QString &line)
+{
+    static const QRegularExpression stage(QStringLiteral("^CALIBRATE (\\d+)/(\\d+) DONE$"));
+    const QString text = line.trimmed();
+    const QRegularExpressionMatch match = stage.match(text);
+    if (match.hasMatch()) {
+        m_calibrationTimer.start();
+        emit calibrationProgress(match.captured(1).toInt(), match.captured(2).toInt());
+        return true;
+    }
+    if (text == QLatin1String("CALIBRATE FINISH")) {
+        finishCalibration(true, QString());
+        return true;
+    }
+    QString token;
+    QString reason;
+    if (parseError(text, &token, &reason) && token == QLatin1String("CALIBRATE")) {
+        finishCalibration(false, reason);
+        return true;
+    }
+    return false;
+}
+
+void SerialService::finishCalibration(bool success, const QString &error, bool resume,
+                                      bool stalled)
+{
+    m_calibrationTimer.stop();
+    m_calibrating = false;
+    if (success)
+        m_notCalibrated = false;
+    emit calibrationFinished(success, stalled, error);
+    if (!resume)
+        return;
+    // Calibration leaves RUNNING, and leaving RUNNING switches the `state:` log off.
+    restoreLogStreaming();
+    pumpQueue();
+}
+
+void SerialService::onCalibrationTimeout()
+{
+    if (!m_calibrating)
+        return;
+    finishCalibration(false,
+                      tr("The actuator reported no calibration progress for %1 s.")
+                              .arg(kCalibrationStageTimeoutMs / 1000),
+                      true, true);
 }
 
 void SerialService::restoreLogStreaming()
@@ -446,10 +531,10 @@ void SerialService::onWorkerPortOpened(bool success, const QString &message)
 {
     m_openPending = false;
 
-    // Handshake: the drive is only considered present once vbdrive_model answers.
+    // Handshake: the drive is only considered present once `device` reads `vbdrive`.
     PendingCommand handshake;
     handshake.kind = CommandKind::Read;
-    handshake.token = QString::fromLatin1(registers::kModel);
+    handshake.token = QString::fromLatin1(registers::kDevice);
     handshake.line = handshake.token + QStringLiteral(":?");
     handshake.timeoutMs = kHandshakeTimeoutMs;
     handshake.handshake = true;
@@ -492,6 +577,11 @@ void SerialService::onWorkerPortClosed()
     m_handshakeDone = false;
     m_closing = false;
     m_closeTimer.stop();
+    if (m_calibrating) {
+        finishCalibration(false, wasClosing ? tr("Disconnected.")
+                                            : tr("The serial connection was lost."),
+                          false);
+    }
     if (m_openPending)
         return;  // the previous port going away on the way to a new one
     if (wasOpen && !wasClosing && m_rebootPending) {
@@ -585,89 +675,70 @@ void SerialService::onResponseTimeout()
     completeCurrent(false, tr("The actuator did not answer in time."));
 }
 
-bool SerialService::isStrayRunningModeError(const QString &line,
-                                            const PendingCommand &command) const
-{
-    if (line.trimmed() != QLatin1String(kRunningModeRequired))
-        return false;
-    // The trajectory workers' immediate servo_cmd / mit_cmd lines bypass the queue,
-    // and once CONFIG has stopped the motor the drive answers each of them with
-    // this error. Those replies belong to the trajectory, not to the config write,
-    // read, CONFIG or APPLY in flight; only the commands the drive really refuses
-    // in CONFIG mode (a runtime write such as is_on:1, or log_on) may take it.
-    switch (command.kind) {
-    case CommandKind::Write:
-        return RegisterCatalog::requiresConfigMode(command.token);
-    case CommandKind::Bare:
-        return command.token != QLatin1String("log_on");
-    case CommandKind::Read:
-        return true;
-    }
-    return false;
-}
-
 void SerialService::onWorkerLine(const QString &line)
 {
     emit logLine(line);
 
-    if (line.startsWith(QLatin1String(kErrorPrefix))) {
-        if (!m_current.has_value())
-            emit linkError(line);
-        else if (!isStrayRunningModeError(line, *m_current))
-            completeCurrent(false, line.mid(static_cast<int>(qstrlen(kErrorPrefix))).trimmed());
+    if (m_calibrating && handleCalibrationLine(line))
+        return;
+
+    QString errorToken;
+    QString reason;
+    if (parseError(line, &errorToken, &reason)) {
+        // Every error names what it refuses, so only a match is the answer to the
+        // command in flight. The trajectory's immediate servo_cmd / mit_cmd lines are
+        // refused this way while CONFIG has the motor stopped; that is not news.
+        if (m_current.has_value() && errorToken == m_current->token)
+            completeCurrent(false, reason);
+        else if (!streamingCommands().contains(errorToken))
+            emit linkError(line.trimmed());
         return;
     }
-
-    if (line.startsWith(QLatin1String(kNotePrefix)))
-        emit linkError(line);  // informational, but the user should see it
 
     if (!m_current.has_value())
         return;  // unsolicited chatter, or an ack for an immediate trajectory command
 
     const PendingCommand &command = *m_current;
+    const QString text = line.trimmed();
 
     switch (command.kind) {
     case CommandKind::Bare:
-        if (command.acks.isEmpty()) {
-            // Generic `OK: <token>`.
-            if (line.startsWith(QLatin1String(kOkPrefix))
-                && line.mid(static_cast<int>(qstrlen(kOkPrefix)))
-                                   .section(QLatin1Char(':'), 0, 0)
-                                   .trimmed()
-                           == command.token) {
-                completeCurrent(true, QString());
-            }
-        } else if (startsWithAny(line, command.acks)) {
+        // `<token> OK`, possibly followed by a remark: `CONFIG OK: mode enabled`.
+        if (command.acks.isEmpty() ? text.startsWith(command.token + QStringLiteral(" OK"))
+                                   : startsWithAny(text, command.acks)) {
             completeCurrent(true, QString());
         }
         return;
 
-    case CommandKind::Write: {
-        // `OK: <name>:<value>`
-        if (!line.startsWith(QLatin1String(kOkPrefix)))
-            return;
-        const QString body = line.mid(static_cast<int>(qstrlen(kOkPrefix)));
-        if (body.section(QLatin1Char(':'), 0, 0).trimmed() == command.token)
+    case CommandKind::Write:
+        // `<name>:<value> OK`
+        if (text.startsWith(command.token + QLatin1Char(':'))
+            && text.endsWith(QStringLiteral(" OK"))) {
             completeCurrent(true, QString());
+        }
         return;
-    }
 
     case CommandKind::Read:
         break;
     }
 
-    // Read reply: `<name>:<value>`, printed through "%s:%.*s" for every register type.
-    const int separator = line.indexOf(QLatin1Char(':'));
+    // Read reply: `<name>:<value>`.
+    const int separator = text.indexOf(QLatin1Char(':'));
     if (separator <= 0)
         return;
-    if (line.left(separator).trimmed() != command.token)
+    if (text.left(separator) != command.token)
         return;
 
-    const QString text = line.mid(separator + 1).trimmed();
+    const QString valueText = text.mid(separator + 1).trimmed();
     const RegisterInfo *info = RegisterCatalog::find(command.token);
     RegisterValue value;
-    if (!info || !RegisterCodec::parse(*info, text, &value)) {
-        completeCurrent(false, tr("Could not interpret the value '%1'.").arg(text));
+    if (!info || !RegisterCodec::parse(*info, valueText, &value)) {
+        completeCurrent(false, tr("Could not interpret the value '%1'.").arg(valueText));
+        return;
+    }
+    if (command.handshake && valueText != QLatin1String(registers::kDeviceVbdrive)) {
+        completeCurrent(false, tr("the device reports itself as '%1', not as a VBDrive.")
+                                       .arg(valueText));
         return;
     }
     emit registerRead(kSerialNodeId, command.token, value, true, QString());
@@ -706,16 +777,19 @@ void SerialService::writeRegisters(quint8, const RegisterWrites &writes)
         return;
     }
 
-    // Config registers are staged inside CONFIG ... APPLY; runtime ones (is_on) go
-    // after APPLY, because CONFIG mode stops the motor and refuses them with
-    // `ERROR: RUNNING mode required`.
+    // Config registers are staged inside CONFIG ... APPLY (or SAVE); runtime ones
+    // (is_on) go after it, because CONFIG mode stops the motor and refuses them with
+    // `is_on ERROR: RUNNING mode required`.
     RegisterWrites configWrites;
     RegisterWrites runtimeWrites;
+    bool needsReboot = false;
     for (const RegisterWrite &write : writes) {
-        if (RegisterCatalog::requiresConfigMode(write.first))
+        if (RegisterCatalog::requiresConfigMode(write.first)) {
             configWrites.append(write);
-        else
+            needsReboot = needsReboot || !RegisterCatalog::isLiveOnSave(write.first);
+        } else {
             runtimeWrites.append(write);
+        }
     }
     const bool needsConfigMode = !configWrites.isEmpty();
 
@@ -734,10 +808,8 @@ void SerialService::writeRegisters(quint8, const RegisterWrites &writes)
     };
 
     if (needsConfigMode) {
-        // CONFIG stops the motor and answers `CONFIG MODE ENABLED`, never `OK:`.
-        PendingCommand config = bareCommand(QStringLiteral("CONFIG"),
-                                            {QStringLiteral("CONFIG MODE ENABLED"),
-                                             QStringLiteral("OK: CONFIG")});
+        // CONFIG stops the motor and answers `CONFIG OK: mode enabled`.
+        PendingCommand config = bareCommand(QStringLiteral("CONFIG"));
         config.batchId = batchId;
         config.opensConfig = true;
         enqueue(config);
@@ -745,24 +817,34 @@ void SerialService::writeRegisters(quint8, const RegisterWrites &writes)
         for (const RegisterWrite &write : std::as_const(configWrites))
             enqueueWrite(write);
 
-        // APPLY persists the staged values and reboots the drive, which is what
-        // makes them take effect (SAVE only applies the servo gains). It prints no
-        // ack of its own: the reply is the boot banner of the restarted drive.
-        PendingCommand apply = bareCommand(QStringLiteral("APPLY"),
-                                           {QString::fromLatin1(kBootBannerEnd)});
-        apply.batchId = batchId;
-        apply.closesConfig = true;
-        apply.reboots = true;
-        apply.timeoutMs = kRebootTimeoutMs;
-        enqueue(apply);
+        if (needsReboot) {
+            // APPLY persists the staged values and reboots the drive, which is what
+            // makes them take effect. Its `APPLY OK` only says the reboot is under
+            // way; the ack that matters is the boot banner of the restarted drive.
+            PendingCommand apply = bareCommand(QStringLiteral("APPLY"),
+                                               {QString::fromLatin1(kBootBannerEnd)});
+            apply.batchId = batchId;
+            apply.closesConfig = true;
+            apply.reboots = true;
+            apply.timeoutMs = kRebootTimeoutMs;
+            enqueue(apply);
+        } else {
+            // Servo settings only: SAVE persists them and puts them into effect at
+            // once, and the motor keeps running.
+            PendingCommand save = bareCommand(QStringLiteral("SAVE"));
+            save.batchId = batchId;
+            save.closesConfig = true;
+            enqueue(save);
+        }
     }
 
     for (const RegisterWrite &write : std::as_const(runtimeWrites))
         enqueueWrite(write);
 }
 
-void SerialService::sendServoSetpoint(quint8, ServoControlType type, float value)
+void SerialService::sendServoSetpoint(quint8, ServoCommandType type, float value)
 {
+    // No command_idx: the drive then drops consecutive identical commands itself.
     sendImmediate(QStringLiteral("servo_cmd: %1 %2")
                           .arg(static_cast<int>(type))
                           .arg(static_cast<double>(value), 0, 'f', 6));
@@ -786,6 +868,15 @@ void SerialService::sendBareCommand(const QString &command, bool expectAck, int 
     pending.timeoutMs = timeoutMs;
     pending.expectAck = expectAck;
     enqueue(pending);
+}
+
+void SerialService::startCalibration()
+{
+    PendingCommand command = bareCommand(QStringLiteral("CALIBRATE"));
+    command.calibrates = true;
+    command.timeoutMs = kCalibrationAckTimeoutMs;
+    if (enqueue(command) < 0)
+        emit calibrationFinished(false, false, tr("Serial port is not open."));
 }
 
 void SerialService::setLogStreaming(bool enabled)

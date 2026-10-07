@@ -14,12 +14,12 @@ constexpr bool kCfg = true;      ///< Serial writes need CONFIG mode
 constexpr bool kRuntime = false;
 constexpr bool kInGroup = true;  ///< shown in the CONFIGURATION group box
 constexpr bool kNotInGroup = false;
+constexpr bool kLive = true;     ///< SAVE puts it into effect, no reboot needed
 
 using Q = RegisterQuantity;
 using T = RegisterType;
 
-// Order matches the firmware's register.List order, decoded from the descriptor
-// table at 0x0801C7FC in VBDrive_full.hex.
+// Order follows PARAMETER_CATALOG in the VBDrive 4.x firmware (App/config/config.hpp).
 const QVector<RegisterInfo> kRegisters = {
     {registers::kGear,            T::UInt32, kRW, kCfg,     Q::Plain,           kInGroup},
     {registers::kMaxCurrent,      T::Real32, kRW, kCfg,     Q::Plain,           kInGroup},
@@ -42,12 +42,14 @@ const QVector<RegisterInfo> kRegisters = {
     {registers::kNodeId,          T::UInt32, kRW, kCfg,     Q::Plain,           kInGroup},
     {registers::kDataBaud,        T::UInt32, kRW, kCfg,     Q::Plain,           kInGroup},
     {registers::kNominalBaud,     T::UInt32, kRW, kCfg,     Q::Plain,           kInGroup},
+    {registers::kName,            T::String, kRW, kCfg,     Q::Plain,           kInGroup},
+    {registers::kRatedMaxCurrent, T::Real32, kRW, kCfg,     Q::Plain,           kInGroup},
 
     {registers::kIsOn,            T::Bool,   kRW, kRuntime, Q::Plain,           kNotInGroup},
     {registers::kBootloader,      T::Bool,   kRW, kRuntime, Q::Plain,           kNotInGroup},
 
     {registers::kCmdErrors,       T::UInt32, kRO, kRuntime, Q::Plain,           kNotInGroup},
-    {registers::kModel,           T::String, kRO, kRuntime, Q::Plain,           kNotInGroup},
+    {registers::kDevice,          T::String, kRO, kRuntime, Q::Plain,           kNotInGroup},
     {registers::kFirmwareRev,     T::String, kRO, kRuntime, Q::Plain,           kNotInGroup},
     {registers::kBusVoltage,      T::Real32, kRO, kRuntime, Q::Plain,           kNotInGroup},
     {registers::kBusCurrent,      T::Real32, kRO, kRuntime, Q::Plain,           kNotInGroup},
@@ -59,13 +61,18 @@ const QVector<RegisterInfo> kRegisters = {
 
     // Edited from the CONTROL group's own Set buttons, not from CONFIGURATION,
     // but still persistent so they belong in a saved profile.
-    {registers::kServoPosP,       T::Real32, kRW, kCfg,     Q::Plain,           kNotInGroup},
-    {registers::kServoPosI,       T::Real32, kRW, kCfg,     Q::Plain,           kNotInGroup},
-    {registers::kServoPosD,       T::Real32, kRW, kCfg,     Q::Plain,           kNotInGroup},
-    {registers::kServoVelP,       T::Real32, kRW, kCfg,     Q::Plain,           kNotInGroup},
-    {registers::kServoVelI,       T::Real32, kRW, kCfg,     Q::Plain,           kNotInGroup},
-    {registers::kServoTransientForm, T::UInt32, kRW, kCfg,  Q::Plain,           kNotInGroup},
-    {registers::kServoTransientVel,  T::Real32, kRW, kCfg,  Q::AngularVelocity, kNotInGroup},
+    {registers::kServoPosP,       T::Real32, kRW, kCfg,     Q::Plain,           kNotInGroup, kLive},
+    {registers::kServoPosI,       T::Real32, kRW, kCfg,     Q::Plain,           kNotInGroup, kLive},
+    {registers::kServoPosD,       T::Real32, kRW, kCfg,     Q::Plain,           kNotInGroup, kLive},
+    {registers::kServoVelP,       T::Real32, kRW, kCfg,     Q::Plain,           kNotInGroup, kLive},
+    {registers::kServoVelI,       T::Real32, kRW, kCfg,     Q::Plain,           kNotInGroup, kLive},
+    // Input generators: bandwidth in 1/s, the limits and the ramp rate in rad/s and
+    // rad/s^2 - all of them scale with the angle unit like a velocity does.
+    {registers::kServoInputBandwidth, T::Real32, kRW, kCfg, Q::Plain,           kNotInGroup, kLive},
+    {registers::kServoVelLimit,   T::Real32, kRW, kCfg,     Q::AngularVelocity, kNotInGroup, kLive},
+    {registers::kServoAccelLimit, T::Real32, kRW, kCfg,     Q::AngularVelocity, kNotInGroup, kLive},
+    {registers::kServoDecelLimit, T::Real32, kRW, kCfg,     Q::AngularVelocity, kNotInGroup, kLive},
+    {registers::kServoVelRampRate, T::Real32, kRW, kCfg,    Q::AngularVelocity, kNotInGroup, kLive},
 };
 
 const QHash<QString, const RegisterInfo *> &index()
@@ -118,7 +125,8 @@ QStringList RegisterCatalog::profileNames()
 {
     QStringList names;
     for (const RegisterInfo &info : kRegisters) {
-        if (info.writable && info.configOnly)  // writable and persistent
+        if (info.writable && info.configOnly  // writable and persistent
+            && qstrcmp(info.name, registers::kName) != 0)
             names << QString::fromLatin1(info.name);
     }
     return names;
@@ -134,6 +142,12 @@ bool RegisterCatalog::requiresConfigMode(const QString &name)
 {
     const RegisterInfo *info = find(name);
     return info && info->configOnly;
+}
+
+bool RegisterCatalog::isLiveOnSave(const QString &name)
+{
+    const RegisterInfo *info = find(name);
+    return info && info->liveOnSave;
 }
 
 bool RegisterCodec::parse(const RegisterInfo &info, const QString &raw, RegisterValue *out)

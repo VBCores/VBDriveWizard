@@ -21,7 +21,7 @@ public:
     /// on a column header maps straight onto it.
     enum class SortKey
     {
-        Model,
+        Name,
         CanId
     };
 

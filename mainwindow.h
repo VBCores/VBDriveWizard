@@ -13,6 +13,8 @@
 #include <QTimer>
 #include <QVector>
 
+#include <optional>
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -32,11 +34,14 @@ class DeviceLink;
 class DeviceManager;
 class DeviceModel;
 class FirmwareDownloader;
+struct FirmwareRelease;
 class FirmwareFlasher;
 class PlotController;
 class RestoreLabel;
+class SafetyMonitor;
 class SerialService;
 class TranslationController;
+class VbbootFlasher;
 struct PlotMeasurement;
 
 /// Wiring for the whole application: it owns the services and translates between the
@@ -137,7 +142,12 @@ private:
     void onLoadProfile();
     void onRestoreDefaults();
     void onCalibrate();
+    void onCalibrationProgress(int done, int total);
+    void onCalibrationFinished(bool success, bool stalled, const QString &error);
     void applyProfile(const RegisterMap &values);
+    /// Asks before a batch changes `rated_max_current`. Returns false when the user
+    /// cancels the whole write; "all except this register" drops it from `writes`.
+    bool confirmCriticalWrites(const DeviceModel *device, RegisterWrites *writes);
 
     // --- devices ---
     void rebuildDeviceList();
@@ -179,10 +189,25 @@ private:
     void onServoUserStart();
     void onControlParamsEdited();
     void onServoControlTypeChanged();
-    /// The gain editors follow the servo control type, and stay disabled entirely
-    /// while the servo configuration is locked.
-    void updateServoGainEnables();
-    void updateServoTargetLabel();
+    /// The transient-form, trajectory-parameter and gain pages that belong to the
+    /// selected control type and transient form.
+    void updateServoPages();
+    /// The servo_cmd type the Control Type and Transient Form selections add up to.
+    ServoCommandType servoCommandType() const;
+    /// A servo register and the spin box on the Servo tab that edits it.
+    struct ServoSettingEditor
+    {
+        const char *name;
+        QDoubleSpinBox *spin;
+        /// Shown in the angle unit: rad/s and rad/s^2 on the wire.
+        bool angular;
+    };
+    QVector<ServoSettingEditor> servoSettingEditors() const;
+    /// Puts a servo register value read from the drive into its spin box.
+    void showServoSetting(const QString &name, const RegisterValue &value);
+    void showServoSettingsOf(const DeviceModel *device);
+    /// A Set button: writes the named servo registers from their spin boxes.
+    void writeServoSettings(const QList<const char *> &names);
     /// What a running trajectory freezes behind it. Serial only: there the settings
     /// are register writes that would land while the drive is being fed set-points,
     /// and the register actions share the one line those set-points go down.
@@ -205,23 +230,49 @@ private:
     /// angular spans follow the display unit and the selected control type.
     void setSliderRange(QSlider *slider, QDoubleSpinBox *spin, double min, double max);
     void updateControlSliderRanges();
-    void onServoGainsSet();
-    void onTransientFormSet();
     void onMitTrajectoryChanged();
+    /// Switches the driver on or off through is_on (see registers::kIsOnEnabled).
+    void setDriverEnabled(quint8 nodeId, bool on);
     void onEmergencyStop();
+    /// Protective stop of one drive: its trajectory is stopped, a zero command takes
+    /// the torque and the gains off, and the driver is switched off (is_on = false).
+    void onSafetyTripped(quint8 nodeId, const QString &reason);
+    /// Refuses, with a reason, to start a drive past a safety limit; re-enables one
+    /// that the protective stop switched off and that is back within the limits.
+    bool prepareSafeStart(DeviceModel *device);
     void onSetpointsProduced(quint8 nodeId, const TrajectoryBatch &outputs);
     void onTrajectoryRunningChanged(quint8 nodeId, bool running);
     quint8 activeNodeId() const;
 
     // --- firmware ---
     void onOpenHexFile();
+    /// Local file: the Open button. Remote repo: the list of releases in its place.
+    void updateFirmwareSourceWidgets();
+    /// Asked on every press of Remote repo; the downloader gives up on a silent server.
+    void requestFirmwareReleases();
+    void onFirmwareReleasesListed(const QList<FirmwareRelease> &releases);
+    void onFirmwareReleasesFailed(const QString &error);
+    /// Placeholder and enabled state of the release list: loading, empty or ready.
+    void updateFirmwareVersionCombo();
+    /// Beta releases are shown in the theme's muted text colour.
+    void updateFirmwareVersionColors();
     void onFlashClicked();
+    /// CurFirmwareRevLabel: red for an outdated firmware, green for the latest, the
+    /// ordinary colour while either version is unknown.
+    void updateFirmwareRevLabel();
+    void setFaultIndicator(const QString &state);
     void startFlashing(const QString &hexPath);
+    /// CAN: the selected drive is reset into VBBoot and flashed through it.
+    void startCanFlashing(const QString &hexPath);
+    void onCanFlashFinished(bool ok, const QString &message);
+    /// The flashed drive is heartbeating again: its registers are read afresh.
+    void finishCanFlash();
     /// Serial: the flashed drive has restarted, so the link is reopened for the
     /// user instead of leaving them to press Disconnect and Connect.
     void reconnectAfterFlash();
     void tryFlashReconnect();
-    /// Flashing goes over SWD, so it needs no link; it is only refused over CAN.
+    /// Without a link or over Serial, flashing goes over SWD and needs nothing; over
+    /// CAN it goes through VBBoot and needs a drive selected in DeviceList.
     bool flashingAvailable() const;
     /// Read / Write / Set Origin: a drive, and no running trajectory locking them.
     void updateRegisterActionButtons();
@@ -256,6 +307,7 @@ private:
     PlotController *m_plot = nullptr;
     DeviceManager *m_devices = nullptr;
     ControlManager *m_control = nullptr;
+    SafetyMonitor *m_safety = nullptr;
     SerialService *m_serial = nullptr;
     CyphalService *m_cyphal = nullptr;
     DeviceLink *m_link = nullptr;
@@ -270,8 +322,14 @@ private:
     /// The emergency stop is closing the link; handleDisconnected() then tells the
     /// user to power-cycle the drive and connect again.
     bool m_emergencyStopPending = false;
+    /// CALIBRATE is running: the drive takes no commands until it reports back.
+    bool m_calibrating = false;
     FirmwareDownloader *m_downloader = nullptr;
     FirmwareFlasher *m_flasher = nullptr;
+    VbbootFlasher *m_vbboot = nullptr;
+    /// Drive being flashed over CAN, from the start of the transfer until it is
+    /// heartbeating with the new image (or the wait for it has given up).
+    std::optional<quint8> m_canFlashNode;
 
     AppConfig m_config;
     QString m_configPath;
@@ -287,6 +345,8 @@ private:
     QTimer m_pollTimer;     ///< periodic re-read of the status registers
 
     QString m_selectedHexPath;
+    /// Latest release tag, empty until the background lookup has answered.
+    QString m_latestFirmware;
     /// Port the drive was on when flashing started; empty when it was not on Serial.
     /// The link is dropped and reopened on it once the new image has been written.
     QString m_flashSerialPort;

@@ -21,6 +21,9 @@ private:
     std::mutex canard_mutex;
     int socketcan_handler;
     pollfd can_pollfd;
+    // VBDriveWizard patch: when the kernel took in the frame read_frame() returned
+    // last, in micros_64() terms (SO_TIMESTAMPNS, on the system clock as well).
+    uint64_t rx_timestamp_us = 0;
     LinuxCAN(Handler can_interface, size_t queue_len, const UtilityConfig& utilities);
 
     // VBDriveWizard patch: upstream called exit(1) from the constructor on any

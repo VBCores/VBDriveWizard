@@ -17,25 +17,27 @@ class SerialWorker;
 /// Serial implementation of DeviceLink.
 ///
 /// Owns the worker thread and turns the drive's line protocol into the asynchronous
-/// register API. Reply shapes, as the VBDrive firmware actually prints them:
+/// register API. Reply shapes, as the VBDrive 4.x firmware prints them:
 ///
 ///   read  `name:?`        -> `name:<value>`
-///   write `name:<value>`  -> `OK: name:<value>`
-///   `log_on` / `log_off`  -> `OK: log_on` / `OK: log_off`
-///   `STOP`                -> `OK: STOP`
-///   `CONFIG`              -> `CONFIG MODE ENABLED`            (also stops the motor)
-///   `SAVE`                -> [`Saved config`] `NOTE: ...`     (leaves CONFIG mode)
-///   `APPLY`               -> reboot; the boot banner ends with
+///   write `name:<value>`  -> `name:<value> OK`
+///   `log_on` / `log_off`  -> `log_on OK` / `log_off OK`
+///   `STOP`                -> `STOP OK`
+///   `CONFIG`              -> `CONFIG OK: mode enabled`        (also stops the motor)
+///   `SAVE`                -> `SAVE OK: config saved; ...`     (leaves CONFIG mode)
+///   `APPLY`               -> `APPLY OK`, then a reboot; the boot banner ends with
 ///                            `See HELP for available commands`
-///   `EXIT`                -> `CONFIG MODE EXITED, ...`, or nothing outside CONFIG
-///   any failure           -> `ERROR: <reason>`
+///   `EXIT`                -> `EXIT OK: changes discarded`, or nothing outside CONFIG
+///   `CALIBRATE`           -> `CALIBRATE OK`, `CALIBRATE <k>/<n> DONE` per stage,
+///                            then `CALIBRATE FINISH`
+///   any failure           -> `<command or register> ERROR: <reason>`
 ///
-/// Config registers are only writable in CONFIG mode, and SAVE only makes the servo
-/// gains take effect ("NOTE: config changes not applied! To apply, run APPLY or
-/// reset controller"), so a write batch that touches any of them is wrapped as
-/// CONFIG -> writes -> APPLY. APPLY persists the staged values and reboots the
-/// drive; the batch is complete once the boot banner has been seen, and
-/// driveRebooted() then tells MainWindow to re-enable the drive and re-read it.
+/// Config registers are only writable in CONFIG mode. SAVE persists them but only
+/// puts the servo settings into effect, so a write batch that touches any other
+/// config register is wrapped as CONFIG -> writes -> APPLY: APPLY persists the staged
+/// values and reboots the drive; the batch is complete once the boot banner has been
+/// seen, and driveRebooted() then tells MainWindow to re-enable the drive and re-read
+/// it. A batch made only of servo settings is closed with SAVE instead, no reboot.
 /// The USB port normally stays open across the reboot (the UART goes through a
 /// bridge); should it drop anyway, the service reopens it itself instead of
 /// reporting a lost link. CONFIG mode survives a port close and even a drive
@@ -68,20 +70,25 @@ public:
     /// closed and the worker thread joined.
     void shutdown();
 
-    /// Opens the port and runs the handshake: a `vbdrive_model` read must answer
-    /// before the drive counts as connected.
+    /// Opens the port and runs the handshake: `device` must read `vbdrive` before
+    /// the drive counts as connected.
     void connectToPort(const QString &portName, int baudRate);
 
     void readRegister(quint8 nodeId, const QString &name) override;
     void readRegisters(quint8 nodeId, const QStringList &names) override;
     void writeRegisters(quint8 nodeId, const RegisterWrites &writes) override;
-    void sendServoSetpoint(quint8 nodeId, ServoControlType type, float value) override;
+    void sendServoSetpoint(quint8 nodeId, ServoCommandType type, float value) override;
     void sendMitCommand(quint8 nodeId, float position, float velocity, float torque,
                         float positionGain, float velocityGain) override;
 
-    /// CALIBRATE, STOP and friends. `expectAck == false` fires and forgets, which is
-    /// what CALIBRATE needs: the drive stops answering for the whole procedure.
+    /// STOP and friends. `expectAck == false` fires and forgets.
     void sendBareCommand(const QString &command, bool expectAck = true, int timeoutMs = 1000);
+
+    /// Runs CALIBRATE. The drive processes nothing else until it is done, so the
+    /// queue is held meanwhile; progress and the outcome are reported by
+    /// calibrationProgress() and calibrationFinished().
+    void startCalibration();
+    bool isCalibrating() const { return m_calibrating; }
 
     /// Turns the 100 Hz `state:` log on or off.
     void setLogStreaming(bool enabled);
@@ -99,6 +106,12 @@ signals:
     /// APPLY finished and the drive is up again. It boots into RUNNING mode with the
     /// `state:` log off, so whoever needs telemetry or `is_on:1` has to ask again.
     void driveRebooted();
+    /// Stage `done` of `total` has been completed.
+    void calibrationProgress(int done, int total);
+    /// CALIBRATE is over: refused, failed, cut off by a lost port, or - `success` -
+    /// finished and saved by the drive. `stalled`: no stage report arrived within the
+    /// timeout, so whether the drive still works at all is unknown.
+    void calibrationFinished(bool success, bool stalled, const QString &error);
 
 private slots:
     void onWorkerPortOpened(bool success, const QString &message);
@@ -110,6 +123,7 @@ private slots:
     void onCloseTimeout();
     void onReopenTimeout();
     void onBootSettled();
+    void onCalibrationTimeout();
 
 private:
     enum class CommandKind
@@ -141,6 +155,8 @@ private:
         bool closesConfig = false;
         /// APPLY: the drive reboots; the ack is its boot banner.
         bool reboots = false;
+        /// CALIBRATE: its ack starts the calibration, see startCalibration().
+        bool calibrates = false;
     };
 
     struct Batch
@@ -154,9 +170,12 @@ private:
     int enqueue(PendingCommand command);
     void pumpQueue();
     void completeCurrent(bool success, const QString &error);
-    /// `ERROR: RUNNING mode required` answering a trajectory command that slipped
-    /// into CONFIG mode, rather than the command in flight.
-    bool isStrayRunningModeError(const QString &line, const PendingCommand &command) const;
+    /// Calibration lines; true when `line` was one.
+    bool handleCalibrationLine(const QString &line);
+    /// Leaves the calibration state. `resume` sends what queued up meanwhile; it is
+    /// false when the port is gone and there is nothing to resume.
+    void finishCalibration(bool success, const QString &error, bool resume = true,
+                           bool stalled = false);
     /// Books one finished command of its batch and reports the batch when done.
     void finishBatchCommand(const PendingCommand &command, bool success, const QString &error);
     /// Drops the batch's remaining commands and reports it as failed.
@@ -189,6 +208,9 @@ private:
     /// Holds the queue after the boot banner: the drive buffers, but does not
     /// answer, what arrives during the first second of its start-up.
     QTimer m_bootSettleTimer;
+    /// Calibration watchdog: restarted by every stage report, it fires when the drive
+    /// has gone quiet for longer than any stage takes.
+    QTimer m_calibrationTimer;
 
     int m_nextCommandId = 1;
     int m_nextBatchId = 1;
@@ -209,6 +231,8 @@ private:
     /// The port dropped during a reboot and is being reopened; the queue is kept
     /// and driveRebooted() is held back until the handshake answers again.
     bool m_reopening = false;
+    /// CALIBRATE was acknowledged and FINISH (or an error) has not arrived yet.
+    bool m_calibrating = false;
     QDeadlineTimer m_reopenDeadline;
     QString m_portName;
     int m_baudRate = 0;

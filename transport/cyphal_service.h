@@ -39,11 +39,16 @@ public:
     void connectToInterface(const QString &interfaceName, quint8 localNodeId);
     /// Restarts the discovery window on an already open interface (RefreshDeviceBtn).
     void rescan();
+    QString interfaceName() const { return m_interfaceName; }
+
+    /// Writes `bootloader = 1`, which resets the drive into VBBoot. Fire and forget:
+    /// the drive stops its CAN controller right away and may never answer.
+    void requestBootloader(quint8 nodeId);
 
     void readRegister(quint8 nodeId, const QString &name) override;
     void readRegisters(quint8 nodeId, const QStringList &names) override;
     void writeRegisters(quint8 nodeId, const RegisterWrites &writes) override;
-    void sendServoSetpoint(quint8 nodeId, ServoControlType type, float value) override;
+    void sendServoSetpoint(quint8 nodeId, ServoCommandType type, float value) override;
     void sendMitCommand(quint8 nodeId, float position, float velocity, float torque,
                         float positionGain, float velocityGain) override;
 
@@ -74,10 +79,23 @@ private:
         qint64 deadlineMs = 0;
         int batchId = 0;
         bool endsBatch = false;
+        /// The service's own `device` read that decides whether the node is a VBDrive.
+        bool identifies = false;
+    };
+
+    /// Whether a node sending heartbeats is a VBDrive. Only confirmed ones are
+    /// reported; other nodes on the bus are ignored.
+    enum class Identity
+    {
+        Unknown,
+        Checking,
+        VbDrive,
+        Foreign
     };
 
     struct NodeState
     {
+        Identity identity = Identity::Unknown;
         qint64 lastHeartbeatMs = 0;
         bool lost = false;
         QQueue<PendingAccess> queue;
@@ -89,6 +107,9 @@ private:
     void pump(quint8 nodeId);
     void finish(quint8 nodeId, bool ok, const RegisterValue &value, const QString &error);
     void failAllFor(quint8 nodeId, const QString &reason);
+    /// Reads `device` from a newly heard node; see Identity.
+    void identify(quint8 nodeId);
+    int confirmedDriveCount() const;
 
     CyphalBridge *m_bridge;
     QHash<quint8, NodeState> m_nodes;

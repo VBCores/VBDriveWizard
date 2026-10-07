@@ -6,6 +6,7 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/uio.h>
 #include <cerrno>
 #include <cstring>
 #include <iostream>
@@ -63,6 +64,20 @@ LinuxCAN::LinuxCAN(
         )) {
         fail("interface '" + can_interface + "' does not support CAN FD");
         return;
+    }
+
+    // VBDriveWizard patch: every frame carries the instant the kernel received it, so
+    // its timestamp does not depend on how soon the RX thread gets to it. Without the
+    // stamp read_frame() falls back to micros_64(), as before.
+    int enable_timestamps = 1;
+    if (setsockopt(
+            socketcan_handler,
+            SOL_SOCKET,
+            SO_TIMESTAMPNS,
+            &enable_timestamps,
+            sizeof(enable_timestamps)
+        )) {
+        std::cerr << "LinuxCAN: no kernel RX timestamps: " << std::strerror(errno) << std::endl;
     }
 
     // non-blocking CAN frame receiving => reading from this socket does not
@@ -131,7 +146,7 @@ void LinuxCAN::can_loop(bool no_tx) {
 
     if (status && (can_pollfd.revents & POLLIN)) {
         while(read_frame(&frame, static_cast<void*>(&raw_frame))) {
-            process_canard_rx(&frame);
+            process_canard_rx(&frame, rx_timestamp_us);
         }
     }
 
@@ -145,9 +160,26 @@ bool LinuxCAN::read_frame(CanardFrame* rxf, void* data) {
         return false;
     }
     auto rxframe = static_cast<struct canfd_frame*>(data);
-    uint8_t nbytes = read(socketcan_handler, rxframe, WIRE_MTU);
-    if (nbytes != WIRE_MTU) {  // only complete CAN frames are accepted
+    struct iovec iov {rxframe, WIRE_MTU};
+    alignas(struct cmsghdr) char control[CMSG_SPACE(sizeof(struct timespec))];
+    struct msghdr msg {};
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = control;
+    msg.msg_controllen = sizeof(control);
+    const ssize_t nbytes = recvmsg(socketcan_handler, &msg, 0);
+    if (nbytes != static_cast<ssize_t>(WIRE_MTU)) {  // only complete CAN frames are accepted
         return false;
+    }
+
+    rx_timestamp_us = utilities.micros_64();
+    for (struct cmsghdr* cmsg = CMSG_FIRSTHDR(&msg); cmsg != nullptr; cmsg = CMSG_NXTHDR(&msg, cmsg)) {
+        if (cmsg->cmsg_level == SOL_SOCKET && cmsg->cmsg_type == SCM_TIMESTAMPNS) {
+            struct timespec stamp {};
+            std::memcpy(&stamp, CMSG_DATA(cmsg), sizeof(stamp));
+            rx_timestamp_us = SEC_TO_US(static_cast<uint64_t>(stamp.tv_sec))
+                + NS_TO_US(static_cast<uint64_t>(stamp.tv_nsec));
+        }
     }
 
     auto msg_id = (uint32_t)rxframe->can_id;

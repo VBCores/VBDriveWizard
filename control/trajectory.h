@@ -16,7 +16,10 @@ struct TrajectoryParams
     TrajectoryForm form = TrajectoryForm::User;
 
     // --- Servo ---
+    /// The quantity driven, which is what the set-point is plotted against.
     ServoControlType servoType = ServoControlType::Position;
+    /// What goes on the wire: the quantity combined with the drive's input shaping.
+    ServoCommandType servoCommand = ServoCommandType::PositionDirect;
     /// Constant set-point for the User tab, in drive-native units.
     double userTarget = 0.0;
 
@@ -56,8 +59,8 @@ struct TrajectoryOutput
     /// Which fields are really commanded: MIT sends position, velocity and torque in
     /// every mit_cmd, Servo only the primary one.
     ControlProtocol protocol = ControlProtocol::Servo;
-    /// Host wall clock (hostTimeUs()) at the moment the command was produced, in the
-    /// same clock as TelemetrySample::t_us. The plot needs it to place the set-point
+    /// Host steady clock (hostTimeUs()) at the moment the command was produced, the
+    /// clock TelemetrySample::host_us is on. The plot needs it to place the set-point
     /// on the same time base as the measurement instead of at delivery time.
     qint64 t_us = 0;
 };

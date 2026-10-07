@@ -29,6 +29,9 @@ struct RegisterInfo
     RegisterQuantity quantity;
     /// Part of the CONFIGURATION group, i.e. covered by Read / Write / profile files.
     bool inConfigGroup;
+    /// Serial: SAVE already puts this register into effect, so a batch made only of
+    /// such registers needs no APPLY and no reboot. True for the servo settings.
+    bool liveOnSave = false;
 };
 
 /// The register set of the VBDrive firmware.
@@ -61,14 +64,23 @@ inline constexpr auto kAngleEncoder = "ang_enc";
 inline constexpr auto kNodeId = "node_id";
 inline constexpr auto kDataBaud = "data_baud";
 inline constexpr auto kNominalBaud = "nominal_baud";
+/// Writable device label (1-15 bytes), what the device list shows.
+inline constexpr auto kName = "name";
+/// Rated current limit, A. Persistent; it takes effect after a restart.
+inline constexpr auto kRatedMaxCurrent = "rated_max_current";
 
 // Runtime controls
 inline constexpr auto kIsOn = "is_on";
+/// TEMP: is_on is unreliable in the current hardware. While false the app never
+/// touches it, and disabling a drive falls back to a zero MIT command. Set to true
+/// to restore.
+inline constexpr bool kIsOnEnabled = false;
 inline constexpr auto kBootloader = "bootloader";
 
 // Read-only information
 inline constexpr auto kCmdErrors = "cmd_errors";
-inline constexpr auto kModel = "vbdrive_model";
+/// Fixed device type; `vbdrive` is what identifies a VBDrive on either transport.
+inline constexpr auto kDevice = "device";
 inline constexpr auto kFirmwareRev = "firmware_rev";
 inline constexpr auto kBusVoltage = "bus_voltage";
 inline constexpr auto kBusCurrent = "bus_current";
@@ -84,8 +96,14 @@ inline constexpr auto kServoPosI = "servo_pos_i_gain";
 inline constexpr auto kServoPosD = "servo_pos_d_gain";
 inline constexpr auto kServoVelP = "servo_vel_p_gain";
 inline constexpr auto kServoVelI = "servo_vel_i_gain";
-inline constexpr auto kServoTransientForm = "servo_tr_form";
-inline constexpr auto kServoTransientVel = "servo_tr_vel";
+inline constexpr auto kServoInputBandwidth = "servo_control_input_bandwith";  // sic
+inline constexpr auto kServoVelLimit = "servo_control_vel_limit";
+inline constexpr auto kServoAccelLimit = "servo_control_accel_limit";
+inline constexpr auto kServoDecelLimit = "servo_control_decel_limit";
+inline constexpr auto kServoVelRampRate = "servo_control_vel_ramp_rate";
+
+/// The value `device` reads on a VBDrive.
+inline constexpr auto kDeviceVbdrive = "vbdrive";
 
 /// `ang_enc` encoding.
 enum class EncoderType
@@ -128,11 +146,13 @@ public:
     static QStringList configGroupNames();
 
     /// Registers persisted to a YAML profile: everything writable that survives a
-    /// reboot. Excludes the runtime-only `is_on` and `bootloader`.
+    /// reboot. Excludes the runtime-only `is_on` and `bootloader`, and `name`: a
+    /// profile is a set of tuning values and must not rename the drive it is loaded into.
     static QStringList profileNames();
 
     static bool isWritable(const QString &name);
     static bool requiresConfigMode(const QString &name);
+    static bool isLiveOnSave(const QString &name);
 };
 
 #endif // CORE_REGISTER_CATALOG_H

@@ -2,6 +2,10 @@
 #include "cyphal/interfaces.h"
 
 void AbstractCANProvider::process_canard_rx(CanardFrame* frame) {
+    process_canard_rx(frame, utilities.micros_64());
+}
+
+void AbstractCANProvider::process_canard_rx(CanardFrame* frame, uint64_t timestamp_usec) {
     CanardRxTransfer transfer = {};
     transfer.payload = nullptr;
 
@@ -10,7 +14,7 @@ void AbstractCANProvider::process_canard_rx(CanardFrame* frame) {
     lock_canard();
     const int8_t accept_result = canardRxAccept(
         &canard,
-        utilities.micros_64(),
+        timestamp_usec,
         frame,
         0,
         &transfer,

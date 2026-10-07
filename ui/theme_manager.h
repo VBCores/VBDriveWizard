@@ -45,6 +45,8 @@ public:
 
     static QColor restoreIconColor(const QString &theme);
     static QColor restoreIconHoverColor(const QString &theme);
+    /// Text that is there but stays in the background, e.g. beta firmware releases.
+    static QColor mutedTextColor(const QString &theme);
 
     /// The VBCORES logo, `width` logical pixels wide, for a screen of the given
     /// device pixel ratio. The light theme shows the brand gradient; the dark one a

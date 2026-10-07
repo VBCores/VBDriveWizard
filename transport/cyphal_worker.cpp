@@ -15,6 +15,7 @@
 
 #include <QMutexLocker>
 
+#include <chrono>
 #include <cstring>
 
 namespace {
@@ -31,6 +32,17 @@ constexpr std::uint8_t kRegisterStringTag = 1U;
 constexpr std::uint64_t kQueueLength = 200;
 /// Cap on buffered telemetry per drive, so a stalled GUI cannot grow it without bound.
 constexpr int kMaxBufferedSamples = 4000;
+
+/// A system clock instant in microseconds, as the kernel stamps received frames, on
+/// the steady clock of hostTimeUs() instead. The two differ by a constant unless the
+/// system clock is stepped, so the difference is taken anew for each sample.
+qint64 steadyFromSystemUs(std::uint64_t systemUs)
+{
+    using namespace std::chrono;
+    const qint64 systemNow =
+            duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
+    return hostTimeUs() - (systemNow - static_cast<qint64>(systemUs));
+}
 
 void setName(uavcan_register_Name_1_0 &out, const QString &name)
 {
@@ -183,9 +195,12 @@ void CyphalBridge::subscribeAll()
 
     m_interface->subscribe(kStatePort, [this](const FocState &state, CanardRxTransfer *transfer) {
         TelemetrySample sample;
+        // The transfer carries the kernel's reception stamp (LinuxCAN), which the plot
+        // maps the drive's clock onto.
+        sample.host_us = steadyFromSystemUs(transfer->timestamp_usec);
         sample.t_us = state.timestamp.microsecond != 0
                 ? static_cast<qint64>(state.timestamp.microsecond)
-                : hostTimeUs();
+                : sample.host_us;
         sample.position = state.pos.radian;
         sample.velocity = state.vel.radian_per_second;
         sample.torque = state._torq.newton_meter;
@@ -225,14 +240,15 @@ int CyphalBridge::sendAccessRequest(quint8 nodeId, const QString &name,
     return used;
 }
 
-void CyphalBridge::sendServo(quint8 nodeId, quint8 setPointType, float value)
+void CyphalBridge::sendServo(quint8 nodeId, quint8 controlType, float value)
 {
     if (!m_interface || nodeId >= m_servoTransferId.size())
         return;
 
     FocServo command{};
-    command.set_point_type = setPointType;
+    command.control_type = controlType;
     command.set_point_value = value;
+    command.command_idx.count = 0;  // no index: the drive deduplicates by itself
 
     CanardTransferID transferId = m_servoTransferId[nodeId];
     m_interface->send_msg(&command, static_cast<CanardPortID>(kServoPortBase + nodeId),

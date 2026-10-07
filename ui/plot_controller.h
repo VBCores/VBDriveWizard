@@ -5,7 +5,6 @@
 #include "ui/plot_export.h"
 #include "ui/plot_measurement.h"
 
-#include <QElapsedTimer>
 #include <QObject>
 #include <QTimer>
 #include <QVector>
@@ -92,6 +91,15 @@ private:
         double value = 0.0;  ///< drive-native units
     };
 
+    /// The smallest delivery delay (host_us - t_us) of one block of drive time, and the
+    /// drive time of the sample it was seen on; see appendTelemetry().
+    struct DelayAnchor
+    {
+        qint64 block = 0;
+        qint64 driveUs = 0;
+        qint64 delayUs = 0;
+    };
+
     /// A telemetry sample whose set-point has not been reported yet.
     struct Unpaired
     {
@@ -111,9 +119,12 @@ private:
     void applyPens(const QString &theme);
     /// Seconds on the plot clock, the key for anything sampled right now.
     double nowKey() const;
-    /// Maps a sample clock (microseconds) onto the plot clock, keeping `offset` as
-    /// the running estimate of that stream's delivery delay. See appendTelemetry().
-    double mapToPlotClock(qint64 t_us, double *offset, bool *haveOffset) const;
+    /// The plot-clock key of a hostTimeUs() instant.
+    double hostKey(qint64 hostUs) const;
+    /// Takes one telemetry sample into the lower envelope of the delivery delay.
+    void addDelaySample(qint64 driveUs, qint64 hostUs);
+    /// Delivery delay to add to a drive timestamp to put it on the host's clock.
+    qint64 delayAt(qint64 driveUs) const;
     /// Set-point at `key`, linearly interpolated between the two reports around it,
     /// held flat outside the reported range. False when nothing has been reported.
     bool setpointAt(double key, double *value) const;
@@ -148,15 +159,18 @@ private:
 
     QVector<Pending> m_pending;
     QTimer m_drawTimer;
-    QElapsedTimer m_clock;
+    /// hostTimeUs() at which the plot clock reads zero.
+    qint64 m_clockStartUs = 0;
     double m_lastKey = 0.0;
     bool m_haveLastKey = false;
     int m_ticksSinceRescale = 0;
     int m_rescaleIntervalTicks = 15;
 
-    /// Plot-clock seconds minus sample-clock seconds; see appendTelemetry().
-    double m_telemetryOffset = 0.0;
-    bool m_haveTelemetryOffset = false;
+    /// The last few blocks of the delay's lower envelope, oldest first; the last one
+    /// is the block still being filled. See appendTelemetry().
+    QVector<DelayAnchor> m_anchors;
+    qint64 m_anchorOriginUs = 0;
+    qint64 m_lastDriveUs = 0;
 
     /// Recent set-point reports, keyed on the plot clock. The set-point trace is
     /// drawn at the telemetry keys, so each measurement is paired with the set-point
@@ -170,8 +184,6 @@ private:
     QVector<Unpaired> m_unpaired;
     /// Set-points for the signal on screen are still being reported; see endSetpoints().
     bool m_setpointStreamOpen = false;
-    double m_setpointOffset = 0.0;
-    bool m_haveSetpointOffset = false;
 };
 
 #endif // VBDW_UI_PLOT_CONTROLLER_H

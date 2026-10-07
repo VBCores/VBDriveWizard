@@ -101,11 +101,13 @@ void TrajectoryWorker::run()
         if (!m_paused.load(std::memory_order_relaxed)) {
             const TrajectoryParams params = currentParams();
             TrajectoryOutput output = generator.step(params, dt);
-            output.t_us = hostTimeUs();
+            output.t_us = std::chrono::duration_cast<std::chrono::microseconds>(
+                                  stepTime.time_since_epoch())
+                                  .count();
 
             if (m_link) {
                 if (params.protocol == ControlProtocol::Servo) {
-                    m_link->sendServoSetpoint(m_nodeId, output.primaryType,
+                    m_link->sendServoSetpoint(m_nodeId, params.servoCommand,
                                               static_cast<float>(output.primary));
                 } else {
                     m_link->sendMitCommand(m_nodeId, static_cast<float>(output.position),

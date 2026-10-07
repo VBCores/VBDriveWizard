@@ -1,5 +1,6 @@
 #include "transport/cyphal_service.h"
 
+#include "core/register_catalog.h"
 #include "transport/cyphal_worker.h"
 
 namespace {
@@ -81,26 +82,63 @@ void CyphalService::closeLink()
         emit linkClosed();
 }
 
+void CyphalService::requestBootloader(quint8 nodeId)
+{
+    // Past the queue: an answer is not waited for, so a lost one is no error.
+    m_bridge->sendAccessRequest(nodeId, QString::fromLatin1(registers::kBootloader),
+                                RegisterValue::fromBool(true));
+}
+
 // --- discovery and liveness ---------------------------------------------------------
 
 void CyphalService::onHeartbeat(quint8 nodeId)
 {
     NodeState &node = m_nodes[nodeId];
-    const bool isNew = node.lastHeartbeatMs == 0;
+    if (node.identity == Identity::Foreign)
+        return;
     const bool wasLost = node.lost;
     node.lastHeartbeatMs = m_clock.elapsed();
     node.lost = false;
 
-    if (isNew)
-        emit deviceDiscovered(nodeId);
-    else if (wasLost)
-        emit deviceReappeared(nodeId);
+    switch (node.identity) {
+    case Identity::Unknown:
+        identify(nodeId);  // reported once `device` has answered
+        break;
+    case Identity::VbDrive:
+        if (wasLost)
+            emit deviceReappeared(nodeId);
+        break;
+    case Identity::Checking:
+    case Identity::Foreign:
+        break;
+    }
+}
+
+void CyphalService::identify(quint8 nodeId)
+{
+    m_nodes[nodeId].identity = Identity::Checking;
+    PendingAccess request;
+    request.nodeId = nodeId;
+    request.name = QString::fromLatin1(registers::kDevice);
+    request.identifies = true;
+    enqueue(request);
+}
+
+int CyphalService::confirmedDriveCount() const
+{
+    int count = 0;
+    for (const NodeState &node : m_nodes) {
+        if (node.identity == Identity::VbDrive)
+            ++count;
+    }
+    return count;
 }
 
 void CyphalService::onDiscoveryFinished()
 {
     m_discovering = false;
-    if (m_nodes.isEmpty()) {
+    const int drives = confirmedDriveCount();
+    if (drives == 0) {
         emit connectionResult(false,
                               tr("No VBDrive answered on %1 within %2 seconds.")
                                       .arg(m_interfaceName)
@@ -108,7 +146,7 @@ void CyphalService::onDiscoveryFinished()
         return;
     }
     emit connectionResult(true,
-                          tr("Found %n actuator(s) on %1.", nullptr, m_nodes.size())
+                          tr("Found %n actuator(s) on %1.", nullptr, drives)
                                   .arg(m_interfaceName));
 }
 
@@ -129,7 +167,7 @@ void CyphalService::onMaintenanceTick()
 
         // Heartbeat liveness. The drive is kept in the map so a later heartbeat can
         // revive it without losing the queued state.
-        if (!node.lost && node.lastHeartbeatMs != 0
+        if (node.identity == Identity::VbDrive && !node.lost && node.lastHeartbeatMs != 0
             && now - node.lastHeartbeatMs > kHeartbeatTimeoutMs) {
             node.lost = true;
             failAllFor(nodeId, tr("The actuator stopped answering."));
@@ -198,7 +236,9 @@ void CyphalService::onAccessResponse(quint8 nodeId, int transferId, const Regist
         return;
     }
 
-    if (value.isEmpty()) {
+    // Any answer settles a node's identity; an empty one means a node without
+    // `device`, which is not a VBDrive either.
+    if (value.isEmpty() && !request.identifies) {
         finish(nodeId, false, value,
                tr("Register '%1' is not available on this actuator.").arg(request.name));
         return;
@@ -215,6 +255,20 @@ void CyphalService::finish(quint8 nodeId, bool ok, const RegisterValue &value,
 
     const PendingAccess request = *node.inFlight;
     node.inFlight.reset();
+
+    if (request.identifies) {
+        // A timeout leaves the node unknown: the next heartbeat asks again.
+        if (!ok)
+            node.identity = Identity::Unknown;
+        else if (value.toString() == QLatin1String(registers::kDeviceVbdrive))
+            node.identity = Identity::VbDrive;
+        else
+            node.identity = Identity::Foreign;
+        if (node.identity == Identity::VbDrive)
+            emit deviceDiscovered(nodeId);
+        pump(nodeId);
+        return;
+    }
 
     if (request.isWrite) {
         emit registerWritten(nodeId, request.name, ok, error);
@@ -247,6 +301,10 @@ void CyphalService::failAllFor(quint8 nodeId, const QString &reason)
     bool hadBatch = !node.batchFailures.isEmpty();
 
     const auto failOne = [&](const PendingAccess &request) {
+        if (request.identifies) {
+            node.identity = Identity::Unknown;
+            return;
+        }
         if (request.isWrite) {
             emit registerWritten(nodeId, request.name, false, reason);
             hadBatch = true;
@@ -310,7 +368,7 @@ void CyphalService::writeRegisters(quint8 nodeId, const RegisterWrites &writes)
     }
 }
 
-void CyphalService::sendServoSetpoint(quint8 nodeId, ServoControlType type, float value)
+void CyphalService::sendServoSetpoint(quint8 nodeId, ServoCommandType type, float value)
 {
     m_bridge->sendServo(nodeId, static_cast<quint8>(type), value);
 }
