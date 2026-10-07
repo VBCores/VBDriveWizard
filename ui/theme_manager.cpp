@@ -730,6 +730,24 @@ QColor ThemeManager::secondaryColor(const QString &theme)
     return color(tokens(theme).secondary);
 }
 
+QColor ThemeManager::plotPanelColor(const QString &theme)
+{
+    QColor back = color(tokens(theme).card);
+    back.setAlpha(220);
+    return back;
+}
+
+QColor ThemeManager::plotPanelBorderColor(const QString &theme)
+{
+    return color(tokens(theme).border);
+}
+
+QColor ThemeManager::plotSplitterColor(const QString &theme, bool active)
+{
+    // A step above the grid, which the panel border matches on light.
+    return color(active ? tokens(theme).accentMark : tokens(theme).inputBorder);
+}
+
 QColor ThemeManager::restoreIconColor(const QString &theme)
 {
     return color(tokens(theme).textMuted);
@@ -771,7 +789,6 @@ void ThemeManager::applyPlotTheme(QCustomPlot *plot, const QString &theme, int f
     if (!plot)
         return;
 
-    const Tokens &t = tokens(theme);
     const QColor background = backgroundColor(theme);
     const QColor foreground = foregroundColor(theme);
     const QColor grid = gridColor(theme);
@@ -783,19 +800,32 @@ void ThemeManager::applyPlotTheme(QCustomPlot *plot, const QString &theme, int f
 
     plot->setBackground(background);
 
-    if (plot->legend) {
-        QColor legendBack = color(t.card);
-        legendBack.setAlpha(220);
-        plot->legend->setBrush(QBrush(legendBack));
-        plot->legend->setBorderPen(QPen(color(t.border)));
-        plot->legend->setTextColor(foreground);
-        QFont legendFont = plot->legend->font();
-        legendFont.setPointSize(fontSize);
-        plot->legend->setFont(legendFont);
-    }
-
     QFont axisFont = plot->font();
     axisFont.setPointSize(fontSize);
+
+    // Legends and titles may sit anywhere in the layout, not only plot->legend.
+    QList<QCPLayoutElement *> elements = plot->plotLayout()->elements(true);
+    if (plot->legend && !elements.contains(plot->legend))
+        elements << plot->legend;
+    for (QCPLayoutElement *element : std::as_const(elements)) {
+        if (auto *legend = qobject_cast<QCPLegend *>(element)) {
+            legend->setBrush(QBrush(plotPanelColor(theme)));
+            legend->setBorderPen(QPen(plotPanelBorderColor(theme)));
+            legend->setTextColor(foreground);
+            QFont legendFont = legend->font();
+            legendFont.setPointSize(fontSize);
+            legend->setFont(legendFont);
+            for (int i = 0; i < legend->itemCount(); ++i) {
+                legend->item(i)->setTextColor(foreground);
+                legend->item(i)->setFont(legendFont);
+            }
+        } else if (auto *text = qobject_cast<QCPTextElement *>(element)) {
+            text->setTextColor(foreground);
+            QFont textFont = text->font();
+            textFont.setPointSize(fontSize);
+            text->setFont(textFont);
+        }
+    }
 
     for (int r = 0; r < plot->axisRectCount(); ++r) {
         const QList<QCPAxis *> axes = plot->axisRect(r)->axes();

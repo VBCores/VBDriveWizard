@@ -37,45 +37,65 @@ PlotCrosshairTool::PlotCrosshairTool(QCustomPlot *plot, QObject *parent)
     }
     m_layer = m_plot->layer(layer);
     m_layer->setMode(QCPLayer::lmBuffered);
-
-    // Everything is placed in pixels: the cursor keeps its place on the screen while
-    // a live plot scrolls under it. Items are drawn in the order they are made, so
-    // the panel covers the line and the markers cover the panel.
-    m_line = new QCPItemStraightLine(m_plot);
-    m_line->setLayer(m_layer);
-    m_line->setSelectable(false);
-    m_line->point1->setType(QCPItemPosition::ptAbsolute);
-    m_line->point2->setType(QCPItemPosition::ptAbsolute);
-    m_line->setVisible(false);
-
-    m_panel = new QCPItemRect(m_plot);
-    m_panel->setLayer(m_layer);
-    m_panel->setSelectable(false);
-    m_panel->topLeft->setType(QCPItemPosition::ptAbsolute);
-    m_panel->bottomRight->setType(QCPItemPosition::ptAbsolute);
-    m_panel->setVisible(false);
-
-    m_timeName = addText(Qt::AlignLeft | Qt::AlignVCenter);
-    m_timeName->setText(tr("t, s"));
-    m_timeValue = addText(Qt::AlignRight | Qt::AlignVCenter);
-    applyTheme(QStringLiteral("dark"));
+    applyTheme(QStringLiteral("dark"), m_plot->font().pointSize());
 
     // QCustomPlot has no leaveEvent() of its own to hook.
     m_plot->installEventFilter(this);
     connect(m_plot, &QCustomPlot::mouseMove, this, &PlotCrosshairTool::onMouseMove);
     // Every replot, so the values follow new samples, panning and zooming. After the
-    // layout, as a resize moves the axis rect.
+    // layout, as a resize moves the axis rects.
     connect(m_plot, &QCustomPlot::afterLayout, this, &PlotCrosshairTool::updateItems);
+}
+
+PlotCrosshairTool::Section &PlotCrosshairTool::section(QCPAxisRect *rect)
+{
+    for (Section &existing : m_sections) {
+        if (existing.rect == rect)
+            return existing;
+    }
+
+    // Everything is placed in pixels: the cursor keeps its place on the screen while
+    // a live plot scrolls under it. Items are drawn in the order they are made, so
+    // the panel covers the line and the markers cover the panel.
+    Section added;
+    added.rect = rect;
+    added.line = new QCPItemStraightLine(m_plot);
+    added.line->setLayer(m_layer);
+    added.line->setSelectable(false);
+    added.line->setClipAxisRect(rect);
+    added.line->point1->setType(QCPItemPosition::ptAbsolute);
+    added.line->point2->setType(QCPItemPosition::ptAbsolute);
+    added.line->setVisible(false);
+
+    added.panel = new QCPItemRect(m_plot);
+    added.panel->setLayer(m_layer);
+    added.panel->setSelectable(false);
+    added.panel->setClipAxisRect(rect);
+    added.panel->topLeft->setType(QCPItemPosition::ptAbsolute);
+    added.panel->bottomRight->setType(QCPItemPosition::ptAbsolute);
+    added.panel->setVisible(false);
+
+    added.timeName = addText(rect, Qt::AlignLeft | Qt::AlignVCenter);
+    added.timeName->setText(tr("t, s"));
+    added.timeValue = addText(rect, Qt::AlignRight | Qt::AlignVCenter);
+
+    m_sections.push_back(added);
+    styleSection(m_sections.last());
+    return m_sections.last();
 }
 
 void PlotCrosshairTool::addGraph(QCPGraph *graph)
 {
+    QCPAxisRect *rect = graph->keyAxis()->axisRect();
+    Section &target = section(rect);
+
     Probe probe;
     probe.graph = graph;
 
     probe.tracer = new QCPItemTracer(m_plot);
     probe.tracer->setLayer(m_layer);
     probe.tracer->setSelectable(false);
+    probe.tracer->setClipAxisRect(rect);
     // The nearest real sample: an interpolated value is one the drive never sent.
     probe.tracer->setInterpolating(false);
     probe.tracer->setStyle(QCPItemTracer::tsCircle);
@@ -86,25 +106,27 @@ void PlotCrosshairTool::addGraph(QCPGraph *graph)
     probe.swatch = new QCPItemLine(m_plot);
     probe.swatch->setLayer(m_layer);
     probe.swatch->setSelectable(false);
+    probe.swatch->setClipAxisRect(rect);
     probe.swatch->start->setType(QCPItemPosition::ptAbsolute);
     probe.swatch->end->setType(QCPItemPosition::ptAbsolute);
     probe.swatch->setVisible(false);
 
-    probe.name = addText(Qt::AlignLeft | Qt::AlignVCenter);
-    probe.value = addText(Qt::AlignRight | Qt::AlignVCenter);
+    probe.name = addText(rect, Qt::AlignLeft | Qt::AlignVCenter);
+    probe.value = addText(rect, Qt::AlignRight | Qt::AlignVCenter);
 
-    m_probes.push_back(probe);
+    target.probes.push_back(probe);
+    styleSection(target);
 }
 
-QCPItemText *PlotCrosshairTool::addText(Qt::Alignment alignment)
+QCPItemText *PlotCrosshairTool::addText(QCPAxisRect *rect, Qt::Alignment alignment)
 {
     auto *text = new QCPItemText(m_plot);
     text->setLayer(m_layer);
     text->setSelectable(false);
+    text->setClipAxisRect(rect);
     text->position->setType(QCPItemPosition::ptAbsolute);
     text->setPositionAlignment(alignment);
     text->setPadding(QMargins());
-    text->setFont(m_font);
     text->setVisible(false);
     return text;
 }
@@ -115,32 +137,41 @@ void PlotCrosshairTool::setEnabled(bool enabled)
         return;
     m_enabled = enabled;
     // Without tracking QCustomPlot reports a mouse move only while a button is down.
-    m_plot->setMouseTracking(enabled);
+    // Turned on only: the plot may track the mouse for its own reasons too.
+    if (enabled)
+        m_plot->setMouseTracking(true);
     m_hovered = false;
     updateItems();
     m_layer->replot();
 }
 
-void PlotCrosshairTool::applyTheme(const QString &theme)
+void PlotCrosshairTool::applyTheme(const QString &theme, int fontSize)
 {
-    QColor line = ThemeManager::foregroundColor(theme);
-    line.setAlpha(160);
-    m_line->setPen(QPen(line, 1, Qt::DashLine));
-
-    const QCPLegend *legend = m_plot->legend;
-    m_panel->setBrush(legend->brush());
-    m_panel->setPen(legend->borderPen());
-    m_font = legend->font();
+    m_lineColor = ThemeManager::foregroundColor(theme);
+    m_lineColor.setAlpha(160);
+    m_panelBrush = QBrush(ThemeManager::plotPanelColor(theme));
+    m_panelPen = QPen(ThemeManager::plotPanelBorderColor(theme));
+    m_textColor = ThemeManager::foregroundColor(theme);
+    m_font = m_plot->font();
+    m_font.setPointSize(fontSize);
     m_markerFill = ThemeManager::backgroundColor(theme);
+    for (const Section &existing : std::as_const(m_sections))
+        styleSection(existing);
+}
 
-    QVector<QCPItemText *> texts = {m_timeName, m_timeValue};
-    for (const Probe &probe : std::as_const(m_probes)) {
+void PlotCrosshairTool::styleSection(const Section &section)
+{
+    section.line->setPen(QPen(m_lineColor, 1, Qt::DashLine));
+    section.panel->setBrush(m_panelBrush);
+    section.panel->setPen(m_panelPen);
+    QVector<QCPItemText *> texts = {section.timeName, section.timeValue};
+    for (const Probe &probe : section.probes) {
         probe.tracer->setBrush(m_markerFill);
         texts << probe.name << probe.value;
     }
     for (QCPItemText *text : std::as_const(texts)) {
         text->setFont(m_font);
-        text->setColor(legend->textColor());
+        text->setColor(m_textColor);
     }
 }
 
@@ -159,52 +190,71 @@ void PlotCrosshairTool::onMouseMove(QMouseEvent *event)
     if (!m_enabled)
         return;
     const QPointF pos = event->position();
-    m_hovered = m_plot->axisRect()->rect().contains(pos.toPoint());
+    m_hovered = isOverRects(pos);
     m_cursorX = pos.x();
     updateItems();
     m_layer->replot();
 }
 
-void PlotCrosshairTool::hideItems()
+bool PlotCrosshairTool::isOverRects(const QPointF &pos) const
 {
-    m_line->setVisible(false);
-    for (const Probe &probe : std::as_const(m_probes))
-        probe.tracer->setVisible(false);
-    hidePanel();
-}
-
-void PlotCrosshairTool::hidePanel()
-{
-    m_panel->setVisible(false);
-    m_timeName->setVisible(false);
-    m_timeValue->setVisible(false);
-    for (const Probe &probe : std::as_const(m_probes)) {
-        probe.swatch->setVisible(false);
-        probe.name->setVisible(false);
-        probe.value->setVisible(false);
+    bool any = false;
+    QRectF span;
+    for (const Section &existing : m_sections) {
+        if (!existing.rect->realVisibility())
+            continue;
+        const QRectF area = existing.rect->rect();
+        span = any ? span.united(area) : area;
+        any = true;
     }
-    m_valueWidth = 0.0;
+    return any && span.contains(pos);
 }
 
 void PlotCrosshairTool::updateItems()
 {
-    if (!m_enabled || !m_hovered) {
-        hideItems();
-        return;
+    for (Section &existing : m_sections) {
+        if (m_enabled && m_hovered && existing.rect->realVisibility())
+            updateSection(existing);
+        else
+            hideSection(existing);
     }
+}
 
-    const QRectF area = m_plot->axisRect()->rect();
-    m_line->point1->setCoords(m_cursorX, area.top());
-    m_line->point2->setCoords(m_cursorX, area.bottom());
-    m_line->setVisible(true);
+void PlotCrosshairTool::hideSection(Section &section)
+{
+    section.line->setVisible(false);
+    for (const Probe &probe : std::as_const(section.probes))
+        probe.tracer->setVisible(false);
+    hidePanel(section);
+}
+
+void PlotCrosshairTool::hidePanel(Section &section)
+{
+    section.panel->setVisible(false);
+    section.timeName->setVisible(false);
+    section.timeValue->setVisible(false);
+    for (const Probe &probe : std::as_const(section.probes)) {
+        probe.swatch->setVisible(false);
+        probe.name->setVisible(false);
+        probe.value->setVisible(false);
+    }
+    section.valueWidth = 0.0;
+}
+
+void PlotCrosshairTool::updateSection(Section &section)
+{
+    const QRectF area = section.rect->rect();
+    section.line->point1->setCoords(m_cursorX, area.top());
+    section.line->point2->setCoords(m_cursorX, area.bottom());
+    section.line->setVisible(true);
 
     // A row for every trace on show, with a dash for one the cursor is off the ends
     // of, so the panel keeps its rows as the cursor moves.
-    const double key = m_plot->xAxis->pixelToCoord(m_cursorX);
+    const double key = section.rect->axis(QCPAxis::atBottom)->pixelToCoord(m_cursorX);
     QVector<const Probe *> rows;
     bool haveSample = false;
     double sampleKey = 0.0;
-    for (const Probe &probe : std::as_const(m_probes)) {
+    for (const Probe &probe : std::as_const(section.probes)) {
         const bool shown = probe.graph->visible();
         // Off the ends of a trace the tracer would stick to its first or last sample.
         const auto data = probe.graph->data();
@@ -227,37 +277,39 @@ void PlotCrosshairTool::updateItems()
         probe.tracer->updatePosition();
         probe.tracer->setPen(QPen(probe.graph->pen().color(), 2));
         probe.value->setText(number(probe.tracer->position->value()));
-        // The traces share their sample times, so the first one gives the time.
+        // The traces of one rect share their sample times, so the first one gives the time.
         if (!haveSample) {
             sampleKey = probe.tracer->position->key();
             haveSample = true;
         }
     }
     if (!haveSample) {
-        hidePanel();
+        hidePanel(section);
         return;
     }
-    m_timeValue->setText(number(sampleKey));
+    section.timeValue->setText(number(sampleKey));
 
     // Two columns: the names left-aligned after the swatches, the values
     // right-aligned against the edge, so the digits keep their places.
     const QFontMetricsF metrics(m_font);
-    double nameWidth = metrics.horizontalAdvance(m_timeName->text());
-    m_valueWidth = qMax(m_valueWidth, metrics.horizontalAdvance(m_timeValue->text()));
+    double nameWidth = metrics.horizontalAdvance(section.timeName->text());
+    section.valueWidth =
+            qMax(section.valueWidth, metrics.horizontalAdvance(section.timeValue->text()));
     for (const Probe *probe : std::as_const(rows)) {
         probe->name->setText(probe->graph->name());
         nameWidth = qMax(nameWidth, metrics.horizontalAdvance(probe->name->text()));
-        m_valueWidth = qMax(m_valueWidth, metrics.horizontalAdvance(probe->value->text()));
+        section.valueWidth =
+                qMax(section.valueWidth, metrics.horizontalAdvance(probe->value->text()));
     }
     const double rowHeight = metrics.height();
     const QSizeF size(2 * kPanelPadding + kSwatchWidth + kSwatchGap + nameWidth + kColumnGap
-                              + m_valueWidth,
+                              + section.valueWidth,
                       2 * kPanelPadding + (rows.size() + 1) * rowHeight);
     const QPointF bottomRight = area.bottomRight() - QPointF(kPanelMargin, kPanelMargin);
     const QPointF topLeft = bottomRight - QPointF(size.width(), size.height());
-    m_panel->topLeft->setPixelPosition(topLeft);
-    m_panel->bottomRight->setPixelPosition(bottomRight);
-    m_panel->setVisible(true);
+    section.panel->topLeft->setPixelPosition(topLeft);
+    section.panel->bottomRight->setPixelPosition(bottomRight);
+    section.panel->setVisible(true);
 
     const double swatchX = topLeft.x() + kPanelPadding;
     const double nameX = swatchX + kSwatchWidth + kSwatchGap;
@@ -272,7 +324,7 @@ void PlotCrosshairTool::updateItems()
         value->setVisible(true);
     };
 
-    place(m_timeName, m_timeValue, rowY(0));
+    place(section.timeName, section.timeValue, rowY(0));
     for (qsizetype i = 0; i < rows.size(); ++i) {
         const Probe *probe = rows[i];
         const double y = rowY(i + 1);
@@ -283,7 +335,7 @@ void PlotCrosshairTool::updateItems()
         probe->swatch->setVisible(true);
     }
     // A trace that is not on show keeps no row.
-    for (const Probe &probe : std::as_const(m_probes)) {
+    for (const Probe &probe : std::as_const(section.probes)) {
         if (!probe.graph->visible()) {
             probe.swatch->setVisible(false);
             probe.name->setVisible(false);

@@ -93,6 +93,8 @@ set(PROJECT_SOURCES
     ui/plot_measurement.h
     ui/plot_export.cpp
     ui/plot_export.h
+    ui/plot_icon_button.cpp
+    ui/plot_icon_button.h
     ui/preferences_dialog.cpp
     ui/preferences_dialog.h
     ui/preferences_dialog.ui

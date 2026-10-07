@@ -81,6 +81,11 @@ constexpr int kFlashReconnectRetryMs = 500;
 constexpr int kFlashReconnectWindowMs = 15000;
 /// VBBoot only takes a stored node_id in this range; otherwise it uses its default id.
 constexpr int kMaxVbbootNodeId = 127;
+/// Set Origin on Serial: the reboot that applies ang_off may bring the angle back off
+/// by whole rotor turns (see onSetOrigin()); this many corrections follow before the
+/// user is told to press it again. Below this angle (rad) the origin counts as set.
+constexpr int kOriginCorrections = 2;
+constexpr double kOriginTolerance = 0.01;
 
 /// FirmwareVersionComboBox item data: the release tag, its image and its beta mark.
 /// Qt::UserRole + 1 is kLongLabelRole, which the combo shares with the port combos.
@@ -426,6 +431,7 @@ void MainWindow::loadSettings()
 
     applyUiSettings();
     restoreControlState();
+    m_plot->setPanels(m_config.ui.plot_panels, m_config.ui.plot_panel_heights);
 
     // Restore the window geometry only if it still lands on an attached screen.
     const QRect stored(m_config.window.x, m_config.window.y, m_config.window.width,
@@ -467,6 +473,8 @@ void MainWindow::storeControlState()
     // Everything inside the CONTROL panel is stored by object name, so a widget added
     // to the panel later is remembered without touching this code.
     m_config.ui.angle_unit = QLatin1String(m_angleUnit == AngleUnit::Degrees ? "deg" : "rad");
+    m_config.ui.plot_panels = m_plot->panelSignals();
+    m_config.ui.plot_panel_heights = m_plot->panelHeights();
 
     QMap<QString, QString> &state = m_config.control;
     state.clear();
@@ -545,6 +553,7 @@ void MainWindow::applyUiSettings()
     setIcon(ui->RefreshDeviceBtn, QStringLiteral("refresh_white"));
     setIcon(ui->PreferencesBtn, QStringLiteral("settings_white"));
     setIcon(ui->crosshairPushButton, QStringLiteral("crosshair_white"));
+    setIcon(ui->LogBtn, QStringLiteral("log_white"));
     setIcon(ui->SavePltBtn, QStringLiteral("save_white"));
     setPlotLive(m_plot->isLiveMode());
     // A new font size changes how wide the captions are.
@@ -1250,6 +1259,7 @@ void MainWindow::handleDisconnected()
     m_devices->clear();
     m_awaitingReconnect.clear();
     m_writesInFlight.clear();
+    m_originChecks.clear();
     m_runningLocks.clear();
     m_safety->clear();
     m_driveNotCalibrated = false;
@@ -1348,10 +1358,14 @@ void MainWindow::updateUiState()
     // Always available, connection or not.
     updateSavePlotButton();
     ui->crosshairPushButton->setEnabled(true);
+    // The log is the drive's Serial text output, so it needs a Serial link; the plot
+    // is brought back so it is not left hidden behind a locked button.
+    if (!serial)
+        ui->LogBtn->setChecked(false);
+    ui->LogBtn->setEnabled(serial);
     // Disconnecting pauses the plot and nothing can resume it until a drive is
     // back, so the button only makes sense while connected.
     ui->PausePltBtn->setEnabled(connected);
-    ui->SignalComboBox->setEnabled(true);
     ui->UnitsComboBox->setEnabled(true);
     ui->PreferencesBtn->setEnabled(true);
 
@@ -1730,6 +1744,18 @@ void MainWindow::onSetOrigin()
     if (!m_link || !device)
         return;
 
+    writeOrigin(device);
+    // With the rotor encoder the drive knows the output angle only within one rotor
+    // turn (2*pi/gear) after a restart: the turns it counted are gone. On Serial
+    // ang_off is applied by APPLY, which restarts it, so the zero written here can
+    // come back off by whole rotor turns. The first sample after the restart tells,
+    // and the offset is corrected from it (checkOrigin()). CAN applies it live.
+    if (m_link->kind() == LinkKind::Serial)
+        m_originChecks.insert(device->nodeId(), {kOriginCorrections, 0});
+}
+
+void MainWindow::writeOrigin(DeviceModel *device)
+{
     // The drive reports angle as measured*ang_dir + ang_off, so making the current
     // reading read as zero means subtracting it from the existing offset.
     const double reported = device->telemetry().position;
@@ -1750,6 +1776,27 @@ void MainWindow::onSetOrigin()
     writeConfigToDrive(device, {{name, RegisterValue::fromReal32(newOffset)}});
     setStatusMessage(tr("Origin set; angle offset is now %1.")
                              .arg(toDisplayUnits(name, newOffset), 0, 'f', 4));
+}
+
+void MainWindow::checkOrigin(DeviceModel *device, const TelemetrySample &sample)
+{
+    const auto check = m_originChecks.find(device->nodeId());
+    if (check == m_originChecks.end() || check->rebootedUs == 0
+        || sample.host_us <= check->rebootedUs)
+        return;
+    if (std::abs(sample.position) <= kOriginTolerance) {
+        m_originChecks.erase(check);
+        return;
+    }
+    if (check->correctionsLeft == 0) {
+        m_originChecks.erase(check);
+        setStatusMessage(tr("The angle did not settle at zero after the restart; "
+                            "press Set Origin again."));
+        return;
+    }
+    --check->correctionsLeft;
+    check->rebootedUs = 0;
+    writeOrigin(device);
 }
 
 void MainWindow::onCalibrate()
@@ -1996,6 +2043,8 @@ void MainWindow::onWriteBatchFinished(quint8 nodeId, bool ok, const QString &err
 {
     const RegisterMap written = m_writesInFlight.take(nodeId);
     updateRegisterActionButtons();
+    if (!ok)
+        m_originChecks.remove(nodeId);
     if (ok) {
         // What was acknowledged is now what the drive runs with, so it is no
         // longer pending; on Serial the re-read after the reboot confirms it.
@@ -2039,6 +2088,7 @@ void MainWindow::onTelemetry(quint8 nodeId, const TelemetryBatch &samples)
     if (!device)
         return;
     device->setTelemetry(samples.last());
+    checkOrigin(device, samples.last());
 
     if (device == m_devices->selected())
         m_plot->appendTelemetry(samples);
@@ -2125,6 +2175,14 @@ void MainWindow::onDriveRebooted()
     if (!m_safety->isTripped(nodeId)) {
         setDriverEnabled(nodeId, true);
     }
+    // Only the angle the drive restarted with tells whether the origin held. A
+    // second restart before any sample arrived means the check went stale.
+    if (const auto check = m_originChecks.find(nodeId); check != m_originChecks.end()) {
+        if (check->rebootedUs == 0)
+            check->rebootedUs = hostTimeUs();
+        else
+            m_originChecks.erase(check);
+    }
     m_link->readRegisters(nodeId, RegisterCatalog::configGroupNames());
     m_link->readRegisters(nodeId, RegisterCatalog::profileNames());
     setStatusMessage(tr("The actuator restarted with the new settings."));
@@ -2180,16 +2238,8 @@ void MainWindow::onStatusTick()
     if (!device)
         return;
 
-    // Signals that are not carried by telemetry are fed from the polled registers.
-    switch (m_plot->currentSignal()) {
-    case PlotSignal::Temperature:
-    case PlotSignal::Current:
-    case PlotSignal::Encoder:
-        m_plot->appendStatus(device->status());
-        break;
-    default:
-        break;
-    }
+    // What telemetry does not carry is plotted from the polled registers.
+    m_plot->appendStatus(device->status());
 }
 
 void MainWindow::updateStatusLabels()
@@ -2197,7 +2247,6 @@ void MainWindow::updateStatusLabels()
     DeviceModel *device = m_devices->selected();
     if (!device) {
         const QString dash = QStringLiteral("--");
-        ui->StatusModelLbl->setText(dash);
         ui->StatusTempMcuLbl->setText(dash);
         ui->StatusTempStatorLbl->setText(dash);
         ui->StatusBusVoltageLbl->setText(dash);
@@ -2232,7 +2281,6 @@ void MainWindow::updateStatusLabels()
     status.fault = fault.toBool();
     device->setStatus(status);
 
-    ui->StatusModelLbl->setText(device->displayName());
     ui->StatusTempMcuLbl->setText(formatNumber(status.tempMcu, 1));
     ui->StatusTempStatorLbl->setText(formatNumber(status.tempStator, 1));
     ui->StatusBusVoltageLbl->setText(formatNumber(status.busVoltage, 2));
@@ -2887,8 +2935,8 @@ void MainWindow::onSetpointsProduced(quint8 nodeId, const TrajectoryBatch &outpu
     if (!m_control->isRunning(nodeId))
         return;
     // Native units: the plot scales the set-point together with the sample it is
-    // drawn against. Every channel that is commanded is reported; the plot keeps only
-    // the one on screen.
+    // drawn against. Every channel that is commanded is reported; the plot keeps a
+    // target trace for each.
     for (const TrajectoryOutput &output : outputs) {
         if (output.protocol == ControlProtocol::Mit) {
             m_plot->appendSetpoint(output.position, ServoControlType::Position, output.t_us);
@@ -2930,8 +2978,10 @@ void MainWindow::setupPlotUi()
 {
     m_plot->setupPlot(ui->PlotHost);
 
-    connect(ui->SignalComboBox, &QComboBox::currentIndexChanged, this,
-            &MainWindow::onSignalChanged);
+    connect(ui->LogBtn, &QPushButton::toggled, this, [this](bool checked) {
+        m_plot->setLogVisible(checked);
+        updateSavePlotButton();
+    });
     connect(ui->UnitsComboBox, &QComboBox::currentIndexChanged, this,
             &MainWindow::onUnitsChanged);
     connect(ui->PausePltBtn, &QPushButton::clicked, this, &MainWindow::onPausePlot);
@@ -2957,12 +3007,6 @@ void MainWindow::setupPlotUi()
                 });
         dialog.exec();
     });
-}
-
-void MainWindow::onSignalChanged()
-{
-    m_plot->setSignal(static_cast<PlotSignal>(ui->SignalComboBox->currentIndex()));
-    updateSavePlotButton();
 }
 
 void MainWindow::onUnitsChanged()
@@ -3087,7 +3131,7 @@ void MainWindow::onSavePlot()
 
 void MainWindow::updateSavePlotButton()
 {
-    ui->SavePltBtn->setEnabled(m_plot->currentSignal() != PlotSignal::Log);
+    ui->SavePltBtn->setEnabled(!m_plot->isLogVisible());
 }
 
 // --- firmware --------------------------------------------------------------------------------

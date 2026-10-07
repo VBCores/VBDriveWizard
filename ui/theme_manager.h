@@ -42,6 +42,12 @@ public:
     static QColor measuredColor(const QString &theme);
     static QColor setpointColor(const QString &theme);
     static QColor secondaryColor(const QString &theme);
+    /// Fill and border of the boxes floating over the plot: the legend and the
+    /// crosshair read-out.
+    static QColor plotPanelColor(const QString &theme);
+    static QColor plotPanelBorderColor(const QString &theme);
+    /// The draggable border between two plot panels, hovered or dragged when `active`.
+    static QColor plotSplitterColor(const QString &theme, bool active);
 
     static QColor restoreIconColor(const QString &theme);
     static QColor restoreIconHoverColor(const QString &theme);

@@ -25,7 +25,7 @@ enum class AngleUnit
     Degrees
 };
 
-/// Signal shown on the realtime plot. Only the selected one is ever sampled.
+/// Quantity shown in one panel of the realtime plot; None hides the panel.
 enum class PlotSignal
 {
     Position,
@@ -34,7 +34,7 @@ enum class PlotSignal
     Temperature,
     Current,
     Encoder,
-    Log
+    None
 };
 
 /// The quantity a set-point drives: what the plot draws it against, and which field
@@ -138,6 +138,10 @@ struct UiSettings
     QString openocd_interface = QStringLiteral("interface/stlink.cfg");
     QString openocd_target = QStringLiteral("target/stm32g4x.cfg");
     QString angle_unit = QStringLiteral("rad");  ///< "rad" or "deg"
+    /// The realtime plot's panels, top to bottom, and their relative heights.
+    QVector<PlotSignal> plot_panels = {PlotSignal::Position, PlotSignal::Velocity,
+                                       PlotSignal::Torque};
+    QVector<double> plot_panel_heights = {1.0, 1.0, 1.0};
 };
 
 /// Limits of the protective stop. A drive past either temperature, or reporting

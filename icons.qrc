@@ -10,6 +10,9 @@
         <file alias="settings_white.svg">icons/settings_white.svg</file>
         <file alias="crosshair_white.svg">icons/crosshair_white.svg</file>
         <file alias="save_white.svg">icons/save_white.svg</file>
+        <file alias="log_white.svg">icons/log_white.svg</file>
+        <file alias="panel_maximize_white.svg">icons/panel_maximize_white.svg</file>
+        <file alias="panel_restore_white.svg">icons/panel_restore_white.svg</file>
         <file alias="restore.svg">icons/restore.svg</file>
         <file alias="check_white.svg">icons/check_white.svg</file>
         <file alias="radio_dot_light.svg">icons/radio_dot_light.svg</file>

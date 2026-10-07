@@ -4,44 +4,54 @@
 #include <QObject>
 #include <QPointF>
 #include <QString>
+#include <QVector>
 
 QT_BEGIN_NAMESPACE
 class QLabel;
 class QMouseEvent;
 QT_END_NAMESPACE
 
+class QCPAxisRect;
 class QCPGraph;
 class QCustomPlot;
 
 /// Points picked on a plot, in display units. `points` is 0, 1 or 2; the second
-/// point is only meaningful when there are two.
+/// point is only meaningful when there are two. `rect1` and `rect2` are the indexes
+/// of the axis rects the points were picked on, in the order they were registered:
+/// the Y difference only means something within one rect.
 struct PlotMeasurement
 {
     int points = 0;
     double x1 = 0.0;
     double y1 = 0.0;
+    int rect1 = 0;
     double x2 = 0.0;
     double y2 = 0.0;
+    int rect2 = 0;
 };
 
 /// Picking points on a plot by clicking it: the first click marks a point, the
 /// second a pair, the third starts over. The points are drawn as markers with no
 /// line between them. A press and release far apart are a drag (pan or zoom
-/// rectangle), not a click.
+/// rectangle), not a click. Clicks count on the registered axis rects that are
+/// visible; the pair may span two of them.
 class PlotMeasurementTool : public QObject
 {
     Q_OBJECT
 
 public:
-    /// Adds the marker graph to `plot`; it stays out of the legend.
     explicit PlotMeasurementTool(QCustomPlot *plot, QObject *parent = nullptr);
+
+    /// Lets points be picked on `rect`, and adds its marker graph; it stays out of the
+    /// legend.
+    void addAxisRect(QCPAxisRect *rect);
 
     void setEnabled(bool enabled);
     bool isEnabled() const { return m_enabled; }
     /// Forgets the points, e.g. when the picture they were taken on changes.
     void clear();
-    /// The values on the plot were multiplied by `factor`; the points follow them.
-    void scaleY(double factor);
+    /// The values on `rect` were multiplied by `factor`; the points on it follow them.
+    void scaleY(QCPAxisRect *rect, double factor);
     void applyTheme(const QString &theme);
 
     const PlotMeasurement &measurement() const { return m_measurement; }
@@ -63,7 +73,10 @@ private:
     void redrawMarkers();
 
     QCustomPlot *m_plot = nullptr;
-    QCPGraph *m_markers = nullptr;
+    QVector<QCPAxisRect *> m_rects;
+    /// One marker graph per rect, in the same order.
+    QVector<QCPGraph *> m_markers;
+    QString m_theme = QStringLiteral("dark");
     bool m_enabled = false;
     PlotMeasurement m_measurement;
     /// Where the left button went down.

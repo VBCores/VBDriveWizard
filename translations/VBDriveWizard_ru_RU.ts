@@ -26,23 +26,23 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
 <context>
     <name>ConfigManager</name>
     <message>
-        <location filename="../ui/config_manager.cpp" line="208"/>
-        <location filename="../ui/config_manager.cpp" line="251"/>
+        <location filename="../ui/config_manager.cpp" line="283"/>
+        <location filename="../ui/config_manager.cpp" line="334"/>
         <source>Cannot write %1: %2</source>
         <translation>Не удалось записать %1: %2</translation>
     </message>
     <message>
-        <location filename="../ui/config_manager.cpp" line="262"/>
+        <location filename="../ui/config_manager.cpp" line="345"/>
         <source>Settings loaded.</source>
         <translation>Настройки загружены.</translation>
     </message>
     <message>
-        <location filename="../ui/config_manager.cpp" line="264"/>
+        <location filename="../ui/config_manager.cpp" line="347"/>
         <source>No settings file found; defaults are in use.</source>
         <translation>Файл настроек не найден; используются значения по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../ui/config_manager.cpp" line="267"/>
+        <location filename="../ui/config_manager.cpp" line="350"/>
         <source>Settings file could not be read; defaults are in use.</source>
         <translation>Не удалось прочитать файл настроек; используются значения по умолчанию.</translation>
     </message>
@@ -50,12 +50,12 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
 <context>
     <name>CyphalBridge</name>
     <message>
-        <location filename="../transport/cyphal_worker.cpp" line="139"/>
+        <location filename="../transport/cyphal_worker.cpp" line="151"/>
         <source>The Cyphal stack reported an internal error.</source>
         <translation>Внутренняя ошибка стека Cyphal.</translation>
     </message>
     <message>
-        <location filename="../transport/cyphal_worker.cpp" line="157"/>
+        <location filename="../transport/cyphal_worker.cpp" line="169"/>
         <source>Could not open CAN interface %1.</source>
         <translation>Не удалось открыть CAN-интерфейс %1.</translation>
     </message>
@@ -253,399 +253,389 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     <message>
         <location filename="../mainwindow.ui" line="14"/>
         <location filename="../mainwindow.ui" line="59"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2897"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2899"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2869"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2871"/>
         <source>VBDrive Wizard</source>
         <translation>VBDrive Wizard</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="95"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2900"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2872"/>
         <source>CONNECTION</source>
         <translation>ПОДКЛЮЧЕНИЕ</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="133"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2901"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2873"/>
         <source>Serial</source>
         <translation>Serial</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="209"/>
         <location filename="../mainwindow.ui" line="277"/>
-        <location filename="../mainwindow.cpp" line="1054"/>
-        <location filename="../mainwindow.cpp" line="1322"/>
-        <location filename="../mainwindow.cpp" line="1323"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2903"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2908"/>
+        <location filename="../mainwindow.cpp" line="1067"/>
+        <location filename="../mainwindow.cpp" line="1332"/>
+        <location filename="../mainwindow.cpp" line="1333"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2875"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2880"/>
         <source>Connect</source>
         <translation>Подключить</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="222"/>
         <location filename="../mainwindow.ui" line="293"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2905"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2910"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2877"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2882"/>
         <source>Refresh</source>
         <translation>Обновить</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="146"/>
         <location filename="../mainwindow.ui" line="705"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2902"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2952"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2874"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2924"/>
         <source>CAN</source>
         <translation>CAN</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="323"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2913"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2885"/>
         <source>DEVICES</source>
         <translation>УСТРОЙСТВА</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="422"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2918"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2890"/>
         <source>CONFIGURATION</source>
         <translation>КОНФИГУРАЦИЯ</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="447"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2937"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2909"/>
         <source>Basic</source>
         <translation>Основные</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="468"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2919"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2891"/>
         <source>Limits</source>
         <translation>Ограничения</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="621"/>
-        <location filename="../mainwindow.ui" line="4576"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2932"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3109"/>
+        <location filename="../mainwindow.ui" line="4469"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2904"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3066"/>
         <source>Angle</source>
         <translation>Угол</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="555"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2925"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2897"/>
         <source>min:</source>
-        <translation>мин:</translation>
+        <translation>мин</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="600"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2929"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2901"/>
         <source>max</source>
         <translation>макс</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="607"/>
-        <location filename="../mainwindow.ui" line="1716"/>
-        <location filename="../mainwindow.ui" line="4044"/>
-        <location filename="../mainwindow.ui" line="4240"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2930"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2995"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3081"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3087"/>
+        <location filename="../mainwindow.ui" line="4007"/>
+        <location filename="../mainwindow.ui" line="4203"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2902"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3048"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3054"/>
         <source>Velocity</source>
         <translation>Скорость</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="614"/>
-        <location filename="../mainwindow.ui" line="1721"/>
-        <location filename="../mainwindow.ui" line="2086"/>
-        <location filename="../mainwindow.ui" line="4074"/>
-        <location filename="../mainwindow.ui" line="4250"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2931"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2996"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3030"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3082"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3088"/>
+        <location filename="../mainwindow.ui" line="2031"/>
+        <location filename="../mainwindow.ui" line="4037"/>
+        <location filename="../mainwindow.ui" line="4213"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2903"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2997"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3049"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3055"/>
         <source>Torque</source>
         <translation>Момент</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="650"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2936"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2908"/>
         <source>Voltage</source>
         <translation>Напряжение</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="581"/>
         <location filename="../mainwindow.ui" line="647"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2927"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2934"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2899"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2906"/>
         <source>The firmware exposes no voltage limit register yet.</source>
         <translation>В прошивке пока нет регистра ограничения напряжения.</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="548"/>
-        <location filename="../mainwindow.ui" line="1731"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2924"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2998"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2896"/>
         <source>Current</source>
         <translation>Ток</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="541"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2923"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2895"/>
         <source>Direction</source>
         <translation>Направление</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="406"/>
         <location filename="../mainwindow.ui" line="978"/>
-        <location filename="../mainwindow.ui" line="4492"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2917"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2960"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3097"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2889"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2932"/>
         <source>Name</source>
         <translation>Имя</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="411"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2916"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2888"/>
         <source>CAN ID</source>
         <translation>CAN ID</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="512"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2920"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2892"/>
         <source>CCW</source>
         <translation>Против часовой</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="517"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2921"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2893"/>
         <source>CW</source>
         <translation>По часовой</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="729"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2938"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2910"/>
         <source>Data Baud Rate</source>
-        <translation>Скорость data-сегмента</translation>
+        <translation>Data Baud Rate</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="736"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2939"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2911"/>
         <source>Node ID</source>
         <translation>Node ID</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="763"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2940"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2912"/>
         <source>62.5 kHz</source>
         <translation>62.5 kHz</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="768"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2941"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2913"/>
         <source>125 kHz</source>
         <translation>125 kHz</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="773"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2942"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2914"/>
         <source>250 kHz</source>
         <translation>250 kHz</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="778"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2943"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2915"/>
         <source>500 kHz</source>
         <translation>500 kHz</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="783"/>
         <location filename="../mainwindow.ui" line="795"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2944"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2946"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2916"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2918"/>
         <source>1 MHz</source>
         <translation>1 MHz</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="800"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2947"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2919"/>
         <source>2 MHz</source>
         <translation>2 MHz</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="805"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2948"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2920"/>
         <source>4 MHz</source>
         <translation>4 MHz</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="810"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2949"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2921"/>
         <source>8 MHz</source>
         <translation>8 MHz</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="818"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2951"/>
-        <source>Nominal Baud Rate</source>
-        <translation>Номинальная скорость</translation>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2923"/>
+        <source>Nom Baud Rate</source>
+        <translation>Nom Baud Rate</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="869"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2971"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2943"/>
         <source>Advanced</source>
         <translation>Расширенные</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="926"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2953"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2925"/>
         <source>Gear Ratio</source>
         <translation>Передаточное число</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1001"/>
-        <location filename="../mainwindow.ui" line="1736"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2961"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2999"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2933"/>
         <source>Encoder</source>
         <translation>Энкодер</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1190"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2969"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2941"/>
         <source>Torque const</source>
         <translation>Постоянная момента</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1173"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2967"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2939"/>
         <source>Current Kp</source>
         <translation>Kp тока</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1166"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2966"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2938"/>
         <source>Current Ki</source>
         <translation>Ki тока</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1072"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2962"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2934"/>
         <source>Position Offset</source>
         <translation>Смещение положения</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1085"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2963"/>
-        <source>Main Filter Param A</source>
-        <translation>Коэф. A основного фильтра</translation>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2935"/>
+        <source>Main Filt Prm A</source>
+        <translation>Осн. фильтр коэф. A</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1180"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2968"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2940"/>
         <source>Filter Gain 1</source>
         <translation>Коэф. фильтра 1</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1143"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2965"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2937"/>
         <source>Filter Gain 2</source>
         <translation>Коэф. фильтра 2</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="949"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2955"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2927"/>
         <source>Filter Gain 3</source>
         <translation>Коэф. фильтра 3</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1111"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2964"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2936"/>
         <source>Current LPF Gain</source>
         <translation>Коэф. ФНЧ тока</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="960"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2956"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2928"/>
         <source>rotor</source>
         <translation>ротор</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="965"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2957"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2929"/>
         <source>shaft</source>
         <translation>вал</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="970"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2958"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2930"/>
         <source>external</source>
         <translation>внешний</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="942"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2954"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2926"/>
         <source>Current Kd</source>
         <translation>Kd тока</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1279"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2988"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2960"/>
         <source>System</source>
         <translation>Система</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1300"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2972"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2944"/>
         <source>Sensor</source>
         <translation>Датчик</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1327"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2973"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2945"/>
         <source>Calibrate</source>
         <translation>Калибровать</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1353"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2974"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2946"/>
         <source>Register Parameters</source>
         <translation>Параметры регистров</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1377"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2975"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2947"/>
         <source>Save to File...</source>
         <translation>Сохранить...</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1384"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2976"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2948"/>
         <source>Load from File...</source>
         <translation>Загрузить...</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1391"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2977"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2949"/>
         <source>Restore to Default</source>
         <translation>Значения по умолчанию</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1401"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2978"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2950"/>
         <source>Firmware</source>
         <translation>Прошивка</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1445"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2979"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2951"/>
         <source>Current Revision:</source>
         <translation>Текущая версия:</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1452"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2980"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2952"/>
         <source>0.0.1</source>
         <translation>0.0.1</translation>
     </message>
@@ -655,7 +645,7 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1526"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2983"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2955"/>
         <source>Open</source>
         <translation>Открыть</translation>
     </message>
@@ -665,25 +655,25 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1581"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2987"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2959"/>
         <source>Flash</source>
         <translation>Прошить</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1634"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2989"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2961"/>
         <source>Read</source>
         <translation>Прочитать</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1641"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2990"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2962"/>
         <source>Write</source>
         <translation>Записать</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1648"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2991"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2963"/>
         <source>Set Origin</source>
         <translation>Задать ноль</translation>
     </message>
@@ -693,61 +683,55 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1662"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2992"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2964"/>
         <source>REALTIME DATA</source>
         <translation>ДАННЫЕ В РЕАЛЬНОМ ВРЕМЕНИ</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1703"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2993"/>
         <source>Signal:</source>
-        <translation>Сигнал:</translation>
+        <translation type="vanished">Сигнал:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1711"/>
-        <location filename="../mainwindow.ui" line="4014"/>
-        <location filename="../mainwindow.ui" line="4227"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2994"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3080"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3086"/>
+        <location filename="../mainwindow.ui" line="3977"/>
+        <location filename="../mainwindow.ui" line="4190"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3047"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3053"/>
         <source>Position</source>
-        <translation>Положение</translation>
+        <translation>Угол</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1726"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2997"/>
         <source>Temperature</source>
-        <translation>Температура</translation>
+        <translation type="vanished">Температура</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1741"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3000"/>
+        <location filename="../mainwindow.ui" line="1766"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2978"/>
         <source>Log</source>
         <translation>Журнал</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1749"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3002"/>
+        <location filename="../mainwindow.ui" line="1789"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2981"/>
         <source>Units:</source>
         <translation>Единицы:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1757"/>
-        <location filename="../mainwindow.ui" line="4590"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3003"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3111"/>
+        <location filename="../mainwindow.ui" line="1797"/>
+        <location filename="../mainwindow.ui" line="4462"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2982"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3065"/>
         <source>rad</source>
         <translation>rad</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1762"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3004"/>
+        <location filename="../mainwindow.ui" line="1802"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2983"/>
         <source>deg</source>
         <translation>deg</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1783"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3007"/>
+        <location filename="../mainwindow.ui" line="1893"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2990"/>
         <source>Preferences</source>
         <translation>Настройки</translation>
     </message>
@@ -764,50 +748,46 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
         <translation type="vanished">Сохранить как PNG...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1908"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3022"/>
+        <location filename="../mainwindow.ui" line="1817"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2985"/>
         <source>X:</source>
         <translation>X:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1922"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3023"/>
+        <location filename="../mainwindow.ui" line="1831"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2986"/>
         <source>Y:</source>
         <translation>Y:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1943"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3024"/>
         <source>Dist X:</source>
-        <translation>ΔX:</translation>
+        <translation type="vanished">ΔX:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1957"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3025"/>
         <source>Dist Y:</source>
-        <translation>ΔY:</translation>
+        <translation type="vanished">ΔY:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1993"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3026"/>
+        <location filename="../mainwindow.ui" line="1938"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2993"/>
         <source>CONTROL</source>
         <translation>УПРАВЛЕНИЕ</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2021"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3073"/>
+        <location filename="../mainwindow.ui" line="1966"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3040"/>
         <source>Servo</source>
         <translation>Servo</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2042"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3027"/>
+        <location filename="../mainwindow.ui" line="1987"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2994"/>
         <source>Control Type</source>
         <translation>Режим</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2122"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3032"/>
+        <location filename="../mainwindow.ui" line="2067"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2999"/>
         <source>Transient Form</source>
         <translation>Переходный процесс</translation>
     </message>
@@ -820,50 +800,50 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
         <translation type="vanished">Полиномиальный</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2520"/>
-        <location filename="../mainwindow.ui" line="2695"/>
-        <location filename="../mainwindow.ui" line="2824"/>
-        <location filename="../mainwindow.ui" line="3038"/>
-        <location filename="../mainwindow.ui" line="3191"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3042"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3046"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3048"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3053"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3056"/>
+        <location filename="../mainwindow.ui" line="2477"/>
+        <location filename="../mainwindow.ui" line="2637"/>
+        <location filename="../mainwindow.ui" line="2781"/>
+        <location filename="../mainwindow.ui" line="3001"/>
+        <location filename="../mainwindow.ui" line="3154"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3009"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3013"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3015"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3020"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3023"/>
         <source>Set</source>
         <translation>Задать</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2840"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3049"/>
+        <location filename="../mainwindow.ui" line="2803"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3016"/>
         <source>Feedback Gains</source>
         <translation>Коэффициенты регулятора</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2903"/>
-        <location filename="../mainwindow.ui" line="3086"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3050"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3054"/>
+        <location filename="../mainwindow.ui" line="2866"/>
+        <location filename="../mainwindow.ui" line="3049"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3017"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3021"/>
         <source>Kp:</source>
         <translation>Kp:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2933"/>
-        <location filename="../mainwindow.ui" line="3116"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3051"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3055"/>
+        <location filename="../mainwindow.ui" line="2896"/>
+        <location filename="../mainwindow.ui" line="3079"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3018"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3022"/>
         <source>Ki:</source>
         <translation>Ki:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2963"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3052"/>
+        <location filename="../mainwindow.ui" line="2926"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3019"/>
         <source>Kd:</source>
         <translation>Kd:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3269"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3060"/>
+        <location filename="../mainwindow.ui" line="3232"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3027"/>
         <source>User</source>
         <translation>Вручную</translation>
     </message>
@@ -872,123 +852,123 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
         <translation type="vanished">Команда:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3382"/>
-        <location filename="../mainwindow.ui" line="3538"/>
-        <location filename="../mainwindow.ui" line="3694"/>
-        <location filename="../mainwindow.ui" line="3850"/>
-        <location filename="../mainwindow.ui" line="4452"/>
-        <location filename="../mainwindow.cpp" line="2853"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3059"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3063"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3067"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3071"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3094"/>
+        <location filename="../mainwindow.ui" line="3345"/>
+        <location filename="../mainwindow.ui" line="3501"/>
+        <location filename="../mainwindow.ui" line="3657"/>
+        <location filename="../mainwindow.ui" line="3813"/>
+        <location filename="../mainwindow.ui" line="4415"/>
+        <location filename="../mainwindow.cpp" line="2968"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3026"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3030"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3034"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3038"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3061"/>
         <source>Start</source>
         <translation>Пуск</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3392"/>
-        <location filename="../mainwindow.ui" line="3919"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3064"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3076"/>
+        <location filename="../mainwindow.ui" line="3355"/>
+        <location filename="../mainwindow.ui" line="3882"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3031"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3043"/>
         <source>Sin</source>
         <translation>Синус</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3433"/>
-        <location filename="../mainwindow.ui" line="3589"/>
-        <location filename="../mainwindow.ui" line="3745"/>
-        <location filename="../mainwindow.ui" line="4282"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3061"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3065"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3069"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3090"/>
+        <location filename="../mainwindow.ui" line="3396"/>
+        <location filename="../mainwindow.ui" line="3552"/>
+        <location filename="../mainwindow.ui" line="3708"/>
+        <location filename="../mainwindow.ui" line="4245"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3028"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3032"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3036"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3057"/>
         <source>Amplitude</source>
         <translation>Амплитуда</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3463"/>
-        <location filename="../mainwindow.ui" line="3619"/>
-        <location filename="../mainwindow.ui" line="3775"/>
-        <location filename="../mainwindow.ui" line="4312"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3062"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3066"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3070"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3091"/>
+        <location filename="../mainwindow.ui" line="3426"/>
+        <location filename="../mainwindow.ui" line="3582"/>
+        <location filename="../mainwindow.ui" line="3738"/>
+        <location filename="../mainwindow.ui" line="4275"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3029"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3033"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3037"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3058"/>
         <source>Frequency</source>
         <translation>Частота</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3548"/>
-        <location filename="../mainwindow.ui" line="3929"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3068"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3077"/>
+        <location filename="../mainwindow.ui" line="3511"/>
+        <location filename="../mainwindow.ui" line="3892"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3035"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3044"/>
         <source>Meander</source>
         <translation>Меандр</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3704"/>
-        <location filename="../mainwindow.ui" line="3939"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3072"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3078"/>
+        <location filename="../mainwindow.ui" line="3667"/>
+        <location filename="../mainwindow.ui" line="3902"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3039"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3045"/>
         <source>Triangle</source>
         <translation>Треуг.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3864"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3095"/>
+        <location filename="../mainwindow.ui" line="3827"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3062"/>
         <source>MIT</source>
         <translation>MIT</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3885"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3074"/>
+        <location filename="../mainwindow.ui" line="3848"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3041"/>
         <source>Trajectory</source>
         <translation>Траектория</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3906"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3075"/>
+        <location filename="../mainwindow.ui" line="3869"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3042"/>
         <source>Step</source>
         <translation>Ступень</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3987"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3079"/>
+        <location filename="../mainwindow.ui" line="3950"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3046"/>
         <source>Step Targets</source>
         <translation>Параметры ступени</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4104"/>
-        <location filename="../mainwindow.ui" line="4342"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3083"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3092"/>
+        <location filename="../mainwindow.ui" line="4067"/>
+        <location filename="../mainwindow.ui" line="4305"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3050"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3059"/>
         <source>Kp</source>
         <translation>Kp</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4134"/>
-        <location filename="../mainwindow.ui" line="4372"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3084"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3093"/>
+        <location filename="../mainwindow.ui" line="4097"/>
+        <location filename="../mainwindow.ui" line="4335"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3051"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3060"/>
         <source>Kd</source>
         <translation>Kd</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4186"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3085"/>
+        <location filename="../mainwindow.ui" line="4149"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3052"/>
         <source>Trajectory Targets</source>
         <translation>Параметры траектории</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4275"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3089"/>
+        <location filename="../mainwindow.ui" line="4238"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3056"/>
         <source>+derivative</source>
         <translation>+производная</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4468"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3096"/>
+        <location filename="../mainwindow.ui" line="4431"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3063"/>
         <source>STATUS</source>
         <translation>СОСТОЯНИЕ</translation>
     </message>
@@ -997,246 +977,254 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
         <translation type="vanished">Модель</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1825"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3011"/>
+        <location filename="../mainwindow.ui" line="1703"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2966"/>
         <source>Play/Pause Plot Data</source>
-        <translation type="unfinished"></translation>
+        <translation>Запустить/приостановить график</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1865"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3019"/>
+        <location filename="../mainwindow.ui" line="1743"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2974"/>
         <source>Crosshair</source>
         <translation>Курсор</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="1845"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3015"/>
+        <location filename="../mainwindow.ui" line="1723"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2970"/>
         <source>Save as...</source>
         <translation>Сохранить как...</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1267"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2970"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2942"/>
         <source>Current Limit</source>
         <translation>Ограничение тока</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1495"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2981"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2953"/>
         <source>Local file</source>
         <translation>Файл</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1508"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2982"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2954"/>
         <source>Remote repo</source>
         <translation>Репозиторий</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1539"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2985"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2957"/>
         <source>Firmware release to flash</source>
         <translation>Релиз прошивки для загрузки</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2063"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3028"/>
-        <source>Pos</source>
-        <translation>Пол.</translation>
+        <location filename="../mainwindow.ui" line="1852"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2987"/>
+        <source>ΔX:</source>
+        <translation>ΔX:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2076"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3029"/>
+        <location filename="../mainwindow.ui" line="1866"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2988"/>
+        <source>ΔY:</source>
+        <translation>ΔY:</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="2008"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2995"/>
+        <source>Pos</source>
+        <translation>Угол</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="2021"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2996"/>
         <source>Vel</source>
         <translation>Скор.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2096"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3031"/>
+        <location filename="../mainwindow.ui" line="2041"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="2998"/>
         <source>Voltage</source>
         <comment>servo segment</comment>
         <translation>Напр.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2165"/>
-        <location filename="../mainwindow.ui" line="2230"/>
-        <location filename="../mainwindow.ui" line="2285"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3033"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3036"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3038"/>
+        <location filename="../mainwindow.ui" line="2116"/>
+        <location filename="../mainwindow.ui" line="2181"/>
+        <location filename="../mainwindow.ui" line="2236"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3000"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3003"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3005"/>
         <source>Direct</source>
         <translation>Прямой</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2178"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3034"/>
+        <location filename="../mainwindow.ui" line="2129"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3001"/>
         <source>Filter</source>
         <translation>Фильтр</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2188"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3035"/>
+        <location filename="../mainwindow.ui" line="2139"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3002"/>
         <source>Polynomial</source>
         <comment>servo segment</comment>
         <translation>Полином</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2243"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3037"/>
+        <location filename="../mainwindow.ui" line="2194"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3004"/>
         <source>Ramp</source>
         <translation>Рампа</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2318"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3039"/>
+        <location filename="../mainwindow.ui" line="2275"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3006"/>
         <source>Trajectory Params</source>
         <translation>Параметры траектории</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2374"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3040"/>
+        <location filename="../mainwindow.ui" line="2331"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3007"/>
         <source>No Params</source>
         <translation>Нет параметров</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2468"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3041"/>
+        <location filename="../mainwindow.ui" line="2425"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3008"/>
         <source>Bandwidth</source>
         <translation>Полоса</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2581"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3043"/>
+        <location filename="../mainwindow.ui" line="2584"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3012"/>
         <source>Vel Limit</source>
         <translation>Макс. скорость</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2604"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3044"/>
+        <location filename="../mainwindow.ui" line="2564"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3011"/>
         <source>Accel Limit</source>
         <translation>Макс. ускорение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2627"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3045"/>
+        <location filename="../mainwindow.ui" line="2541"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3010"/>
         <source>Decel Limit</source>
         <translation>Макс. торможение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="2756"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3047"/>
+        <location filename="../mainwindow.ui" line="2713"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3014"/>
         <source>Rate</source>
         <translation>Темп</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3232"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3057"/>
+        <location filename="../mainwindow.ui" line="3195"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3024"/>
         <source>No Gains</source>
         <translation>Нет коэффициентов</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="3307"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3058"/>
+        <location filename="../mainwindow.ui" line="3270"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3025"/>
         <source>Target</source>
-        <translation>Задание</translation>
+        <translation>Уставка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4499"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3098"/>
         <source>M4310R10</source>
-        <translation>M4310R10</translation>
+        <translation type="vanished">M4310R10</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4513"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3100"/>
+        <location filename="../mainwindow.ui" line="4525"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3074"/>
         <source>Temperature MCU</source>
         <translation>Температура МК</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4520"/>
-        <location filename="../mainwindow.ui" line="4541"/>
-        <location filename="../mainwindow.ui" line="4562"/>
-        <location filename="../mainwindow.ui" line="4583"/>
-        <location filename="../mainwindow.ui" line="4604"/>
-        <location filename="../mainwindow.ui" line="4625"/>
-        <location filename="../mainwindow.ui" line="4646"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3101"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3104"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3107"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3110"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3113"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3116"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3119"/>
+        <location filename="../mainwindow.ui" line="4483"/>
+        <location filename="../mainwindow.ui" line="4518"/>
+        <location filename="../mainwindow.ui" line="4532"/>
+        <location filename="../mainwindow.ui" line="4539"/>
+        <location filename="../mainwindow.ui" line="4574"/>
+        <location filename="../mainwindow.ui" line="4581"/>
+        <location filename="../mainwindow.ui" line="4595"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3068"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3073"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3075"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3076"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3081"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3082"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3084"/>
         <source>TextLabel</source>
         <translation>TextLabel</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4527"/>
-        <location filename="../mainwindow.ui" line="4548"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3102"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3105"/>
+        <location filename="../mainwindow.ui" line="4504"/>
+        <location filename="../mainwindow.ui" line="4553"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3071"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3078"/>
         <source>C</source>
         <translation>C</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4534"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3103"/>
+        <location filename="../mainwindow.ui" line="4588"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3083"/>
         <source>Temperature Stator</source>
         <translation>Температура статора</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4555"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3106"/>
+        <location filename="../mainwindow.ui" line="4567"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3080"/>
         <source>Bus Voltage</source>
         <translation>Напряжение шины</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4569"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3108"/>
+        <location filename="../mainwindow.ui" line="4560"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3079"/>
         <source>V</source>
         <translation>V</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4597"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3112"/>
+        <location filename="../mainwindow.ui" line="4511"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3072"/>
         <source>Motor Encoder</source>
         <translation>Энкодер ротора</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4611"/>
-        <location filename="../mainwindow.ui" line="4632"/>
-        <location filename="../mainwindow.ui" line="4653"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3114"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3117"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3120"/>
+        <location filename="../mainwindow.ui" line="4476"/>
+        <location filename="../mainwindow.ui" line="4546"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3067"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3077"/>
         <source>-</source>
         <translation>-</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4618"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3115"/>
+        <location filename="../mainwindow.ui" line="4455"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3064"/>
         <source>Shaft Encoder</source>
         <translation>Энкодер вала</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4639"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3118"/>
+        <location filename="../mainwindow.ui" line="4497"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3070"/>
         <source>Fault</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="4699"/>
-        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3122"/>
+        <location filename="../mainwindow.ui" line="4641"/>
+        <location filename="../build/Desktop-Debug/VBDriveWizard_autogen/include/ui_mainwindow.h" line="3086"/>
         <source>STOP</source>
         <translation>СТОП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="288"/>
+        <location filename="../mainwindow.cpp" line="298"/>
         <source>Reconnect failed</source>
         <translation>Не удалось переподключиться</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="289"/>
+        <location filename="../mainwindow.cpp" line="299"/>
         <source>The actuator did not answer after flashing; connect again by hand.
 
 %1</source>
@@ -1245,35 +1233,35 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
 %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="294"/>
-        <location filename="../mainwindow.cpp" line="306"/>
-        <location filename="../mainwindow.cpp" line="1171"/>
-        <location filename="../mainwindow.cpp" line="1203"/>
+        <location filename="../mainwindow.cpp" line="304"/>
+        <location filename="../mainwindow.cpp" line="316"/>
+        <location filename="../mainwindow.cpp" line="1182"/>
+        <location filename="../mainwindow.cpp" line="1212"/>
         <source>Connection failed</source>
         <translation>Не удалось подключиться</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="333"/>
+        <location filename="../mainwindow.cpp" line="343"/>
         <source>Firmware download failed</source>
         <translation>Не удалось загрузить прошивку</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="346"/>
+        <location filename="../mainwindow.cpp" line="356"/>
         <source>Downloaded firmware %1.</source>
         <translation>Прошивка %1 загружена.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="366"/>
-        <location filename="../mainwindow.cpp" line="3296"/>
+        <location filename="../mainwindow.cpp" line="376"/>
+        <location filename="../mainwindow.cpp" line="3429"/>
         <source>Flashing failed</source>
         <translation>Не удалось прошить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="589"/>
-        <location filename="../mainwindow.cpp" line="591"/>
-        <location filename="../mainwindow.cpp" line="1054"/>
-        <location filename="../mainwindow.cpp" line="1322"/>
-        <location filename="../mainwindow.cpp" line="1323"/>
+        <location filename="../mainwindow.cpp" line="604"/>
+        <location filename="../mainwindow.cpp" line="606"/>
+        <location filename="../mainwindow.cpp" line="1067"/>
+        <location filename="../mainwindow.cpp" line="1332"/>
+        <location filename="../mainwindow.cpp" line="1333"/>
         <source>Disconnect</source>
         <translation>Отключить</translation>
     </message>
@@ -1282,92 +1270,92 @@ VBDrive использует Cyphal поверх CAN FD, поэтому нуже
         <translation type="vanished">Продолжить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1482"/>
+        <location filename="../mainwindow.cpp" line="1496"/>
         <source>No actuators found - press refresh</source>
         <translation>Устройства не найдены - нажмите обновить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="213"/>
-        <location filename="../mainwindow.cpp" line="600"/>
-        <location filename="../mainwindow.cpp" line="1263"/>
+        <location filename="../mainwindow.cpp" line="220"/>
+        <location filename="../mainwindow.cpp" line="615"/>
+        <location filename="../mainwindow.cpp" line="1273"/>
         <source>Not connected</source>
         <translation>Не подключено</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="618"/>
+        <location filename="../mainwindow.cpp" line="633"/>
         <source>Calibration in progress</source>
         <translation>Идёт калибровка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="619"/>
+        <location filename="../mainwindow.cpp" line="634"/>
         <source>The actuator is still calibrating and cannot be stopped. Closing now leaves it to finish on its own.
 Close anyway?</source>
         <translation>Привод ещё калибруется, и остановить калибровку нельзя. Если закрыть программу, привод завершит её сам.
 Всё равно закрыть?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="630"/>
+        <location filename="../mainwindow.cpp" line="645"/>
         <source>Flashing in progress</source>
         <translation>Идёт прошивка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="631"/>
+        <location filename="../mainwindow.cpp" line="646"/>
         <source>The actuator is being flashed over CAN. Closing now leaves it in the bootloader without firmware.
 Close anyway?</source>
         <translation>Привод прошивается по CAN. Если закрыть приложение сейчас, он останется в загрузчике без прошивки.
 Всё равно закрыть?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="643"/>
-        <location filename="../mainwindow.cpp" line="1543"/>
+        <location filename="../mainwindow.cpp" line="658"/>
+        <location filename="../mainwindow.cpp" line="1557"/>
         <source>Unsaved changes</source>
         <translation>Несохранённые изменения</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="644"/>
+        <location filename="../mainwindow.cpp" line="659"/>
         <source>Some register changes have not been written to the actuator.
 Close anyway?</source>
         <translation>Часть изменений регистров не записана в привод.
 Всё равно закрыть?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="673"/>
-        <location filename="../mainwindow.cpp" line="1164"/>
+        <location filename="../mainwindow.cpp" line="686"/>
+        <location filename="../mainwindow.cpp" line="1175"/>
         <source>Disconnecting...</source>
         <translation>Отключение...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1102"/>
+        <location filename="../mainwindow.cpp" line="1115"/>
         <source>%1 (unavailable)</source>
         <translation>%1 (недоступен)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1171"/>
+        <location filename="../mainwindow.cpp" line="1182"/>
         <source>No serial port selected.</source>
         <translation>Serial-порт не выбран.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1181"/>
+        <location filename="../mainwindow.cpp" line="1192"/>
         <source>Opening %1...</source>
         <translation>Открытие %1...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1209"/>
+        <location filename="../mainwindow.cpp" line="1218"/>
         <source>Listening for actuators on %1...</source>
         <translation>Поиск приводов на %1...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1240"/>
+        <location filename="../mainwindow.cpp" line="1248"/>
         <source>Serial connected</source>
         <translation>Serial подключён</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1241"/>
+        <location filename="../mainwindow.cpp" line="1249"/>
         <source>CAN connected</source>
         <translation>CAN подключён</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1264"/>
+        <location filename="../mainwindow.cpp" line="1274"/>
         <source>Disconnected.</source>
         <translation>Отключено.</translation>
     </message>
@@ -1380,45 +1368,45 @@ Close anyway?</source>
         <translation type="vanished">Сортировать по Node ID</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1468"/>
+        <location filename="../mainwindow.cpp" line="1482"/>
         <source>  (no heartbeat)</source>
         <translation>  (нет heartbeat)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1544"/>
+        <location filename="../mainwindow.cpp" line="1558"/>
         <source>Actuator %1 has register changes that were not written.
 Write them before switching?</source>
         <translation>У привода %1 есть незаписанные изменения регистров.
 Записать их перед переключением?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1630"/>
+        <location filename="../mainwindow.cpp" line="1644"/>
         <source>Reading registers...</source>
         <translation>Чтение регистров...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1641"/>
-        <location filename="../mainwindow.cpp" line="1647"/>
+        <location filename="../mainwindow.cpp" line="1655"/>
+        <location filename="../mainwindow.cpp" line="1661"/>
         <source>No changes to write.</source>
         <translation>Нет изменений для записи.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1668"/>
+        <location filename="../mainwindow.cpp" line="1682"/>
         <source>Critical register</source>
         <translation>Критичный регистр</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1669"/>
+        <location filename="../mainwindow.cpp" line="1683"/>
         <source>The value of register %1 will be changed from %2 A to %3 A. Are you sure you want to overwrite it?</source>
         <translation>Значение регистра %1 будет изменено с %2 А на %3 А. Вы уверены, что хотите перезаписать его?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1677"/>
+        <location filename="../mainwindow.cpp" line="1691"/>
         <source>Write all except this register</source>
         <translation>Записать все, кроме этого регистра</translation>
     </message>
     <message numerus="yes">
-        <location filename="../mainwindow.cpp" line="1719"/>
+        <location filename="../mainwindow.cpp" line="1733"/>
         <source>Writing %n register(s), the actuator restarts to apply them...</source>
         <translation>
             <numerusform>Запись %n регистра, привод перезапустится для применения...</numerusform>
@@ -1427,7 +1415,7 @@ Write them before switching?</source>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../mainwindow.cpp" line="1724"/>
+        <location filename="../mainwindow.cpp" line="1738"/>
         <source>Writing %n register(s)...</source>
         <translation>
             <numerusform>Запись %n регистра...</numerusform>
@@ -1436,17 +1424,22 @@ Write them before switching?</source>
         </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1751"/>
+        <location filename="../mainwindow.cpp" line="1777"/>
         <source>Origin set; angle offset is now %1.</source>
         <translation>Ноль задан; смещение угла теперь %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1761"/>
+        <location filename="../mainwindow.cpp" line="1793"/>
+        <source>The angle did not settle at zero after the restart; press Set Origin again.</source>
+        <translation>После перезапуска угол не установился в ноль; нажмите «Задать ноль» ещё раз.</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1808"/>
         <source>Calibrate sensor</source>
         <translation>Калибровка датчика</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1762"/>
+        <location filename="../mainwindow.cpp" line="1809"/>
         <source>Calibration moves the motor and cannot be cancelled. The actuator stops answering until it finishes.
 
 Start calibration?</source>
@@ -1455,32 +1448,32 @@ Start calibration?</source>
 Начать калибровку?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1776"/>
+        <location filename="../mainwindow.cpp" line="1823"/>
         <source>Calibration started; the actuator will not answer until it is done.</source>
         <translation>Калибровка запущена; привод не будет отвечать до её окончания.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1785"/>
+        <location filename="../mainwindow.cpp" line="1832"/>
         <source>Calibrating: stage %1 of %2 done...</source>
         <translation>Калибровка: этап %1 из %2 выполнен...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1809"/>
+        <location filename="../mainwindow.cpp" line="1855"/>
         <source>Calibration finished.</source>
         <translation>Калибровка завершена.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1815"/>
+        <location filename="../mainwindow.cpp" line="1861"/>
         <source>Calibration failed: %1</source>
         <translation>Калибровка не удалась: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1826"/>
+        <location filename="../mainwindow.cpp" line="1872"/>
         <source>Calibration failed</source>
         <translation>Калибровка не удалась</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1827"/>
+        <location filename="../mainwindow.cpp" line="1873"/>
         <source>%1
 
 The actuator may be hung. Restart it and connect again.</source>
@@ -1489,38 +1482,38 @@ The actuator may be hung. Restart it and connect again.</source>
 Возможно, привод завис. Перезапустите его и подключитесь снова.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1852"/>
+        <location filename="../mainwindow.cpp" line="1898"/>
         <source>Save register profile</source>
         <translation>Сохранить профиль регистров</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1855"/>
-        <location filename="../mainwindow.cpp" line="1878"/>
+        <location filename="../mainwindow.cpp" line="1901"/>
+        <location filename="../mainwindow.cpp" line="1924"/>
         <source>YAML files (*.yaml *.yml)</source>
         <translation>Файлы YAML (*.yaml *.yml)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1869"/>
+        <location filename="../mainwindow.cpp" line="1915"/>
         <source>Could not save the profile</source>
         <translation>Не удалось сохранить профиль</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1871"/>
+        <location filename="../mainwindow.cpp" line="1917"/>
         <source>Profile saved to %1.</source>
         <translation>Профиль сохранён в %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1877"/>
+        <location filename="../mainwindow.cpp" line="1923"/>
         <source>Load register profile</source>
         <translation>Загрузить профиль регистров</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1886"/>
+        <location filename="../mainwindow.cpp" line="1932"/>
         <source>Could not load the profile</source>
         <translation>Не удалось загрузить профиль</translation>
     </message>
     <message numerus="yes">
-        <location filename="../mainwindow.cpp" line="1891"/>
+        <location filename="../mainwindow.cpp" line="1937"/>
         <source>Loaded %n register(s) from the profile.</source>
         <translation>
             <numerusform>Из профиля загружен %n регистр.</numerusform>
@@ -1529,102 +1522,131 @@ The actuator may be hung. Restart it and connect again.</source>
         </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1893"/>
+        <location filename="../mainwindow.cpp" line="1939"/>
         <source>Loaded with warnings: %1</source>
         <translation>Загружено с предупреждениями: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1909"/>
+        <location filename="../mainwindow.cpp" line="1955"/>
         <source>Could not load the default profile</source>
         <translation>Не удалось загрузить профиль по умолчанию</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1913"/>
+        <location filename="../mainwindow.cpp" line="1959"/>
         <source>Default values for %1 loaded into the editors.</source>
         <translation>Значения по умолчанию для %1 загружены в поля.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1940"/>
+        <location filename="../mainwindow.cpp" line="1987"/>
         <source>Could not read &apos;%1&apos;: %2</source>
         <translation>Не удалось прочитать «%1»: %2</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1991"/>
+        <location filename="../mainwindow.cpp" line="2039"/>
         <source>Could not write &apos;%1&apos;: %2</source>
         <translation>Не удалось записать «%1»: %2</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2007"/>
+        <location filename="../mainwindow.cpp" line="2057"/>
         <source>Registers written.</source>
         <translation>Регистры записаны.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2017"/>
+        <location filename="../mainwindow.cpp" line="2067"/>
         <source>Some registers were not written</source>
         <translation>Часть регистров не записана</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2023"/>
+        <location filename="../mainwindow.cpp" line="2073"/>
         <source>The actuator is not calibrated. Please calibrate the actuator to start working.</source>
         <translation>Привод не откалиброван. Пожалуйста, откалибруйте привод, чтобы начать работу.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2030"/>
+        <location filename="../mainwindow.cpp" line="2080"/>
         <source>Actuator not calibrated</source>
         <translation>Привод не откалиброван</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2086"/>
+        <location filename="../mainwindow.cpp" line="2137"/>
         <source>Actuator lost</source>
         <translation>Связь с приводом потеряна</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2087"/>
+        <location filename="../mainwindow.cpp" line="2138"/>
         <source>Actuator %1 (node %2) stopped sending heartbeats.</source>
         <translation>Привод %1 (узел %2) перестал отправлять heartbeat.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2090"/>
+        <location filename="../mainwindow.cpp" line="2141"/>
         <source>Wait for it to come back, keeping your unsaved register changes, or drop it and discard them?</source>
         <translation>Дождаться его возвращения, сохранив несохранённые изменения регистров, или убрать привод и отменить их?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2092"/>
+        <location filename="../mainwindow.cpp" line="2143"/>
         <source>Reconnect</source>
         <translation>Подключить снова</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2093"/>
+        <location filename="../mainwindow.cpp" line="2144"/>
         <source>Remove actuator</source>
         <translation>Убрать привод</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2105"/>
+        <location filename="../mainwindow.cpp" line="2156"/>
         <source>Waiting for node %1 to return...</source>
         <translation>Ожидание возвращения узла %1...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2127"/>
+        <location filename="../mainwindow.cpp" line="2188"/>
         <source>The actuator restarted with the new settings.</source>
         <translation>Привод перезапущен с новыми настройками.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2147"/>
+        <location filename="../mainwindow.cpp" line="2208"/>
         <source>Node %1 is back.</source>
         <translation>Узел %1 снова на связи.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3070"/>
+        <location filename="../mainwindow.cpp" line="2893"/>
+        <source>Node %1</source>
+        <translation>Узел %1</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2894"/>
+        <source>Protective stop of %1: %2</source>
+        <translation>Защитная остановка %1: %2</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2898"/>
+        <location filename="../mainwindow.cpp" line="2914"/>
+        <source>Protective stop</source>
+        <translation>Защитная остановка</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2899"/>
+        <source>%1 has been stopped and disabled.
+
+%2
+
+Let the actuator cool down or clear the fault; the next Start enables it again.</source>
+        <translation>%1 остановлен и выключен.
+
+%2
+
+Дайте приводу остыть или сбросьте ошибку; следующий «Пуск» снова включит его.</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3187"/>
         <source>Looking up the firmware releases...</source>
         <translation>Поиск релизов прошивки...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3096"/>
+        <location filename="../mainwindow.cpp" line="3216"/>
         <source>This release carries no firmware image to flash.</source>
         <translation>В этом релизе нет образа прошивки для загрузки.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../mainwindow.cpp" line="3111"/>
+        <location filename="../mainwindow.cpp" line="3232"/>
         <source>Found %n firmware release(s).</source>
         <translation>
             <numerusform>Найден %n релиз прошивки.</numerusform>
@@ -1633,17 +1655,17 @@ The actuator may be hung. Restart it and connect again.</source>
         </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3118"/>
+        <location filename="../mainwindow.cpp" line="3239"/>
         <source>Could not list the firmware releases.</source>
         <translation>Не удалось получить список релизов прошивки.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3121"/>
+        <location filename="../mainwindow.cpp" line="3242"/>
         <source>Firmware releases unavailable</source>
         <translation>Релизы прошивки недоступны</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3122"/>
+        <location filename="../mainwindow.cpp" line="3243"/>
         <source>%1
 
 Select Remote repo again to retry.</source>
@@ -1652,48 +1674,46 @@ Select Remote repo again to retry.</source>
 Чтобы повторить попытку, снова выберите «Репозиторий».</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3129"/>
+        <location filename="../mainwindow.cpp" line="3250"/>
         <source>Loading...</source>
         <translation>Загрузка...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3129"/>
+        <location filename="../mainwindow.cpp" line="3250"/>
         <source>No releases</source>
         <translation>Нет релизов</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3151"/>
+        <location filename="../mainwindow.cpp" line="3272"/>
         <source>Pick a release from the list. If it is empty, select Remote repo again to retry.</source>
         <translation>Выберите релиз из списка. Если он пуст, снова выберите «Репозиторий», чтобы повторить попытку.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3166"/>
+        <location filename="../mainwindow.cpp" line="3287"/>
         <source>The actuator runs firmware %1, which is newer than %2.
 Flash %2 anyway?</source>
         <translation>На приводе прошивка %1, она новее %2.
 Всё равно загрузить %2?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3168"/>
+        <location filename="../mainwindow.cpp" line="3289"/>
         <source>The actuator already runs firmware %1.
 Flash %2 anyway?</source>
         <translation>На приводе уже прошивка %1.
 Всё равно загрузить %2?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3211"/>
+        <location filename="../mainwindow.cpp" line="3332"/>
         <source>You have the latest firmware version.</source>
-        <translation type="unfinished"></translation>
+        <translation>У вас установлена последняя версия прошивки.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1674"/>
-        <location filename="../mainwindow.cpp" line="2236"/>
+        <location filename="../mainwindow.cpp" line="1688"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1675"/>
-        <location filename="../mainwindow.cpp" line="2236"/>
+        <location filename="../mainwindow.cpp" line="1689"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
@@ -1706,7 +1726,7 @@ Flash %2 anyway?</source>
         <translation type="vanished">Команда:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2744"/>
+        <location filename="../mainwindow.cpp" line="2801"/>
         <source>Serial cannot sustain %1 Hz; running at %2 Hz instead.</source>
         <translation>Serial не выдерживает %1 Гц; используется %2 Гц.</translation>
     </message>
@@ -1719,82 +1739,82 @@ Flash %2 anyway?</source>
         <translation type="vanished">Параметры переходного процесса записаны.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2800"/>
+        <location filename="../mainwindow.cpp" line="2868"/>
         <source>Emergency stop: all actuators disabled.</source>
         <translation>Аварийная остановка: все приводы выключены.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2954"/>
+        <location filename="../mainwindow.cpp" line="3066"/>
         <source>Pause the plot</source>
         <translation>Приостановить график</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2954"/>
+        <location filename="../mainwindow.cpp" line="3066"/>
         <source>Resume the plot</source>
         <translation>Возобновить график</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2984"/>
+        <location filename="../mainwindow.cpp" line="3096"/>
         <source>No file was selected.</source>
         <translation>Файл не выбран.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2988"/>
+        <location filename="../mainwindow.cpp" line="3100"/>
         <source>Save plot</source>
         <translation>Сохранение графика</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2989"/>
+        <location filename="../mainwindow.cpp" line="3101"/>
         <source>%1 already exists. Overwrite it?</source>
         <translation>%1 уже существует. Перезаписать?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3015"/>
+        <location filename="../mainwindow.cpp" line="3127"/>
         <source>Saved to %1.</source>
         <translation>Сохранено в %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3017"/>
+        <location filename="../mainwindow.cpp" line="3129"/>
         <source>Could not save the plot</source>
         <translation>Не удалось сохранить график</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1280"/>
+        <location filename="../mainwindow.cpp" line="1290"/>
         <source>Emergency stop</source>
         <translation>Экстренная остановка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="375"/>
+        <location filename="../mainwindow.cpp" line="385"/>
         <source>Firmware flashed</source>
         <translation>Прошивка записана</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="376"/>
+        <location filename="../mainwindow.cpp" line="386"/>
         <source>Restart the actuator and press OK.</source>
         <translation>Перезапустите привод и нажмите OK.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="390"/>
+        <location filename="../mainwindow.cpp" line="400"/>
         <source>%1 Connect to the actuator from CONNECTION.</source>
         <translation>%1 Подключитесь к приводу в панели ПОДКЛЮЧЕНИЕ.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1281"/>
+        <location filename="../mainwindow.cpp" line="1291"/>
         <source>The actuator has been stopped by the emergency stop. To resume, restart the actuator and connect to it again.</source>
         <translation>Привод экстренно остановлен. Для возобновления работы перезагрузите привод и заново подключитесь к нему</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2468"/>
+        <location filename="../mainwindow.cpp" line="2523"/>
         <source>Servo settings written.</source>
         <translation>Параметры Servo записаны.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2853"/>
+        <location filename="../mainwindow.cpp" line="2968"/>
         <source>Stop</source>
         <translation>Стоп</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2962"/>
+        <location filename="../mainwindow.cpp" line="3074"/>
         <source>s</source>
         <translation>с</translation>
     </message>
@@ -1831,17 +1851,17 @@ Flash %2 anyway?</source>
         <translation type="vanished">Изображение графика сохранено.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3050"/>
+        <location filename="../mainwindow.cpp" line="3163"/>
         <source>Select firmware image</source>
         <translation>Выбрать файл прошивки</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3051"/>
+        <location filename="../mainwindow.cpp" line="3164"/>
         <source>Intel HEX files (*.hex)</source>
         <translation>Файлы Intel HEX (*.hex)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3055"/>
+        <location filename="../mainwindow.cpp" line="3168"/>
         <source>Selected %1.</source>
         <translation>Выбрано: %1.</translation>
     </message>
@@ -1850,8 +1870,8 @@ Flash %2 anyway?</source>
         <translation type="vanished">Поиск последнего релиза...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3150"/>
-        <location filename="../mainwindow.cpp" line="3185"/>
+        <location filename="../mainwindow.cpp" line="3271"/>
+        <location filename="../mainwindow.cpp" line="3306"/>
         <source>No firmware selected</source>
         <translation>Прошивка не выбрана</translation>
     </message>
@@ -1872,22 +1892,22 @@ Flash %2 anyway?</source>
 Всё равно прошить %2?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3169"/>
+        <location filename="../mainwindow.cpp" line="3290"/>
         <source>Flash firmware</source>
         <translation>Прошивка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3174"/>
+        <location filename="../mainwindow.cpp" line="3295"/>
         <source>Flashing cancelled.</source>
         <translation>Прошивка отменена.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3186"/>
+        <location filename="../mainwindow.cpp" line="3307"/>
         <source>Choose a .hex file first, or switch to a release from the remote repo.</source>
         <translation>Сначала выберите файл .hex или переключитесь на релиз из репозитория.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3208"/>
+        <location filename="../mainwindow.cpp" line="3329"/>
         <source>The firmware is outdated: release %1 is available.</source>
         <translation>Прошивка устарела: доступна версия %1.</translation>
     </message>
@@ -1896,52 +1916,52 @@ Flash %2 anyway?</source>
         <translation type="vanished">У вас самая последняя версия прошивки</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3248"/>
+        <location filename="../mainwindow.cpp" line="3381"/>
         <source>Flashing %1...</source>
         <translation>Прошивка %1...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3257"/>
+        <location filename="../mainwindow.cpp" line="3390"/>
         <source>No actuator selected</source>
         <translation>Привод не выбран</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3258"/>
+        <location filename="../mainwindow.cpp" line="3391"/>
         <source>Select the actuator to flash in the device list.</source>
         <translation>Выберите в списке устройств привод для прошивки.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3281"/>
+        <location filename="../mainwindow.cpp" line="3414"/>
         <source>Flashing %1 into %2 over CAN...</source>
         <translation>Прошивка %1 в %2 по CAN...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3315"/>
+        <location filename="../mainwindow.cpp" line="3448"/>
         <source>%1 Waiting for the actuator to start...</source>
         <translation>%1 Ожидание запуска привода...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3325"/>
+        <location filename="../mainwindow.cpp" line="3458"/>
         <source>Actuator did not start</source>
         <translation>Привод не запустился</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3326"/>
+        <location filename="../mainwindow.cpp" line="3459"/>
         <source>The firmware was written, but node %1 has sent no heartbeat since. Power-cycle the actuator; if it stays silent, flash it over SWD.</source>
         <translation>Прошивка записана, но узел %1 с тех пор не отправил ни одного heartbeat. Перезапустите питание привода; если он так и не ответит, прошейте его по SWD.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3351"/>
+        <location filename="../mainwindow.cpp" line="3484"/>
         <source>Node %1 is running the new firmware.</source>
         <translation>Узел %1 работает на новой прошивке.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3366"/>
+        <location filename="../mainwindow.cpp" line="3499"/>
         <source>Reconnecting to the flashed actuator...</source>
         <translation>Переподключение к прошитому приводу...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3392"/>
+        <location filename="../mainwindow.cpp" line="3525"/>
         <source>Reconnecting to %1...</source>
         <translation>Переподключение к %1...</translation>
     </message>
@@ -1949,93 +1969,118 @@ Flash %2 anyway?</source>
 <context>
     <name>PlotController</name>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="153"/>
+        <location filename="../ui/plot_controller.cpp" line="667"/>
         <source>t, s</source>
         <translation>t, с</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="178"/>
+        <location filename="../ui/plot_controller.cpp" line="439"/>
         <source>Position</source>
-        <translation>Положение</translation>
+        <translation>Угол</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="180"/>
+        <location filename="../ui/plot_controller.cpp" line="441"/>
         <source>Velocity</source>
         <translation>Скорость</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="182"/>
+        <location filename="../ui/plot_controller.cpp" line="443"/>
         <source>Torque</source>
         <translation>Момент</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="184"/>
+        <location filename="../ui/plot_controller.cpp" line="445"/>
         <source>MCU</source>
         <translation>МК</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="186"/>
+        <location filename="../ui/plot_controller.cpp" line="447"/>
         <source>Bus current</source>
         <translation>Ток шины</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="188"/>
+        <location filename="../ui/plot_controller.cpp" line="449"/>
         <source>Rotor</source>
         <translation>Ротор</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="201"/>
+        <location filename="../ui/plot_controller.cpp" line="462"/>
         <source>Target</source>
-        <translation>Задание</translation>
+        <translation>Уставка</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="203"/>
+        <location filename="../ui/plot_controller.cpp" line="464"/>
         <source>Stator</source>
         <translation>Статор</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="205"/>
+        <location filename="../ui/plot_controller.cpp" line="466"/>
         <source>Shaft</source>
         <translation>Вал</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="216"/>
+        <location filename="../ui/plot_controller.cpp" line="477"/>
         <source>Position, %1</source>
-        <translation>Положение, %1</translation>
+        <translation>Угол, %1</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="218"/>
+        <location filename="../ui/plot_controller.cpp" line="479"/>
         <source>Velocity, %1</source>
         <translation>Скорость, %1</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="221"/>
+        <location filename="../ui/plot_controller.cpp" line="482"/>
         <source>Torque, N*m</source>
         <translation>Момент, Н·м</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="223"/>
+        <location filename="../ui/plot_controller.cpp" line="484"/>
         <source>Temperature, C</source>
         <translation>Температура, °C</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="225"/>
-        <source>Current, A</source>
-        <translation>Ток, А</translation>
+        <location filename="../ui/plot_controller.cpp" line="486"/>
+        <source>Bus current, A</source>
+        <translation>Ток шины, А</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="227"/>
+        <location filename="../ui/plot_controller.cpp" line="488"/>
         <source>Encoder, counts</source>
         <translation>Энкодер, отсчёты</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="629"/>
-        <location filename="../ui/plot_controller.cpp" line="654"/>
+        <location filename="../ui/plot_controller.cpp" line="691"/>
+        <source>Fit to data</source>
+        <translation>Масштаб по данным</translation>
+    </message>
+    <message>
+        <location filename="../ui/plot_controller.cpp" line="698"/>
+        <source>Restore panels</source>
+        <translation>Восстановить панели</translation>
+    </message>
+    <message>
+        <location filename="../ui/plot_controller.cpp" line="698"/>
+        <source>Maximize panel</source>
+        <translation>Развернуть панель</translation>
+    </message>
+    <message>
+        <location filename="../ui/plot_controller.cpp" line="702"/>
+        <source>Add panel</source>
+        <translation>Добавить панель</translation>
+    </message>
+    <message>
+        <location filename="../ui/plot_controller.cpp" line="705"/>
+        <source>Hide panel</source>
+        <translation>Скрыть панель</translation>
+    </message>
+    <message>
+        <location filename="../ui/plot_controller.cpp" line="1354"/>
+        <location filename="../ui/plot_controller.cpp" line="1389"/>
         <source>The plot is not initialised.</source>
         <translation>График не инициализирован.</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="634"/>
+        <location filename="../ui/plot_controller.cpp" line="1359"/>
         <source>The log view cannot be exported as an image.</source>
         <translation>Журнал нельзя сохранить как изображение.</translation>
     </message>
@@ -2048,10 +2093,8 @@ Flash %2 anyway?</source>
         <translation type="vanished">Не удалось записать %1.</translation>
     </message>
     <message>
-        <location filename="../ui/plot_controller.cpp" line="662"/>
-        <location filename="../ui/plot_controller.cpp" line="670"/>
-        <location filename="../ui/plot_controller.cpp" line="679"/>
-        <location filename="../ui/plot_controller.cpp" line="715"/>
+        <location filename="../ui/plot_controller.cpp" line="1396"/>
+        <location filename="../ui/plot_controller.cpp" line="1460"/>
         <source>Could not write %1: %2</source>
         <translation>Не удалось записать %1: %2</translation>
     </message>
@@ -2059,7 +2102,7 @@ Flash %2 anyway?</source>
 <context>
     <name>PlotCrosshairTool</name>
     <message>
-        <location filename="../ui/plot_crosshair.cpp" line="59"/>
+        <location filename="../ui/plot_crosshair.cpp" line="79"/>
         <source>t, s</source>
         <translation>t, с</translation>
     </message>
@@ -2143,16 +2186,31 @@ Flash %2 anyway?</source>
     </message>
     <message>
         <location filename="../ui/preferences_dialog.ui" line="303"/>
+        <source>Protective stop</source>
+        <translation>Защитная остановка</translation>
+    </message>
+    <message>
+        <location filename="../ui/preferences_dialog.ui" line="327"/>
+        <source>Maximum stator temperature:</source>
+        <translation>Максимальная температура статора:</translation>
+    </message>
+    <message>
+        <location filename="../ui/preferences_dialog.ui" line="353"/>
+        <source>Maximum MCU temperature:</source>
+        <translation>Максимальная температура МК:</translation>
+    </message>
+    <message>
+        <location filename="../ui/preferences_dialog.ui" line="382"/>
         <source>Firmware flashing (OpenOCD)</source>
         <translation>Прошивка (OpenOCD)</translation>
     </message>
     <message>
-        <location filename="../ui/preferences_dialog.ui" line="327"/>
+        <location filename="../ui/preferences_dialog.ui" line="406"/>
         <source>Interface config:</source>
         <translation>Конфигурация интерфейса:</translation>
     </message>
     <message>
-        <location filename="../ui/preferences_dialog.ui" line="338"/>
+        <location filename="../ui/preferences_dialog.ui" line="417"/>
         <source>Target config:</source>
         <translation>Конфигурация цели:</translation>
     </message>
@@ -2174,6 +2232,16 @@ VBDrive программируется по SWD через ST-Link.</translation
 It must not collide with any actuator.</source>
         <translation>Node ID, который приложение объявляет на шине CAN.
 Он не должен совпадать с Node ID приводов.</translation>
+    </message>
+    <message>
+        <location filename="../ui/preferences_dialog.cpp" line="32"/>
+        <source>An actuator whose motor gets hotter than this is stopped and disabled.</source>
+        <translation>Привод, двигатель которого нагреется выше этого значения, будет остановлен и выключен.</translation>
+    </message>
+    <message>
+        <location filename="../ui/preferences_dialog.cpp" line="34"/>
+        <source>An actuator whose microcontroller gets hotter than this is stopped and disabled.</source>
+        <translation>Привод, микроконтроллер которого нагреется выше этого значения, будет остановлен и выключен.</translation>
     </message>
 </context>
 <context>
@@ -2257,6 +2325,34 @@ It must not collide with any actuator.</source>
     </message>
 </context>
 <context>
+    <name>SafetyMonitor</name>
+    <message>
+        <location filename="../control/safety_monitor.cpp" line="17"/>
+        <source>The actuator reports a fault (is_fault = 1).</source>
+        <translation>Привод сообщает об ошибке (is_fault = 1).</translation>
+    </message>
+    <message>
+        <location filename="../control/safety_monitor.cpp" line="24"/>
+        <source>Stator</source>
+        <translation>Статор</translation>
+    </message>
+    <message>
+        <location filename="../control/safety_monitor.cpp" line="27"/>
+        <source>Microcontroller</source>
+        <translation>Микроконтроллер</translation>
+    </message>
+    <message>
+        <location filename="../control/safety_monitor.cpp" line="39"/>
+        <source>%1 temperature %2 °C exceeded the limit of %3 °C set in Preferences.</source>
+        <translation>%1: температура %2 °C превысила предел %3 °C, заданный в настройках.</translation>
+    </message>
+    <message>
+        <location filename="../control/safety_monitor.cpp" line="74"/>
+        <source>The actuator reports a fault (is_fault = 1). Clear the fault before starting.</source>
+        <translation>Привод сообщает об ошибке (is_fault = 1). Сбросьте ошибку перед запуском.</translation>
+    </message>
+</context>
+<context>
     <name>SaveFileDialog</name>
     <message>
         <location filename="../ui/save_file_dialog.ui" line="14"/>
@@ -2287,12 +2383,12 @@ It must not collide with any actuator.</source>
     <message>
         <location filename="../ui/save_file_dialog.ui" line="78"/>
         <source>Light</source>
-        <translation type="unfinished">Светлая</translation>
+        <translation>Светлая</translation>
     </message>
     <message>
         <location filename="../ui/save_file_dialog.ui" line="83"/>
         <source>Dark</source>
-        <translation type="unfinished">Тёмная</translation>
+        <translation>Тёмная</translation>
     </message>
     <message>
         <location filename="../ui/save_file_dialog.ui" line="91"/>
@@ -2548,7 +2644,7 @@ It must not collide with any actuator.</source>
     <message>
         <location filename="../ui/plot_export.cpp" line="62"/>
         <source>The plot is not initialised.</source>
-        <translation type="unfinished">График не инициализирован.</translation>
+        <translation>График не инициализирован.</translation>
     </message>
     <message>
         <location filename="../ui/plot_export.cpp" line="67"/>
@@ -2558,7 +2654,7 @@ It must not collide with any actuator.</source>
     <message>
         <location filename="../ui/plot_export.cpp" line="98"/>
         <source>Could not write %1.</source>
-        <translation type="unfinished">Не удалось записать %1.</translation>
+        <translation>Не удалось записать %1.</translation>
     </message>
 </context>
 </TS>

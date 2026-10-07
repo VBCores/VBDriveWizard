@@ -138,6 +138,10 @@ private:
     /// CONFIG -> writes -> APPLY, with the drive rebooting to take them.
     void writeConfigToDrive(DeviceModel *device, const RegisterWrites &writes);
     void onSetOrigin();
+    /// Writes ang_off so that the angle the drive reports now reads as zero.
+    void writeOrigin(DeviceModel *device);
+    /// Serial: corrects the origin from the first sample after the restart.
+    void checkOrigin(DeviceModel *device, const TelemetrySample &sample);
     void onSaveProfile();
     void onLoadProfile();
     void onRestoreDefaults();
@@ -278,7 +282,6 @@ private:
     void updateRegisterActionButtons();
 
     // --- plot ---
-    void onSignalChanged();
     void onUnitsChanged();
     /// Re-expresses the angular control-tab spin boxes in the new display unit.
     void convertControlEditors(AngleUnit from, AngleUnit to);
@@ -372,6 +375,13 @@ private:
     /// Values of the config batch in flight per node, adopted as the drive's own
     /// once the batch succeeds (the link reports only the name of a written register).
     QHash<quint8, RegisterMap> m_writesInFlight;
+    /// Serial Set Origin waiting for the angle the drive restarts with (checkOrigin()).
+    struct OriginCheck
+    {
+        int correctionsLeft = 0;
+        qint64 rebootedUs = 0;  ///< hostTimeUs() of the restart; 0 until it happens
+    };
+    QHash<quint8, OriginCheck> m_originChecks;
 };
 
 #endif // MAINWINDOW_H

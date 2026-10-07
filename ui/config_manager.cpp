@@ -5,12 +5,14 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QLocale>
 #include <QSaveFile>
 #include <QStandardPaths>
 #include <QTextStream>
 
 #include <yaml-cpp/yaml.h>
 
+#include <algorithm>
 #include <cmath>
 
 namespace {
@@ -59,6 +61,53 @@ QString readString(const YAML::Node &root, const char *key, const QString &fallb
     } catch (const YAML::Exception &) {
         return fallback;
     }
+}
+
+/// Names of the plot panels' signals in config.yaml, in PlotSignal order.
+const char *const kPlotSignalNames[] = {"position", "velocity",   "torque", "temperature",
+                                        "current",  "encoder",    "none"};
+
+QString plotPanelsToString(const QVector<PlotSignal> &panels)
+{
+    QStringList names;
+    for (PlotSignal signal : panels)
+        names << QLatin1String(kPlotSignalNames[static_cast<int>(signal)]);
+    return names.join(QLatin1Char(','));
+}
+
+/// Unknown names are dropped, so sanitize() sees a short list and restores the default.
+QVector<PlotSignal> plotPanelsFromString(const QString &text)
+{
+    QVector<PlotSignal> panels;
+    for (const QString &name : text.split(QLatin1Char(','))) {
+        for (int i = 0; i <= static_cast<int>(PlotSignal::None); ++i) {
+            if (name.trimmed().compare(QLatin1String(kPlotSignalNames[i]), Qt::CaseInsensitive)
+                == 0) {
+                panels << static_cast<PlotSignal>(i);
+                break;
+            }
+        }
+    }
+    return panels;
+}
+
+QString plotHeightsToString(const QVector<double> &heights)
+{
+    QStringList values;
+    for (double height : heights)
+        values << QString::number(height, 'g', 4);
+    return values.join(QLatin1Char(','));
+}
+
+QVector<double> plotHeightsFromString(const QString &text)
+{
+    QVector<double> heights;
+    for (const QString &value : text.split(QLatin1Char(','))) {
+        bool ok = false;
+        const double height = QLocale::c().toDouble(value.trimmed(), &ok);
+        heights << (ok ? height : -1.0);
+    }
+    return heights;
 }
 
 /// Bundled config shipped with the build, used to seed the user's copy.
@@ -127,6 +176,16 @@ void ConfigManager::sanitize(AppConfig *config)
     ui.angle_unit = ui.angle_unit.toLower();
     if (ui.angle_unit != QLatin1String("rad") && ui.angle_unit != QLatin1String("deg"))
         ui.angle_unit = defaults.ui.angle_unit;
+    if (ui.plot_panels.size() != defaults.ui.plot_panels.size()
+        || std::all_of(ui.plot_panels.cbegin(), ui.plot_panels.cend(),
+                       [](PlotSignal signal) { return signal == PlotSignal::None; })) {
+        ui.plot_panels = defaults.ui.plot_panels;
+    }
+    if (ui.plot_panel_heights.size() != defaults.ui.plot_panel_heights.size()
+        || std::any_of(ui.plot_panel_heights.cbegin(), ui.plot_panel_heights.cend(),
+                       [](double h) { return !std::isfinite(h) || h <= 0.0; })) {
+        ui.plot_panel_heights = defaults.ui.plot_panel_heights;
+    }
 
     SafetySettings &safety = config->safety;
     const auto validTemp = [](double c) { return std::isfinite(c) && c >= 0.0 && c <= 250.0; };
@@ -170,6 +229,10 @@ AppConfig ConfigManager::loadConfig(const QString &path, QString *message, LoadS
                         readString(root, "openocd_interface", ui.openocd_interface);
                 ui.openocd_target = readString(root, "openocd_target", ui.openocd_target);
                 ui.angle_unit = readString(root, "angle_unit", ui.angle_unit);
+                ui.plot_panels = plotPanelsFromString(readString(
+                        root, "plot_panels", plotPanelsToString(ui.plot_panels)));
+                ui.plot_panel_heights = plotHeightsFromString(readString(
+                        root, "plot_panel_heights", plotHeightsToString(ui.plot_panel_heights)));
 
                 SafetySettings &safety = config.safety;
                 safety.max_stator_temp_c =
@@ -253,7 +316,11 @@ bool ConfigManager::saveConfig(const QString &path, const AppConfig &config, QSt
         << "window_width: " << window.width << '\n'
         << "window_height: " << window.height << '\n'
         << "window_maximized: " << (window.maximized ? "true" : "false") << '\n'
-        << "\nangle_unit: " << ui.angle_unit << '\n';
+        << "\nangle_unit: " << ui.angle_unit << '\n'
+        << "\n# Realtime plot panels, top to bottom: position, velocity, torque, temperature,\n"
+        << "# current, encoder or none; and their relative heights.\n"
+        << "plot_panels: " << plotPanelsToString(ui.plot_panels) << '\n'
+        << "plot_panel_heights: " << plotHeightsToString(ui.plot_panel_heights) << '\n';
 
     if (!config.control.isEmpty()) {
         out << "\n# Last input of the CONTROL panel, keyed by widget name.\n"
