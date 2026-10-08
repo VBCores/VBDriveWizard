@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1326</width>
+    <width>1371</width>
     <height>995</height>
    </rect>
   </property>
@@ -537,6 +537,9 @@
                 </item>
                 <item row="8" column="0">
                  <widget class="QLabel" name="DirLbl">
+                  <property name="toolTip">
+                   <string>reg: ang_dir</string>
+                  </property>
                   <property name="text">
                    <string>Direction</string>
                   </property>
@@ -544,6 +547,9 @@
                 </item>
                 <item row="7" column="0">
                  <widget class="QCheckBox" name="CurrentLimitCheckBox">
+                  <property name="toolTip">
+                   <string>reg: max_i</string>
+                  </property>
                   <property name="text">
                    <string>Current</string>
                   </property>
@@ -551,6 +557,9 @@
                 </item>
                 <item row="0" column="1" rowspan="2">
                  <widget class="QLabel" name="AngleMinLbl">
+                  <property name="toolTip">
+                   <string>reg: min_ang</string>
+                  </property>
                   <property name="text">
                    <string>min:</string>
                   </property>
@@ -596,6 +605,9 @@
                 </item>
                 <item row="3" column="1">
                  <widget class="QLabel" name="AngleMaxLbl">
+                  <property name="toolTip">
+                   <string>reg: max_ang</string>
+                  </property>
                   <property name="text">
                    <string>max</string>
                   </property>
@@ -603,6 +615,9 @@
                 </item>
                 <item row="4" column="0">
                  <widget class="QCheckBox" name="VelLimitCheckBox">
+                  <property name="toolTip">
+                   <string>reg: max_spd</string>
+                  </property>
                   <property name="text">
                    <string>Velocity</string>
                   </property>
@@ -610,6 +625,9 @@
                 </item>
                 <item row="5" column="0">
                  <widget class="QCheckBox" name="TorqLimitCheckBox">
+                  <property name="toolTip">
+                   <string>reg: max_tq</string>
+                  </property>
                   <property name="text">
                    <string>Torque</string>
                   </property>
@@ -617,6 +635,9 @@
                 </item>
                 <item row="1" column="0">
                  <widget class="QCheckBox" name="AngleLimitCheckBox">
+                  <property name="toolTip">
+                   <string>reg: min_ang, max_ang</string>
+                  </property>
                   <property name="text">
                    <string>Angle</string>
                   </property>
@@ -725,6 +746,9 @@
              </property>
              <item row="1" column="0" colspan="2">
               <widget class="QLabel" name="DataBaudLbl">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;reg:  data_baud&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string>Data Baud Rate</string>
                </property>
@@ -732,6 +756,9 @@
              </item>
              <item row="0" column="0">
               <widget class="QLabel" name="NodeIdLbl">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;reg: node_id&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string>Node ID</string>
                </property>
@@ -814,6 +841,9 @@
              </item>
              <item row="2" column="0" colspan="2">
               <widget class="QLabel" name="NomBaudLbl">
+               <property name="toolTip">
+                <string>reg: nominal_baud</string>
+               </property>
                <property name="text">
                 <string>Nom Baud Rate</string>
                </property>
@@ -922,6 +952,9 @@
                  </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="GearRatioLbl">
+                   <property name="toolTip">
+                    <string>reg: gear</string>
+                   </property>
                    <property name="text">
                     <string>Gear Ratio</string>
                    </property>
@@ -938,6 +971,9 @@
                  </item>
                  <item row="6" column="0">
                   <widget class="QLabel" name="CurrentKdLbl">
+                   <property name="toolTip">
+                    <string>reg: kd</string>
+                   </property>
                    <property name="text">
                     <string>Current Kd</string>
                    </property>
@@ -945,6 +981,9 @@
                  </item>
                  <item row="11" column="0">
                   <widget class="QLabel" name="FilterG3Lbl">
+                   <property name="toolTip">
+                    <string>reg: flt_g3</string>
+                   </property>
                    <property name="text">
                     <string>Filter Gain 3</string>
                    </property>
@@ -974,6 +1013,9 @@
                  </item>
                  <item row="0" column="0">
                   <widget class="QLabel" name="DriveNameLabel">
+                   <property name="toolTip">
+                    <string>reg: name</string>
+                   </property>
                    <property name="text">
                     <string>Name</string>
                    </property>
@@ -997,6 +1039,9 @@
                  </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="EncoderTypeLbl">
+                   <property name="toolTip">
+                    <string>reg: ang_enc</string>
+                   </property>
                    <property name="text">
                     <string>Encoder</string>
                    </property>
@@ -1068,6 +1113,9 @@
                  </item>
                  <item row="7" column="0">
                   <widget class="QLabel" name="PosOffsetLbl">
+                   <property name="toolTip">
+                    <string>reg: ang_off</string>
+                   </property>
                    <property name="text">
                     <string>Position Offset</string>
                    </property>
@@ -1081,6 +1129,9 @@
                  </item>
                  <item row="8" column="0">
                   <widget class="QLabel" name="FilterALbl">
+                   <property name="toolTip">
+                    <string>reg: flt_a</string>
+                   </property>
                    <property name="text">
                     <string>Main Filt Prm A</string>
                    </property>
@@ -1107,6 +1158,9 @@
                  </item>
                  <item row="12" column="0">
                   <widget class="QLabel" name="CurrentLpfLbl">
+                   <property name="toolTip">
+                    <string>reg: i_lpf</string>
+                   </property>
                    <property name="text">
                     <string>Current LPF Gain</string>
                    </property>
@@ -1139,6 +1193,9 @@
                  </item>
                  <item row="10" column="0">
                   <widget class="QLabel" name="FilterG2Lbl">
+                   <property name="toolTip">
+                    <string>reg: flt_g2</string>
+                   </property>
                    <property name="text">
                     <string>Filter Gain 2</string>
                    </property>
@@ -1162,6 +1219,9 @@
                  </item>
                  <item row="5" column="0">
                   <widget class="QLabel" name="CurrentKiLbl">
+                   <property name="toolTip">
+                    <string>reg: ki</string>
+                   </property>
                    <property name="text">
                     <string>Current Ki</string>
                    </property>
@@ -1169,6 +1229,9 @@
                  </item>
                  <item row="4" column="0">
                   <widget class="QLabel" name="CurrentKpLbl">
+                   <property name="toolTip">
+                    <string>reg: kp</string>
+                   </property>
                    <property name="text">
                     <string>Current Kp</string>
                    </property>
@@ -1176,6 +1239,9 @@
                  </item>
                  <item row="9" column="0">
                   <widget class="QLabel" name="FilterG1Lbl">
+                   <property name="toolTip">
+                    <string>reg: flt_g1</string>
+                   </property>
                    <property name="text">
                     <string>Filter Gain 1</string>
                    </property>
@@ -1186,6 +1252,9 @@
                  </item>
                  <item row="3" column="0">
                   <widget class="QLabel" name="TorqueConstLbl">
+                   <property name="toolTip">
+                    <string>reg: kt</string>
+                   </property>
                    <property name="text">
                     <string>Torque const</string>
                    </property>
@@ -1263,6 +1332,9 @@
                  </item>
                  <item row="13" column="0">
                   <widget class="QLabel" name="RatedCurrentLbl">
+                   <property name="toolTip">
+                    <string>reg: rated_max_current</string>
+                   </property>
                    <property name="text">
                     <string>Current Limit</string>
                    </property>
@@ -1959,7 +2031,7 @@
          <item row="0" column="0">
           <widget class="QTabWidget" name="ControlTabWidget">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="ServoTab">
             <attribute name="title">
@@ -2421,6 +2493,9 @@
                       </item>
                       <item row="0" column="0">
                        <widget class="QLabel" name="PosFilterBandwidthLbl">
+                        <property name="toolTip">
+                         <string>reg: servo_control_input_bandwith</string>
+                        </property>
                         <property name="text">
                          <string>Bandwidth</string>
                         </property>
@@ -2537,6 +2612,9 @@
                       </item>
                       <item row="2" column="0">
                        <widget class="QLabel" name="PosPolyDecelLimitLbl">
+                        <property name="toolTip">
+                         <string>reg: servo_control_decel_limit</string>
+                        </property>
                         <property name="text">
                          <string>Decel Limit</string>
                         </property>
@@ -2560,6 +2638,9 @@
                       </item>
                       <item row="1" column="0">
                        <widget class="QLabel" name="PosPolyAccelLimitLbl">
+                        <property name="toolTip">
+                         <string>reg: servo_control_accel_limit</string>
+                        </property>
                         <property name="text">
                          <string>Accel Limit</string>
                         </property>
@@ -2580,6 +2661,9 @@
                       </item>
                       <item row="0" column="0">
                        <widget class="QLabel" name="PosPolyVelLimitLbl">
+                        <property name="toolTip">
+                         <string>reg: servo_control_vel_limit</string>
+                        </property>
                         <property name="text">
                          <string>Vel Limit</string>
                         </property>
@@ -2709,6 +2793,9 @@
                       </item>
                       <item row="0" column="0">
                        <widget class="QLabel" name="VelRampRateLbl">
+                        <property name="toolTip">
+                         <string>reg: servo_control_vel_ramp_rate</string>
+                        </property>
                         <property name="text">
                          <string>Rate</string>
                         </property>
@@ -2862,6 +2949,9 @@
                       </property>
                       <item row="0" column="0">
                        <widget class="QLabel" name="ServoPosKpLbl">
+                        <property name="toolTip">
+                         <string>reg: servo_pos_p_gain</string>
+                        </property>
                         <property name="text">
                          <string>Kp:</string>
                         </property>
@@ -2892,6 +2982,9 @@
                       </item>
                       <item row="1" column="0">
                        <widget class="QLabel" name="ServoPosKiLbl">
+                        <property name="toolTip">
+                         <string>reg: servo_pos_i_gain</string>
+                        </property>
                         <property name="text">
                          <string>Ki:</string>
                         </property>
@@ -2922,6 +3015,9 @@
                       </item>
                       <item row="2" column="0">
                        <widget class="QLabel" name="ServoPosKdLbl">
+                        <property name="toolTip">
+                         <string>reg: servo_pos_d_gain</string>
+                        </property>
                         <property name="text">
                          <string>Kd:</string>
                         </property>
@@ -3045,6 +3141,9 @@
                       </property>
                       <item row="0" column="0">
                        <widget class="QLabel" name="ServoVelKpLbl">
+                        <property name="toolTip">
+                         <string>reg: servo_vel_p_gain</string>
+                        </property>
                         <property name="text">
                          <string>Kp:</string>
                         </property>
@@ -3075,6 +3174,9 @@
                       </item>
                       <item row="1" column="0">
                        <widget class="QLabel" name="ServoVelKiLbl">
+                        <property name="toolTip">
+                         <string>reg: servo_vel_i_gain</string>
+                        </property>
                         <property name="text">
                          <string>Ki:</string>
                         </property>
@@ -4637,6 +4739,9 @@
              <height>50</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Stops VBDrive in emergency situations. Sets all the commands to zero and is_on=0</string>
+           </property>
            <property name="text">
             <string>STOP</string>
            </property>
@@ -4654,7 +4759,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1326</width>
+     <width>1371</width>
      <height>23</height>
     </rect>
    </property>

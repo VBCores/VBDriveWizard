@@ -1332,6 +1332,17 @@ void MainWindow::updateUiState()
     ui->SerialConnectBtn->setText(serial ? tr("Disconnect") : tr("Connect"));
     ui->CanConnectBtn->setText(can ? tr("Disconnect") : tr("Connect"));
 
+    // What Start puts on the wire. The radio buttons are locked while connected, so
+    // they name the live transport too.
+    const QString servoTip = tr("Send %1").arg(
+            serialChosen ? QStringLiteral("servo_cmd") : QStringLiteral("voltbro.foc.Servo.1.0"));
+    for (QPushButton *button : {ui->ServoUserStartBtn, ui->ServoSinStartBtn,
+                                ui->ServoMeanderStartBtn, ui->ServoTriangleStartBtn})
+        button->setToolTip(servoTip);
+    ui->MitStartBtn->setToolTip(
+            tr("Send %1").arg(serialChosen ? QStringLiteral("mit_cmd")
+                                           : QStringLiteral("voltbro.foc.MIT.1.0")));
+
     // The CAN bit rates are drive registers that the firmware only exposes for
     // editing over Serial, per the spec.
     ui->DataBaudComboBox->setEnabled(serial);
