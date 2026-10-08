@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 # The single definition of the application version: configure_file() turns it into
 # version.h, which is what verLabel shows. Never hard-code it in the sources.
-project(VBDriveWizard VERSION 0.1.0 LANGUAGES C CXX)
+project(VBDriveWizard VERSION 0.1.1 LANGUAGES C CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
