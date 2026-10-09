@@ -2,7 +2,17 @@ cmake_minimum_required(VERSION 3.16)
 
 # The single definition of the application version: configure_file() turns it into
 # version.h, which is what verLabel shows. Never hard-code it in the sources.
-project(VBDriveWizard VERSION 0.1.1 LANGUAGES C CXX)
+
+# In order to publish release on Github:
+# 1. В CMakeLists.txt: project(VBDriveWizard VERSION 0.0.2 ...)
+# git commit -am "release: 0.1.2"
+# git push origin main
+
+# 2. Тег на этот коммит, имя совпадает с версией в CMake
+# git tag -a v0.1.2 -m "VBDriveWizard 0.1.2"
+# git push origin v0.1.2
+
+project(VBDriveWizard VERSION 0.1.2 LANGUAGES C CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

@@ -3285,6 +3285,18 @@ void MainWindow::onFlashClicked()
             return;
         }
 
+        if (combo->currentData(kFirmwareBetaRole).toBool()) {
+            const auto answer = QMessageBox::warning(
+                    this, tr("Flash firmware"),
+                    tr("You are trying to flash a beta firmware version. It may be unstable.\n"
+                       "Are you sure you want to flash it?"),
+                    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (answer != QMessageBox::Yes) {
+                setStatusMessage(tr("Flashing cancelled."));
+                return;
+            }
+        }
+
         // Flashing what the drive already runs, or something older, is most likely a
         // mistake - but a deliberate reflash or downgrade is allowed.
         const DeviceModel *device = m_devices->selected();

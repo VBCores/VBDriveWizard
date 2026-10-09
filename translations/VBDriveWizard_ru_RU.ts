@@ -1703,6 +1703,13 @@ Flash %2 anyway?</source>
 Всё равно загрузить %2?</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="3287"/>
+        <source>You are trying to flash a beta firmware version. It may be unstable.
+Are you sure you want to flash it?</source>
+        <translation>Вы пытаетесь загрузить бета-версию прошивки. Её работа может быть нестабильна.
+Вы уверены, что хотите загрузить её?</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="3332"/>
         <source>You have the latest firmware version.</source>
         <translation>У вас установлена последняя версия прошивки.</translation>

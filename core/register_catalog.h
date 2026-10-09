@@ -74,7 +74,7 @@ inline constexpr auto kIsOn = "is_on";
 /// TEMP: is_on is unreliable in the current hardware. While false the app never
 /// touches it, and disabling a drive falls back to a zero MIT command. Set to true
 /// to restore.
-inline constexpr bool kIsOnEnabled = false;
+inline constexpr bool kIsOnEnabled = true;
 inline constexpr auto kBootloader = "bootloader";
 
 // Read-only information

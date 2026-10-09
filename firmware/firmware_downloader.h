@@ -24,7 +24,7 @@ struct FirmwareRelease
 
 /// Fetches firmware images from the VBDrive GitHub releases.
 ///
-/// checkLatest() asks the releases API for the latest tag, which is what the firmware
+/// checkLatest() finds the newest stable (non-beta) release, which is what the firmware
 /// label compares the drive's version against; listReleases() fetches every release
 /// for the user to pick from. download() then fetches the chosen release's image into
 /// firmwares/: `VBDrive_full.hex`, the combined VBBoot + application build, or for the
@@ -37,8 +37,6 @@ class FirmwareDownloader : public QObject
     Q_OBJECT
 
 public:
-    static constexpr auto kLatestReleaseUrl =
-            "https://api.github.com/repos/VBCores/VBDrive/releases/latest";
     /// One page of 100 covers every release so far.
     static constexpr auto kReleasesUrl =
             "https://api.github.com/repos/VBCores/VBDrive/releases?per_page=100";
@@ -47,8 +45,8 @@ public:
 
     explicit FirmwareDownloader(QObject *parent = nullptr);
 
-    /// Looks up the latest release. A lookup already in flight is not repeated: its
-    /// answer serves every caller.
+    /// Looks up the newest stable release. A lookup already in flight is not repeated:
+    /// its answer serves every caller.
     void checkLatest();
     /// Fetches all releases, newest first. A listing already in flight is not repeated.
     void listReleases();

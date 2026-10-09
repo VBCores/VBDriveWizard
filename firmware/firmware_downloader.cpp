@@ -1,5 +1,7 @@
 #include "firmware/firmware_downloader.h"
 
+#include "firmware/firmware_version.h"
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -62,6 +64,26 @@ QUrl flashableAsset(const QJsonObject &release)
     return fallback;
 }
 
+/// The releases of a releases API listing, drafts left out, in the listing's order.
+QList<FirmwareRelease> parseReleases(const QJsonArray &array)
+{
+    QList<FirmwareRelease> releases;
+    for (const QJsonValue &value : array) {
+        const QJsonObject object = value.toObject();
+        FirmwareRelease release;
+        release.version = object.value(QStringLiteral("tag_name")).toString();
+        if (release.version.isEmpty() || object.value(QStringLiteral("draft")).toBool())
+            continue;
+        release.name = object.value(QStringLiteral("name")).toString();
+        release.assetUrl = flashableAsset(object);
+        release.beta = object.value(QStringLiteral("prerelease")).toBool()
+                || release.version.contains(QLatin1String("beta"), Qt::CaseInsensitive)
+                || release.name.contains(QLatin1String("beta"), Qt::CaseInsensitive);
+        releases.append(release);
+    }
+    return releases;
+}
+
 } // namespace
 
 FirmwareDownloader::FirmwareDownloader(QObject *parent)
@@ -96,7 +118,7 @@ void FirmwareDownloader::checkLatest()
     if (m_metadataReply)
         return;
 
-    m_metadataReply = m_network->get(apiRequest(QUrl(QString::fromLatin1(kLatestReleaseUrl))));
+    m_metadataReply = m_network->get(apiRequest(QUrl(QString::fromLatin1(kReleasesUrl))));
     connect(m_metadataReply, &QNetworkReply::finished, this,
             &FirmwareDownloader::onMetadataFinished);
 }
@@ -114,14 +136,26 @@ void FirmwareDownloader::onMetadataFinished()
         return;
     }
 
-    const QJsonObject release = QJsonDocument::fromJson(reply->readAll()).object();
-    const QString version = release.value(QStringLiteral("tag_name")).toString();
-    if (version.isEmpty()) {
-        emit checkFailed(tr("The VBDrive releases did not name a latest version."));
+    // Not GitHub's own "latest": the betas are not marked as pre-releases, so it
+    // names a beta as soon as one is published. By version, not by listing order:
+    // a hotfix to an older line may be published after a newer release.
+    const QList<FirmwareRelease> releases =
+            parseReleases(QJsonDocument::fromJson(reply->readAll()).array());
+    const FirmwareRelease *latest = nullptr;
+    std::optional<FirmwareVersion> latestVersion;
+    for (const FirmwareRelease &release : releases) {
+        const auto version = FirmwareVersion::parse(release.version);
+        if (release.beta || !version || (latestVersion && !(*latestVersion < *version)))
+            continue;
+        latest = &release;
+        latestVersion = version;
+    }
+    if (!latest) {
+        emit checkFailed(tr("The VBDrive releases name no stable version."));
         return;
     }
 
-    emit latestReleaseFound(version, flashableAsset(release));
+    emit latestReleaseFound(latest->version, latest->assetUrl);
 }
 
 void FirmwareDownloader::listReleases()
@@ -153,22 +187,7 @@ void FirmwareDownloader::onListFinished()
     }
 
     // The API lists them newest first, which is the order they are offered in.
-    QList<FirmwareRelease> releases;
-    const QJsonArray array = document.array();
-    for (const QJsonValue &value : array) {
-        const QJsonObject object = value.toObject();
-        FirmwareRelease release;
-        release.version = object.value(QStringLiteral("tag_name")).toString();
-        if (release.version.isEmpty() || object.value(QStringLiteral("draft")).toBool())
-            continue;
-        release.name = object.value(QStringLiteral("name")).toString();
-        release.assetUrl = flashableAsset(object);
-        release.beta = object.value(QStringLiteral("prerelease")).toBool()
-                || release.version.contains(QLatin1String("beta"), Qt::CaseInsensitive)
-                || release.name.contains(QLatin1String("beta"), Qt::CaseInsensitive);
-        releases.append(release);
-    }
-    emit releasesListed(releases);
+    emit releasesListed(parseReleases(document.array()));
 }
 
 void FirmwareDownloader::download(const QUrl &assetUrl, const QString &version,
