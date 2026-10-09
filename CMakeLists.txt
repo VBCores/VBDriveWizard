@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.16)
 # 1. В CMakeLists.txt: project(VBDriveWizard VERSION 0.0.2 ...)
 # git commit -am "release: 0.1.2"
 # git push origin main
-
+ 
 # 2. Тег на этот коммит, имя совпадает с версией в CMake
 # git tag -a v0.1.2 -m "VBDriveWizard 0.1.2"
 # git push origin v0.1.2
