@@ -97,12 +97,27 @@ void FirmwareFlasher::flash(const QString &hexFilePath, const QString &interface
                 }
             });
 
+    // PB8 is both BOOT0 and FDCAN1_RX, and an idle CAN transceiver holds it high, so
+    // with the factory nSWBOOT0 = 1 the drive powers up into the ST system bootloader.
+    // Clearing nSWBOOT0 (FLASH_OPTR bit 26) makes the nBOOT0 option bit pick the boot
+    // source instead of the pin. Written only when set; option_load applies it with a
+    // reset that drops the ST-Link session, so its error and that of the first reset
+    // after it are expected and ignored - the `reset init` in `program` reconnects.
+    const QString clearSwBoot0 = QStringLiteral(
+            "init; reset halt; "
+            "if {[read_memory 0x40022020 32 1] & 0x04000000} {"
+            " echo \"Clearing nSWBOOT0\";"
+            " stm32l4x option_write 0 0x20 0 0x04000000;"
+            " catch {stm32l4x option_load 0};"
+            " catch {reset init} }");
+
     // `program <file> verify reset exit` writes, verifies, resets and quits. The hex
     // carries absolute addresses (VBBoot at 0x08000000, the application at 0x08003000),
     // so no offset is needed.
     const QStringList arguments = {
         QStringLiteral("-f"), interfaceConfig,
         QStringLiteral("-f"), targetConfig,
+        QStringLiteral("-c"), clearSwBoot0,
         QStringLiteral("-c"),
         QStringLiteral("program \"%1\" verify reset exit").arg(hexFilePath),
     };
