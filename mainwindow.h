@@ -228,6 +228,11 @@ private:
     void applyControlLock(ControlLock lock);
     /// Records what is now running on `nodeId`, and re-evaluates the lock.
     void setRunningControlLock(quint8 nodeId, const TrajectoryParams &params);
+    /// The same for every drive of the running group, after its parameters changed.
+    void setGroupControlLock(const TrajectoryParams &params);
+    /// Start/Stop labels for the selected drive, and the Start buttons an idle drive
+    /// may use while other drives run.
+    void updateControlButtons();
     /// Servo tab with the User trajectory tab in front: edits there are not live.
     bool servoUserTabActive() const;
     /// Sliders step their spin box in hundredths over a fixed useful span; the
@@ -244,7 +249,7 @@ private:
     /// Refuses, with a reason, to start a drive past a safety limit; re-enables one
     /// that the protective stop switched off and that is back within the limits.
     bool prepareSafeStart(DeviceModel *device);
-    void onSetpointsProduced(quint8 nodeId, const TrajectoryBatch &outputs);
+    void onSetpointsProduced(const TrajectoryBatch &outputs);
     void onTrajectoryRunningChanged(quint8 nodeId, bool running);
     quint8 activeNodeId() const;
 

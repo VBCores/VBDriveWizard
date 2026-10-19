@@ -3,6 +3,7 @@
 
 #include "control/trajectory.h"
 
+#include <QHash>
 #include <QMutex>
 #include <QObject>
 #include <QThread>
@@ -11,11 +12,13 @@
 
 class DeviceLink;
 
-/// Generates and sends one drive's reference trajectory on its own thread.
+/// Generates one reference trajectory on its own thread and sends it to every drive
+/// of the group.
 ///
-/// The worker is bound to a node id, not to the current DeviceList selection, so
-/// several drives can run trajectories at once and switching the selected drive never
-/// disturbs them.
+/// There is a single generator for the whole group: each cycle computes one point and
+/// every drive gets that same point, so drives that joined at different moments still
+/// follow the same waveform in the same phase. The group is independent of the
+/// DeviceList selection, so switching the selected drive never disturbs it.
 ///
 /// Timing uses a steady-clock deadline rather than a QTimer: at the MIT rate of 1 kHz
 /// a coarse timer drifts badly. Parameters are swapped under a mutex so the user can
@@ -27,10 +30,9 @@ class TrajectoryWorker : public QObject
 public:
     /// Deliberately takes no parent: the constructor calls moveToThread(), which
     /// refuses to move an object that has one. ControlManager owns the instance.
-    TrajectoryWorker(quint8 nodeId, DeviceLink *link, int rateHz);
+    TrajectoryWorker(DeviceLink *link, int rateHz);
     ~TrajectoryWorker() override;
 
-    quint8 nodeId() const { return m_nodeId; }
     int rateHz() const { return m_rateHz; }
     bool isRunning() const { return m_running.load(std::memory_order_relaxed); }
 
@@ -40,34 +42,42 @@ public:
     /// Applies new parameters to a running trajectory without interrupting it.
     void updateParams(const TrajectoryParams &params);
 
-    /// Suspends sending while keeping the worker and its phase alive, used when the
-    /// drive's heartbeat disappears and the user chooses to wait for it.
-    void setPaused(bool paused);
-    bool isPaused() const { return m_paused.load(std::memory_order_relaxed); }
+    /// A drive joins at the current point of the trajectory, not at its start.
+    void addNode(quint8 nodeId);
+    /// Returns whether any drive is left in the group.
+    bool removeNode(quint8 nodeId);
+    bool hasNode(quint8 nodeId) const;
+    QList<quint8> nodes() const;
+
+    /// Stops sending to one drive while its heartbeat is missing and the user chooses
+    /// to wait for it. The trajectory itself runs on, so the drive comes back at the
+    /// group's current point.
+    void setPaused(quint8 nodeId, bool paused);
+    bool isPaused(quint8 nodeId) const;
 
 signals:
     /// Every command sent since the previous batch, delivered at roughly 100 Hz. Each
     /// is stamped with its production time so the plot can place it on the telemetry
     /// time base rather than at delivery time.
-    void setpointsProduced(quint8 nodeId, const TrajectoryBatch &outputs);
-    void runningChanged(quint8 nodeId, bool running);
+    void setpointsProduced(const TrajectoryBatch &outputs);
 
 private slots:
     void run();
 
 private:
-    TrajectoryParams currentParams() const;
+    /// Parameters and the drives that are not paused, taken under one lock per cycle.
+    TrajectoryParams currentParams(QList<quint8> *activeNodes) const;
 
-    quint8 m_nodeId;
     DeviceLink *m_link;
     int m_rateHz;
 
     QThread m_thread;
-    mutable QMutex m_paramsMutex;
+    mutable QMutex m_mutex;
     TrajectoryParams m_params;
+    /// Node id -> paused.
+    QHash<quint8, bool> m_nodes;
 
     std::atomic_bool m_running{false};
-    std::atomic_bool m_paused{false};
     std::atomic_bool m_stopRequested{false};
 };
 

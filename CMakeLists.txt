@@ -4,15 +4,15 @@ cmake_minimum_required(VERSION 3.16)
 # version.h, which is what verLabel shows. Never hard-code it in the sources.
 
 # In order to publish release on Github:
-# 1. В CMakeLists.txt: project(VBDriveWizard VERSION 0.0.2 ...)
-# git commit -am "release: 0.2.0"
+# 1. В CMakeLists.txt: project(VBDriveWizard VERSION 0.2.1 ...)
+# git commit -am "release: 0.2.1"
 # git push origin main
  
 # 2. Тег на этот коммит, имя совпадает с версией в CMake
-# git tag -a v0.2.0 -m "VBDriveWizard 0.2.0"
-# git push origin v0.2.0
+# git tag -a v0.2.1 -m "VBDriveWizard 0.2.1"
+# git push origin v0.2.1
 
-project(VBDriveWizard VERSION 0.2.0 LANGUAGES C CXX)
+project(VBDriveWizard VERSION 0.2.1 LANGUAGES C CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

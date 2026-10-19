@@ -9,9 +9,9 @@
 /// Owns every drive the application currently knows about and tracks which one the
 /// UI is pointed at.
 ///
-/// Selection only steers reads and configuration commands. Running trajectories are
-/// keyed by node id in ControlManager and are deliberately unaffected by it, so
-/// several drives can be exercised at once.
+/// Selection only steers reads and configuration commands. The drives following the
+/// running trajectory are tracked by node id in ControlManager and are deliberately
+/// unaffected by it, so several drives can be exercised at once.
 class DeviceManager : public QObject
 {
     Q_OBJECT

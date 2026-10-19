@@ -40,6 +40,8 @@
 #include <QLineEdit>
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QPainter>
+#include <QPixmap>
 #include <QPushButton>
 #include <QRegularExpressionValidator>
 #include <QScreen>
@@ -182,6 +184,42 @@ void widenPopupToContents(QComboBox *combo)
     // Item padding from the stylesheet, plus room for the scroll bar a long list gets.
     const int scrollBar = combo->style()->pixelMetric(QStyle::PM_ScrollBarExtent, nullptr, view);
     view->setMinimumWidth(widest + 16 + scrollBar + 2 * view->frameWidth());
+}
+
+/// What the dot beside a drive in DeviceList says about it.
+enum class DeviceState { Ready, Running, Offline };
+
+/// A filled circle on a transparent square, drawn at the screen's pixel ratio so it
+/// stays round and sharp on HiDPI. The three icons are built once.
+QIcon deviceStateIcon(DeviceState state)
+{
+    static const auto make = [](const QColor &color) {
+        constexpr int kSize = 16;
+        constexpr int kDiameter = 9;
+        const qreal ratio = qApp->devicePixelRatio();
+        QPixmap pixmap(QSize(kSize, kSize) * ratio);
+        pixmap.setDevicePixelRatio(ratio);
+        pixmap.fill(Qt::transparent);
+        QPainter painter(&pixmap);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(color);
+        constexpr qreal kOffset = (kSize - kDiameter) / 2.0;
+        painter.drawEllipse(QRectF(kOffset, kOffset, kDiameter, kDiameter));
+        return QIcon(pixmap);
+    };
+    static const QIcon ready = make(QColor(0x22, 0xC5, 0x5E));
+    static const QIcon running = make(QColor(0xEA, 0xB3, 0x08));
+    static const QIcon offline = make(QColor(0x94, 0xA3, 0xB8));
+    switch (state) {
+    case DeviceState::Ready:
+        return ready;
+    case DeviceState::Running:
+        return running;
+    case DeviceState::Offline:
+        return offline;
+    }
+    return ready;
 }
 
 /// The waveform trajectories: unlike the User target, which is applied once, these
@@ -1488,6 +1526,12 @@ void MainWindow::rebuildDeviceList()
                       canId >= 0 ? QString::number(canId) : QStringLiteral("-"));
         item->setTextAlignment(kDeviceCanIdColumn, Qt::AlignRight | Qt::AlignVCenter);
         item->setData(kDeviceNameColumn, Qt::UserRole, device->nodeId());
+        // A running drive stays "running" while its heartbeat is missing: it is still
+        // in the group and gets the trajectory again as soon as it is back.
+        const DeviceState state = m_control->isRunning(device->nodeId()) ? DeviceState::Running
+                : device->isOnline()                                   ? DeviceState::Ready
+                                                                       : DeviceState::Offline;
+        item->setIcon(kDeviceNameColumn, deviceStateIcon(state));
         if (!device->isOnline()) {
             item->setText(kDeviceNameColumn,
                           item->text(kDeviceNameColumn) + tr("  (no heartbeat)"));
@@ -1596,6 +1640,7 @@ void MainWindow::onDeviceSelected(DeviceModel *device)
         }
         updateStatusLabels();
         updateControlLock();
+        updateControlButtons();
         return;
     }
 
@@ -1615,6 +1660,7 @@ void MainWindow::onDeviceSelected(DeviceModel *device)
                               {QString::fromLatin1(registers::kFirmwareRev)});
     }
     updateControlLock();
+    updateControlButtons();
     rebuildDeviceList();
 }
 
@@ -2213,7 +2259,7 @@ void MainWindow::onDeviceReappeared(quint8 nodeId)
     }
     device->setOnline(true);
     m_awaitingReconnect.remove(nodeId);
-    // Resume exactly where the trajectory left off.
+    // Back into the group's trajectory, at the point the other drives have reached.
     m_control->setPaused(nodeId, false);
     rebuildDeviceList();
     setStatusMessage(tr("Node %1 is back.").arg(nodeId));
@@ -2614,6 +2660,13 @@ void MainWindow::setRunningControlLock(quint8 nodeId, const TrajectoryParams &pa
     updateControlLock();
 }
 
+void MainWindow::setGroupControlLock(const TrajectoryParams &params)
+{
+    const QList<quint8> nodes = m_control->runningNodes();
+    for (quint8 nodeId : nodes)
+        setRunningControlLock(nodeId, params);
+}
+
 void MainWindow::setSliderRange(QSlider *slider, QDoubleSpinBox *spin, double min, double max)
 {
     const QSignalBlocker blocker(slider);
@@ -2815,8 +2868,9 @@ void MainWindow::onTrajectoryStart(ControlProtocol protocol)
                          8000);
     }
 
+    // Joins the group if other drives already run; the parameters are the group's.
     m_control->start(nodeId, params);
-    setRunningControlLock(nodeId, params);
+    setGroupControlLock(params);
 }
 
 void MainWindow::onServoUserStart()
@@ -2825,15 +2879,16 @@ void MainWindow::onServoUserStart()
     if (!m_link || !device)
         return;
 
-    // Whatever is running keeps running; the press only swaps in the new target.
-    const quint8 nodeId = device->nodeId();
-    if (m_control->isRunning(nodeId)) {
+    // Whatever is running keeps running; the press swaps in the new target for the
+    // whole group, and an idle selected drive joins it.
+    if (m_control->anyRunning()) {
         const TrajectoryParams params = collectServoParams();
-        m_control->updateParams(nodeId, params);
-        setRunningControlLock(nodeId, params);
-        return;
+        m_control->updateParams(params);
+        setGroupControlLock(params);
+        updateControlButtons();
     }
-    onTrajectoryStart(ControlProtocol::Servo);
+    if (!m_control->isRunning(device->nodeId()))
+        onTrajectoryStart(ControlProtocol::Servo);
 }
 
 void MainWindow::onControlParamsEdited()
@@ -2841,16 +2896,15 @@ void MainWindow::onControlParamsEdited()
     // The User tab waits for its Start button; see onServoUserStart().
     if (servoUserTabActive())
         return;
-    DeviceModel *device = m_devices->selected();
-    if (!device)
-        return;
-    const quint8 nodeId = device->nodeId();
-    if (!m_control->isRunning(nodeId))
+    // The CONTROL panel is the group's trajectory, whichever drive is selected.
+    if (!m_control->anyRunning())
         return;
     const TrajectoryParams params = collectCurrentParams();
-    m_control->updateParams(nodeId, params);
-    // Switching trajectory tabs mid-run changes the shape, and with it the lock.
-    setRunningControlLock(nodeId, params);
+    m_control->updateParams(params);
+    // Switching trajectory tabs mid-run changes the shape, and with it the lock; an
+    // edit on the other protocol's tab switches the group over to it.
+    setGroupControlLock(params);
+    updateControlButtons();
 }
 
 void MainWindow::setDriverEnabled(quint8 nodeId, bool on)
@@ -2936,14 +2990,16 @@ bool MainWindow::prepareSafeStart(DeviceModel *device)
     return true;
 }
 
-void MainWindow::onSetpointsProduced(quint8 nodeId, const TrajectoryBatch &outputs)
+void MainWindow::onSetpointsProduced(const TrajectoryBatch &outputs)
 {
     DeviceModel *device = m_devices->selected();
-    if (!device || device->nodeId() != nodeId)
+    if (!device)
         return;
-    // A batch still queued when Stop was pressed would reopen the set-point stream
-    // that onTrajectoryRunningChanged() has just closed.
-    if (!m_control->isRunning(nodeId))
+    // Only a drive of the group is plotted against the set-point, and only while it
+    // is being sent. This also drops a batch still queued when Stop was pressed, which
+    // would reopen the set-point stream onTrajectoryRunningChanged() has just closed.
+    const quint8 nodeId = device->nodeId();
+    if (!m_control->isRunning(nodeId) || m_control->isPaused(nodeId))
         return;
     // Native units: the plot scales the set-point together with the sample it is
     // drawn against. Every channel that is commanded is reported; the plot keeps a
@@ -2965,15 +3021,18 @@ void MainWindow::onTrajectoryRunningChanged(quint8 nodeId, bool running)
     if (!running)
         m_runningLocks.remove(nodeId);
     updateControlLock();
+    updateControlButtons();
+    rebuildDeviceList();
 
     DeviceModel *device = m_devices->selected();
-    if (!device || device->nodeId() != nodeId)
-        return;
-
-    // A protocol change rebuilds the worker, and the old one reports its stop while
-    // the new one already runs.
-    if (!running && !m_control->isRunning(nodeId))
+    if (device && device->nodeId() == nodeId && !running)
         m_plot->endSetpoints();
+}
+
+void MainWindow::updateControlButtons()
+{
+    const DeviceModel *device = m_devices->selected();
+    const bool running = device && m_control->isRunning(device->nodeId());
 
     // ServoUserStartBtn stays "Start": it applies a target rather than toggling.
     const QString label = running ? tr("Stop") : tr("Start");
@@ -2981,6 +3040,17 @@ void MainWindow::onTrajectoryRunningChanged(quint8 nodeId, bool running)
                                 ui->ServoTriangleStartBtn, ui->MitStartBtn}) {
         button->setText(label);
     }
+
+    // While other drives run, an idle one may only join their trajectory, so the
+    // other protocol's Start is closed to it. A running drive's buttons are its Stop.
+    const std::optional<ControlProtocol> group = m_control->runningProtocol();
+    const bool servo = running || !group || *group == ControlProtocol::Servo;
+    const bool mit = running || !group || *group == ControlProtocol::Mit;
+    for (QPushButton *button : {ui->ServoUserStartBtn, ui->ServoSinStartBtn,
+                                ui->ServoMeanderStartBtn, ui->ServoTriangleStartBtn}) {
+        button->setEnabled(servo);
+    }
+    ui->MitStartBtn->setEnabled(mit);
 }
 
 // --- plot and preferences -----------------------------------------------------------------

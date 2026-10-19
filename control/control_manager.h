@@ -3,17 +3,19 @@
 
 #include "control/trajectory.h"
 
-#include <QHash>
 #include <QObject>
+
+#include <optional>
 
 class DeviceLink;
 class TrajectoryWorker;
 
-/// Owns one trajectory worker per drive.
+/// Owns the one trajectory that is running, and the group of drives following it.
 ///
-/// Workers are keyed by node id and are deliberately independent of the DeviceList
-/// selection: selecting another drive does not stop, reset or re-target a running
-/// trajectory, which is what makes it possible to exercise several drives at once.
+/// Several drives can be exercised at once, but only on the same trajectory: a drive
+/// that is started while others run joins them at the current point, in the same
+/// phase, rather than starting a waveform of its own. The group is independent of the
+/// DeviceList selection: selecting another drive does not stop, reset or re-target it.
 class ControlManager : public QObject
 {
     Q_OBJECT
@@ -31,38 +33,46 @@ public:
     /// link before switching.
     void setLink(DeviceLink *link);
 
+    /// Adds the drive to the group, starting the trajectory if nothing runs yet. The
+    /// parameters apply to the whole group.
     void start(quint8 nodeId, const TrajectoryParams &params);
+    /// Takes the drive out of the group; the others keep running.
     void stop(quint8 nodeId);
     /// Emergency stop: every drive, every protocol.
     void stopAll();
 
-    /// Applies new parameters to a running trajectory without interrupting it.
-    /// Switching between the Servo and MIT protocols restarts the worker, because the
-    /// two run at different rates.
-    void updateParams(quint8 nodeId, const TrajectoryParams &params);
+    /// Applies new parameters to the running trajectory, for every drive of the group,
+    /// without interrupting it. Switching between the Servo and MIT protocols restarts
+    /// the worker, because the two run at different rates.
+    void updateParams(const TrajectoryParams &params);
 
     bool isRunning(quint8 nodeId) const;
     bool anyRunning() const;
     QList<quint8> runningNodes() const;
+    /// Protocol of the running trajectory, none while nothing runs.
+    std::optional<ControlProtocol> runningProtocol() const;
 
-    /// Suspends a drive's trajectory while its heartbeat is missing, and resumes it
-    /// when the drive comes back.
+    /// Stops sending to a drive while its heartbeat is missing, and resumes it at the
+    /// group's current point when the drive comes back.
     void setPaused(quint8 nodeId, bool paused);
+    bool isPaused(quint8 nodeId) const;
 
     /// Rate the given protocol actually runs at on the current link.
     int effectiveRateHz(ControlProtocol protocol) const;
 
 signals:
-    void setpointsProduced(quint8 nodeId, const TrajectoryBatch &outputs);
+    /// The commands sent to every drive of the group.
+    void setpointsProduced(const TrajectoryBatch &outputs);
     void runningChanged(quint8 nodeId, bool running);
 
 private:
-    TrajectoryWorker *workerFor(quint8 nodeId) const;
-    void destroyWorker(quint8 nodeId);
+    /// Starts a worker for the given parameters and drives.
+    void createWorker(const TrajectoryParams &params, const QList<quint8> &nodes);
+    void destroyWorker();
 
     DeviceLink *m_link = nullptr;
-    QHash<quint8, TrajectoryWorker *> m_workers;
-    QHash<quint8, ControlProtocol> m_protocols;
+    TrajectoryWorker *m_worker = nullptr;
+    ControlProtocol m_protocol = ControlProtocol::Servo;
 };
 
 #endif // CONTROL_CONTROL_MANAGER_H

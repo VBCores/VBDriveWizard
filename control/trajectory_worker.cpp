@@ -14,9 +14,8 @@ namespace {
 constexpr int kSetpointReportHz = 100;
 } // namespace
 
-TrajectoryWorker::TrajectoryWorker(quint8 nodeId, DeviceLink *link, int rateHz)
-    : m_nodeId(nodeId)
-    , m_link(link)
+TrajectoryWorker::TrajectoryWorker(DeviceLink *link, int rateHz)
+    : m_link(link)
     , m_rateHz(qBound(1, rateHz, 2000))
 {
     moveToThread(&m_thread);
@@ -34,41 +33,73 @@ void TrajectoryWorker::start(const TrajectoryParams &params)
         return;
     updateParams(params);
     m_stopRequested.store(false);
-    m_paused.store(false);
     m_running.store(true);
     m_thread.start(QThread::TimeCriticalPriority);
-    emit runningChanged(m_nodeId, true);
 }
 
 void TrajectoryWorker::stop()
 {
-    if (!m_thread.isRunning()) {
-        if (m_running.exchange(false))
-            emit runningChanged(m_nodeId, false);
-        return;
+    if (m_thread.isRunning()) {
+        m_stopRequested.store(true);
+        m_thread.quit();
+        m_thread.wait();
     }
-    m_stopRequested.store(true);
-    m_thread.quit();
-    m_thread.wait();
-    if (m_running.exchange(false))
-        emit runningChanged(m_nodeId, false);
+    m_running.store(false);
 }
 
 void TrajectoryWorker::updateParams(const TrajectoryParams &params)
 {
-    QMutexLocker locker(&m_paramsMutex);
+    QMutexLocker locker(&m_mutex);
     m_params = params;
 }
 
-TrajectoryParams TrajectoryWorker::currentParams() const
+TrajectoryParams TrajectoryWorker::currentParams(QList<quint8> *activeNodes) const
 {
-    QMutexLocker locker(&m_paramsMutex);
+    QMutexLocker locker(&m_mutex);
+    activeNodes->clear();
+    for (auto it = m_nodes.constBegin(); it != m_nodes.constEnd(); ++it) {
+        if (!it.value())
+            activeNodes->append(it.key());
+    }
     return m_params;
 }
 
-void TrajectoryWorker::setPaused(bool paused)
+void TrajectoryWorker::addNode(quint8 nodeId)
 {
-    m_paused.store(paused);
+    QMutexLocker locker(&m_mutex);
+    m_nodes.insert(nodeId, false);
+}
+
+bool TrajectoryWorker::removeNode(quint8 nodeId)
+{
+    QMutexLocker locker(&m_mutex);
+    m_nodes.remove(nodeId);
+    return !m_nodes.isEmpty();
+}
+
+bool TrajectoryWorker::hasNode(quint8 nodeId) const
+{
+    QMutexLocker locker(&m_mutex);
+    return m_nodes.contains(nodeId);
+}
+
+QList<quint8> TrajectoryWorker::nodes() const
+{
+    QMutexLocker locker(&m_mutex);
+    return m_nodes.keys();
+}
+
+void TrajectoryWorker::setPaused(quint8 nodeId, bool paused)
+{
+    QMutexLocker locker(&m_mutex);
+    if (auto it = m_nodes.find(nodeId); it != m_nodes.end())
+        it.value() = paused;
+}
+
+bool TrajectoryWorker::isPaused(quint8 nodeId) const
+{
+    QMutexLocker locker(&m_mutex);
+    return m_nodes.value(nodeId, false);
 }
 
 void TrajectoryWorker::run()
@@ -86,43 +117,45 @@ void TrajectoryWorker::run()
     auto lastStep = nextDeadline;
     TrajectoryBatch batch;
     batch.reserve(reportEvery);
+    QList<quint8> activeNodes;
 
     while (!m_stopRequested.load(std::memory_order_relaxed)) {
         nextDeadline += period;
 
         // Measured rather than assumed: a cycle that overran must advance the phase by
-        // the time it really took, or the trajectory slows down under load. Read even
-        // while paused, so that resuming starts from one period and not from the whole
-        // length of the pause.
+        // the time it really took, or the trajectory slows down under load.
         const auto stepTime = clock::now();
         const double dt = std::chrono::duration<double>(stepTime - lastStep).count();
         lastStep = stepTime;
 
-        if (!m_paused.load(std::memory_order_relaxed)) {
-            const TrajectoryParams params = currentParams();
-            TrajectoryOutput output = generator.step(params, dt);
-            output.t_us = std::chrono::duration_cast<std::chrono::microseconds>(
-                                  stepTime.time_since_epoch())
-                                  .count();
+        // One point per cycle for the whole group: every drive gets exactly the same
+        // command, which is what keeps them in phase. A paused drive is only skipped;
+        // the trajectory runs on for the others.
+        const TrajectoryParams params = currentParams(&activeNodes);
+        TrajectoryOutput output = generator.step(params, dt);
+        output.t_us = std::chrono::duration_cast<std::chrono::microseconds>(
+                              stepTime.time_since_epoch())
+                              .count();
 
-            if (m_link) {
+        if (m_link) {
+            for (quint8 nodeId : std::as_const(activeNodes)) {
                 if (params.protocol == ControlProtocol::Servo) {
-                    m_link->sendServoSetpoint(m_nodeId, params.servoCommand,
+                    m_link->sendServoSetpoint(nodeId, params.servoCommand,
                                               static_cast<float>(output.primary));
                 } else {
-                    m_link->sendMitCommand(m_nodeId, static_cast<float>(output.position),
+                    m_link->sendMitCommand(nodeId, static_cast<float>(output.position),
                                            static_cast<float>(output.velocity),
                                            static_cast<float>(output.torque),
                                            static_cast<float>(output.positionGain),
                                            static_cast<float>(output.velocityGain));
                 }
             }
+        }
 
-            batch.push_back(output);
-            if (batch.size() >= reportEvery) {
-                emit setpointsProduced(m_nodeId, batch);
-                batch.clear();
-            }
+        batch.push_back(output);
+        if (batch.size() >= reportEvery) {
+            emit setpointsProduced(batch);
+            batch.clear();
         }
 
         // If a cycle overran, drop the missed slots instead of trying to catch up in

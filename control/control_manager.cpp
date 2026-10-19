@@ -34,19 +34,24 @@ int ControlManager::effectiveRateHz(ControlProtocol protocol) const
     return qMin(wanted, limit);
 }
 
-TrajectoryWorker *ControlManager::workerFor(quint8 nodeId) const
+void ControlManager::createWorker(const TrajectoryParams &params, const QList<quint8> &nodes)
 {
-    return m_workers.value(nodeId, nullptr);
+    m_worker = new TrajectoryWorker(m_link, effectiveRateHz(params.protocol));
+    m_protocol = params.protocol;
+    connect(m_worker, &TrajectoryWorker::setpointsProduced, this,
+            &ControlManager::setpointsProduced, Qt::QueuedConnection);
+    for (quint8 nodeId : nodes)
+        m_worker->addNode(nodeId);
+    m_worker->start(params);
 }
 
-void ControlManager::destroyWorker(quint8 nodeId)
+void ControlManager::destroyWorker()
 {
-    TrajectoryWorker *worker = m_workers.take(nodeId);
-    if (!worker)
+    if (!m_worker)
         return;
-    worker->stop();
-    delete worker;  // parentless by design: moveToThread() forbids a parent
-    m_protocols.remove(nodeId);
+    m_worker->stop();
+    delete m_worker;  // parentless by design: moveToThread() forbids a parent
+    m_worker = nullptr;
 }
 
 void ControlManager::start(quint8 nodeId, const TrajectoryParams &params)
@@ -54,82 +59,75 @@ void ControlManager::start(quint8 nodeId, const TrajectoryParams &params)
     if (!m_link)
         return;
 
-    // A protocol change means a different command rate, so the worker is rebuilt.
-    if (TrajectoryWorker *existing = workerFor(nodeId)) {
-        if (m_protocols.value(nodeId) == params.protocol) {
-            existing->updateParams(params);
-            if (!existing->isRunning())
-                existing->start(params);
-            return;
-        }
-        destroyWorker(nodeId);
+    if (!m_worker) {
+        createWorker(params, {nodeId});
+    } else {
+        // The new drive joins the trajectory already running; the parameters, which
+        // come from the one CONTROL panel, are the group's.
+        updateParams(params);
+        m_worker->addNode(nodeId);
     }
-
-    auto *worker = new TrajectoryWorker(nodeId, m_link, effectiveRateHz(params.protocol));
-    connect(worker, &TrajectoryWorker::setpointsProduced, this,
-            &ControlManager::setpointsProduced, Qt::QueuedConnection);
-    connect(worker, &TrajectoryWorker::runningChanged, this, &ControlManager::runningChanged,
-            Qt::QueuedConnection);
-
-    m_workers.insert(nodeId, worker);
-    m_protocols.insert(nodeId, params.protocol);
-    worker->start(params);
+    emit runningChanged(nodeId, true);
 }
 
 void ControlManager::stop(quint8 nodeId)
 {
-    if (TrajectoryWorker *worker = workerFor(nodeId))
-        worker->stop();
-    destroyWorker(nodeId);
+    if (m_worker && !m_worker->removeNode(nodeId))
+        destroyWorker();
     emit runningChanged(nodeId, false);
 }
 
 void ControlManager::stopAll()
 {
-    const QList<quint8> nodeIds = m_workers.keys();
+    const QList<quint8> nodeIds = runningNodes();
     for (quint8 nodeId : nodeIds)
         stop(nodeId);
 }
 
-void ControlManager::updateParams(quint8 nodeId, const TrajectoryParams &params)
+void ControlManager::updateParams(const TrajectoryParams &params)
 {
-    TrajectoryWorker *worker = workerFor(nodeId);
-    if (!worker)
+    if (!m_worker)
         return;
-    if (m_protocols.value(nodeId) != params.protocol) {
-        start(nodeId, params);  // rebuilds at the new rate
+    if (m_protocol != params.protocol) {
+        // A different command rate: the worker is rebuilt for the same drives, which
+        // stay in the group throughout.
+        const QList<quint8> nodes = m_worker->nodes();
+        destroyWorker();
+        createWorker(params, nodes);
         return;
     }
-    worker->updateParams(params);
+    m_worker->updateParams(params);
 }
 
 bool ControlManager::isRunning(quint8 nodeId) const
 {
-    TrajectoryWorker *worker = workerFor(nodeId);
-    return worker && worker->isRunning();
+    return m_worker && m_worker->hasNode(nodeId);
 }
 
 bool ControlManager::anyRunning() const
 {
-    for (TrajectoryWorker *worker : m_workers) {
-        if (worker->isRunning())
-            return true;
-    }
-    return false;
+    return m_worker != nullptr;
 }
 
 QList<quint8> ControlManager::runningNodes() const
 {
-    QList<quint8> nodes;
-    for (auto it = m_workers.constBegin(); it != m_workers.constEnd(); ++it) {
-        if (it.value()->isRunning())
-            nodes << it.key();
-    }
-    return nodes;
+    return m_worker ? m_worker->nodes() : QList<quint8>();
+}
+
+std::optional<ControlProtocol> ControlManager::runningProtocol() const
+{
+    if (!m_worker)
+        return std::nullopt;
+    return m_protocol;
 }
 
 void ControlManager::setPaused(quint8 nodeId, bool paused)
 {
-    if (TrajectoryWorker *worker = workerFor(nodeId))
-        worker->setPaused(paused);
+    if (m_worker)
+        m_worker->setPaused(nodeId, paused);
+}
+
+bool ControlManager::isPaused(quint8 nodeId) const
+{
+    return m_worker && m_worker->isPaused(nodeId);
 }
